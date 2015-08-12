@@ -1,0 +1,17 @@
+#### IMPORTANT #### YAML DOES NOT SUPPORT UTF-8 #### PLEASE MAKE SURE THIS IS IN ASCII FORMAT: http://www.rapidmonkey.com/unicodeconverter/
+#### PLEASE READ BELOW IF YOU WOULD LIKE TO MODIFY ANY MESSAGES:
+## You should not edit this file but you can edit a copy (e.g. rename it to gibberish.yml)
+## The "language: english" in the "config.yml" should change to reflect this (e.g. "language: gibberish")
+## NOTE: messages that are blank will not be sent to players.
+MYSQL: "&fMySQL conectado - Estableciendo conexion a la base de datos..."
+MYSQL-CONNECT: "&cNo se puede establecer una conexion con la base de datos. Verifica que esta correctamente configurado en la config.yml"
+MYSQL-GET: "&a[&7EXPBANK&a]&f Uh oh! Error al conectar con la base de datos."
+YAML: "&fUtilizando en la configuracion el almacenamiento en YAML"
+CONVERT: "&fConvirtiendo la configuracion de YAML a MySQL. Por favor, espera..."
+SUCCESS: "&aRealizado con exito"
+DONE: "&aListo!"
+CREATE: "&7Se ha creado correctamente un cartel de &aEXP BANK&7!"
+NOPERM: "&7No tienes los suficientes permisos: &c{STRING}"
+BOTTLE-ERROR: "&7Perdona, pero no tienes la suficiente &cEXP&7 para rellenar esa botella!"
+EXP-NONE: "&7Ni tienes &cnada&7 de EXP."
+EXP-LIMIT: "&7Tu &cno tienes permiso&7 para almacenar mas experiencia."

@@ -1,0 +1,8 @@
+# If you would like to change the commands to something else, this can be done in the commands.yml file.
+# View this page for help on adding command aliases: http://wiki.bukkit.org/Commands.yml
+name: ExpBank
+main: com.empcraft.xpbank.ExpBank
+version: 2
+author: Empire92
+website: www.empcraft.com
+softdepend: [ProtocolLib]
