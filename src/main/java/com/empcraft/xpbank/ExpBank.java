@@ -8,7 +8,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
@@ -264,15 +263,15 @@ public class ExpBank extends JavaPlugin implements Listener {
 								amount = myExp;
 							}
 						}
-						if (player.getItemInHand().getType()==Material.GLASS_BOTTLE && checkperm(player,"expbank.use.bottle")) {
-							int bottles = player.getItemInHand().getAmount();
+						if (player.getInventory().getItemInMainHand().getType()==Material.GLASS_BOTTLE && checkperm(player,"expbank.use.bottle")) {
+							int bottles = player.getInventory().getItemInMainHand().getAmount();
 							if (bottles*7>myExp) {
 								msg(player,getMessage("BOTTLE-ERROR"));
 								return;
 							}
 							else {
 								amount = bottles*7;
-								player.getItemInHand().setType(Material.EXP_BOTTLE);
+								player.getInventory().getItemInMainHand().setType(Material.EXP_BOTTLE);
 								event.setCancelled(true);
 							}
 						}
