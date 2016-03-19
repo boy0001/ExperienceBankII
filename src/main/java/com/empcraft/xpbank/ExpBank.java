@@ -39,9 +39,9 @@ public class ExpBank extends JavaPlugin implements Listener {
 	private Connection connection;
 	private Statement statement;
 	private YamlConfiguration langYAML;
-	
+
 	public HashMap<UUID, Integer> exp_map = new HashMap<>();
-	
+
 	public final String version = getDescription().getVersion();
 	String evaluate(String mystring, Player player) {
 		if (mystring.contains("{player}")) {
@@ -76,12 +76,12 @@ public class ExpBank extends JavaPlugin implements Listener {
 			return "";
 		}
 	}
-	
+
 	@Override
 	public void onDisable() {
 	    saveConfig();
 	}
-	
+
 	@Override
 	public void onEnable(){
 		msg(null,"&8===&a[&7EXPBANK&a]&8===");
@@ -115,33 +115,50 @@ public class ExpBank extends JavaPlugin implements Listener {
         saveConfig();
         langYAML = YamlConfiguration.loadConfiguration(new File(getDataFolder(), getConfig().getString("language").toLowerCase()+".yml"));
         if (getConfig().getBoolean("mysql.enabled")) {
+        	Statement createIfNotExists = null;
+        	Statement countEntries = null;
+        	Statement uidAndExp = null;
+        	Statement newPlayer = null;
+
         	msg(null,getMessage("MYSQL"));
         	MySQL MySQL = new MySQL(plugin, getConfig().getString("mysql.connection.host"), getConfig().getString("mysql.connection.port"), getConfig().getString("mysql.connection.database"), getConfig().getString("mysql.connection.username"), getConfig().getString("mysql.connection.password"));
         	try {
 				connection = MySQL.openConnection();
+				createIfNotExists = connection.createStatement();
 				msg(null,getMessage("SUCCESS"));
-				statement = connection.createStatement();
-				statement.executeUpdate("CREATE TABLE IF NOT EXISTS "+getConfig().getString("mysql.connection.table")+" ( UUID VARCHAR(36), EXP INT )");
-				ResultSet result = statement.executeQuery("SELECT COUNT(*) FROM "+getConfig().getString("mysql.connection.table"));
+				createIfNotExists.executeUpdate("CREATE TABLE IF NOT EXISTS "+getConfig().getString("mysql.connection.table")+" ( UUID VARCHAR(36), EXP INT )");
+				createIfNotExists.close();
+
+				countEntries = connection.createStatement();
+				ResultSet result = countEntries.executeQuery("SELECT COUNT(*) FROM "+getConfig().getString("mysql.connection.table"));
 				int length = 0;
 				if(result.next()){
 					length = result.getInt(1);
 				}
+
+				result.close();
+				countEntries.close();
+
 				if (length==0) {
 					Set<String> players = exp.getKeys(false);
 					if (players.size()>0) {
 						msg(null,getMessage("CONVERT"));
 						for (String player:players) {
-							statement.executeUpdate("INSERT INTO "+getConfig().getString("mysql.connection.table")+" VALUES('"+player+"',"+exp.get(player)+")");
+							newPlayer = connection.createStatement();
+							newPlayer.executeUpdate("INSERT INTO "+getConfig().getString("mysql.connection.table")+" VALUES('"+player+"',"+exp.get(player)+")");
+							newPlayer.close();
 						}
 						msg(null,getMessage("DONE"));
 						exp = null;
 						expFile = null;
 					}
 				}
-				
-				
-	                result = statement.executeQuery("SELECT UUID, EXP FROM "+getConfig().getString("mysql.connection.table")+";");
+
+
+
+
+				uidAndExp = connection.createStatement();
+	                result = uidAndExp.executeQuery("SELECT UUID, EXP FROM "+getConfig().getString("mysql.connection.table")+";");
 	                while (result.next()) {
 	                    try {
     	                    int experience = result.getInt("EXP");
@@ -152,9 +169,64 @@ public class ExpBank extends JavaPlugin implements Listener {
 	                    catch (Exception e) {
 	                    }
 	                }
+
+	                result.close();
+	                uidAndExp.close();
+	                connection.close();
 			} catch (Exception e) {
 				e.printStackTrace();
-				connection = null;
+				if (connection != null) {
+					try {
+						connection.close();
+					} catch (SQLException e1) {
+					}
+				}
+
+				if (statement != null) {
+					try {
+						statement.close();
+					} catch (SQLException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
+
+				if (newPlayer != null) {
+					try {
+						newPlayer.close();
+					} catch (SQLException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
+
+				if (uidAndExp != null) {
+					try {
+						uidAndExp.close();
+					} catch (SQLException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
+
+				if (countEntries != null) {
+					try {
+						countEntries.close();
+					} catch (SQLException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
+
+				if (createIfNotExists != null) {
+					try {
+						createIfNotExists.close();
+					} catch (SQLException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
+
  				msg(null,getMessage("MYSQL-CONNECT"));
 			}
         }
@@ -171,7 +243,7 @@ public class ExpBank extends JavaPlugin implements Listener {
             }
         	msg(null,getMessage("YAML"));
         }
-        
+
         boolean manual = true;
         Plugin protocolPlugin = Bukkit.getServer().getPluginManager().getPlugin("ProtocolLib");
         if((protocolPlugin != null)) {
@@ -181,7 +253,7 @@ public class ExpBank extends JavaPlugin implements Listener {
                 manual = false;
             }
         }
-        
+
 		ISN = new InSignsNano(plugin, false, manual) {
 			@Override
 			public String[] getValue(String[] lines, Player player, Sign sign) {
@@ -196,7 +268,7 @@ public class ExpBank extends JavaPlugin implements Listener {
 		};
 		Bukkit.getServer().getPluginManager().registerEvents(this, this);
         BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
-        
+
         // Save any changes to the config
         scheduler.scheduleSyncRepeatingTask(this, new Runnable() {
             @Override
@@ -205,11 +277,11 @@ public class ExpBank extends JavaPlugin implements Listener {
             }
         }, 24000L, 24000L);
 	}
-	
+
 	private void runTask(final Runnable r) {
         Bukkit.getScheduler().runTaskAsynchronously(this, r);
     }
-	
+
     @EventHandler
 	public void onSignChange(SignChangeEvent event) {
     	String line = ChatColor.stripColor(event.getLine(0)).toLowerCase();
@@ -237,7 +309,7 @@ public class ExpBank extends JavaPlugin implements Listener {
             }
         }
     }
-    
+
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
     	if (!(event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.LEFT_CLICK_BLOCK)) {
@@ -337,9 +409,11 @@ public class ExpBank extends JavaPlugin implements Listener {
                 public void run() {
                     try {
                         statement.executeUpdate("UPDATE "+getConfig().getString("mysql.connection.table")+" SET EXP=EXP+"+value+" WHERE UUID='"+uuid.toString()+"'");
+                        statement.close();
                     } catch (SQLException e) {
                         msg(null,getMessage("MYSQL-GET"));
                     }
+
                     return;
                 }
             });

@@ -12,7 +12,7 @@ import code.husky.Database;
 
 /**
  * Connects to and uses a MySQL database
- * 
+ *
  * @author -_Husky_-
  * @author tips48
  */
@@ -27,7 +27,7 @@ public class MySQL extends Database {
 
 	/**
 	 * Creates a new MySQL instance
-	 * 
+	 *
 	 * @param plugin
 	 *            Plugin instance
 	 * @param hostname
@@ -95,6 +95,8 @@ public class MySQL extends Database {
 
 		ResultSet result = statement.executeQuery(query);
 
+		statement.close();
+
 		return result;
 	}
 
@@ -108,6 +110,8 @@ public class MySQL extends Database {
 		Statement statement = connection.createStatement();
 
 		int result = statement.executeUpdate(query);
+
+		statement.close();
 
 		return result;
 	}
