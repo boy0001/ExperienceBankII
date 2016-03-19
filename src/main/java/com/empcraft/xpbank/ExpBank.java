@@ -41,7 +41,7 @@ public class ExpBank extends JavaPlugin implements Listener {
   private Statement statement;
   private YamlConfiguration langYAML;
 
-  public HashMap<UUID, Integer> expMap = new HashMap<>();
+  private Map<UUID, Integer> expMap = new HashMap<>();
 
   public final String version = getDescription().getVersion();
 
@@ -106,7 +106,7 @@ public class ExpBank extends JavaPlugin implements Listener {
     saveResource("spanish.yml", true);
     saveResource("catalan.yml", true);
 
-    Map<String, Object> options = new HashMap<String, Object>();
+    Map<String, Object> options = new HashMap<>();
     getConfig().set("version", version);
     options.put("language", "english");
     options.put("storage.default", 825);
@@ -169,7 +169,7 @@ public class ExpBank extends JavaPlugin implements Listener {
         if (length == 0) {
           Set<String> players = exp.getKeys(false);
 
-          if (players.size() > 0) {
+          if (!players.isEmpty()) {
             msg(null, getMessage("CONVERT"));
 
             for (String player : players) {
@@ -275,11 +275,9 @@ public class ExpBank extends JavaPlugin implements Listener {
     boolean manual = true;
     Plugin protocolPlugin = Bukkit.getServer().getPluginManager().getPlugin("ProtocolLib");
 
-    if ((protocolPlugin != null)) {
-      if (protocolPlugin.isEnabled()) {
-        msg(null, "&aUsing ProtocolLib for packets");
-        manual = false;
-      }
+    if ((protocolPlugin != null && protocolPlugin.isEnabled())) {
+      msg(null, "&aUsing ProtocolLib for packets");
+      manual = false;
     }
 
     ISN = new InSignsNano(plugin, false, manual) {
@@ -430,7 +428,7 @@ public class ExpBank extends JavaPlugin implements Listener {
     int max = 0;
 
     for (String perm : nodes) {
-      if (perm.equals("default") || checkperm(player, "expbank.limit." + perm)) {
+      if ("default".equals(perm) || checkperm(player, "expbank.limit." + perm)) {
         int value = getConfig().getInt("storage." + perm);
 
         if (value > max) {
@@ -505,7 +503,7 @@ public class ExpBank extends JavaPlugin implements Listener {
   }
 
   public void msg(Player player, String mystring) {
-    if (mystring.equals("")) {
+    if ("".equals(mystring)) {
       return;
     }
 
