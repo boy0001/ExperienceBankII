@@ -1,12 +1,6 @@
 package com.empcraft.xpbank;
 
-import org.apache.commons.lang.StringUtils;
-import org.bukkit.Location;
 import org.bukkit.entity.Player;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
@@ -15,7 +9,6 @@ import com.comphenix.protocol.events.ListenerPriority;
 import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
-import com.comphenix.protocol.wrappers.BlockPosition;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
 
 public class ProtocolClass {
@@ -40,14 +33,8 @@ public class ProtocolClass {
             public void onPacketSending(PacketEvent event) {
                 PacketContainer oldpacket = event.getPacket();
                 PacketContainer packet = oldpacket.shallowClone();
-                BlockPosition block = packet.getBlockPositionModifier().getValues().get(0);
-                
-                int packetx = block.getX();
-                int packety = block.getY();
-                int packetz = block.getZ();
                 
                 Player player = event.getPlayer();
-                Location loc = new Location(player.getWorld(), packetx, packety, packetz);
                 WrappedChatComponent[] component = packet.getChatComponentArrays().read(0);
                 if (component.length == 0 || component[0] == null) {
                     return;
