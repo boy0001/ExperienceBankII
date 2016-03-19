@@ -34,14 +34,14 @@ import code.husky.mysql.MySQL;
 
 public class ExpBank extends JavaPlugin implements Listener {
   ExpBank plugin;
-  private static YamlConfiguration exp;
-  private static File expFile;
+  private YamlConfiguration exp;
+  private File expFile;
   private InSignsNano ISN;
   private Connection connection;
   private Statement statement;
   private YamlConfiguration langYAML;
 
-  public HashMap<UUID, Integer> exp_map = new HashMap<>();
+  public HashMap<UUID, Integer> expMap = new HashMap<>();
 
   public final String version = getDescription().getVersion();
 
@@ -194,7 +194,7 @@ public class ExpBank extends JavaPlugin implements Listener {
             int experience = result.getInt("EXP");
             String uuid_s = result.getString("UUID");
             UUID uuid = UUID.fromString(uuid_s);
-            exp_map.put(uuid, experience);
+            expMap.put(uuid, experience);
           } catch (Exception e) {
             getLogger().log(Level.SEVERE, "Could not get exp for players.", e);
           }
@@ -264,7 +264,7 @@ public class ExpBank extends JavaPlugin implements Listener {
         try {
           int experience = exp.getInt(player);
           UUID uuid = UUID.fromString(player);
-          exp_map.put(uuid, experience);
+          expMap.put(uuid, experience);
         } catch (Exception e) {
           getLogger().log(Level.WARNING, "Could not register Players.", e);
         }
@@ -274,10 +274,10 @@ public class ExpBank extends JavaPlugin implements Listener {
 
     boolean manual = true;
     Plugin protocolPlugin = Bukkit.getServer().getPluginManager().getPlugin("ProtocolLib");
+
     if ((protocolPlugin != null)) {
       if (protocolPlugin.isEnabled()) {
         msg(null, "&aUsing ProtocolLib for packets");
-        new ProtocolClass(plugin);
         manual = false;
       }
     }
@@ -316,6 +316,7 @@ public class ExpBank extends JavaPlugin implements Listener {
   public void onSignChange(SignChangeEvent event) {
     String line = ChatColor.stripColor(event.getLine(0)).toLowerCase();
     String expLine = ChatColor.stripColor(getConfig().getString("text.create").toLowerCase());
+
     if (line.contains(expLine)) {
       Player player = event.getPlayer();
       if (checkperm(player, "expbank.create")) {
@@ -325,6 +326,7 @@ public class ExpBank extends JavaPlugin implements Listener {
         event.setLine(0, "&4[ERROR]");
         msg(player, getMessage("NOPERM").replace("{STRING}", "expbank.create" + ""));
       }
+
       ISN.scheduleUpdate(player, (Sign) event.getBlock().getState(), 6);
     }
   }
@@ -332,8 +334,10 @@ public class ExpBank extends JavaPlugin implements Listener {
   @EventHandler
   public void onBlockBreak(BlockBreakEvent event) {
     Block block = event.getBlock();
+
     if ((block.getType() == Material.SIGN_POST) || (block.getType() == Material.WALL_SIGN)) {
       Sign sign = (Sign) block.getState();
+
       if (sign.getLine(0).equals(colorise(getConfig().getString("text.create")))) {
         ISN.broken_signs.add(event.getBlock().getLocation());
       }
@@ -346,6 +350,7 @@ public class ExpBank extends JavaPlugin implements Listener {
         || event.getAction() == Action.LEFT_CLICK_BLOCK)) {
       return;
     }
+
     Block block = event.getClickedBlock();
     if ((block.getType() == Material.SIGN_POST) || (block.getType() == Material.WALL_SIGN)) {
       Sign sign = (Sign) block.getState();
@@ -437,7 +442,7 @@ public class ExpBank extends JavaPlugin implements Listener {
   }
 
   public int getExp(UUID uuid) {
-    Integer value = exp_map.get(uuid);
+    Integer value = expMap.get(uuid);
 
     if (value == null) {
       return 0;
@@ -474,7 +479,7 @@ public class ExpBank extends JavaPlugin implements Listener {
             "Could not change experience level for [" + uuid.toString() + "].", e);
       }
     }
-    exp_map.put(uuid, getExp(uuid) + value);
+    expMap.put(uuid, getExp(uuid) + value);
   }
 
   public boolean checkperm(Player player, String perm) {

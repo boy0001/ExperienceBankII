@@ -72,11 +72,13 @@ public abstract class InSignsNano implements Listener {
       Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable() {
         public void run() {
           int size = updateQueuePlayer.size();
+
           if (size > UPDATE_BUFFER) {
             updateQueuePlayer.remove(size - 1);
             updateQueueSign.remove(size - 1);
             size -= 1;
           }
+
           ArrayList<Sign> toRemoveSign = new ArrayList<Sign>();
           ArrayList<Player> toRemovePlayer = new ArrayList<Player>();
 
