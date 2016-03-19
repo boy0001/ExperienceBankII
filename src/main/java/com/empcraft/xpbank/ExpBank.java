@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -28,6 +30,8 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
+
+import com.avaje.ebean.LogLevel;
 
 import code.husky.mysql.MySQL;
 
@@ -72,7 +76,10 @@ public class ExpBank extends JavaPlugin implements Listener {
 		try {
 			return colorise(langYAML.getString(key));
 		}
-		catch (Exception e){
+		catch (Exception e) {
+			getLogger()
+				.log(Level.INFO, "Could get Message for key [" + key + "].", e);
+
 			return "";
 		}
 	}
@@ -165,8 +172,8 @@ public class ExpBank extends JavaPlugin implements Listener {
     	                    String uuid_s = result.getString("UUID");
     	                    UUID uuid = UUID.fromString(uuid_s);
     	                    exp_map.put(uuid, experience);
-	                    }
-	                    catch (Exception e) {
+	                    } catch (Exception e) {
+	                    	getLogger().log(Level.SEVERE, "Could not get exp for players.", e);
 	                    }
 	                }
 
@@ -174,20 +181,15 @@ public class ExpBank extends JavaPlugin implements Listener {
 	                uidAndExp.close();
 	                connection.close();
 			} catch (Exception e) {
-				e.printStackTrace();
-				if (connection != null) {
-					try {
-						connection.close();
-					} catch (SQLException e1) {
-					}
-				}
+				getLogger().log(Level.SEVERE, "Clould not complete onEnable()-Queries.", e);
 
+ 				msg(null,getMessage("MYSQL-CONNECT"));
+			} finally {
 				if (statement != null) {
 					try {
 						statement.close();
 					} catch (SQLException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
+						getLogger().log(Level.WARNING, "Could not close Statement statement.", e1);
 					}
 				}
 
@@ -195,8 +197,7 @@ public class ExpBank extends JavaPlugin implements Listener {
 					try {
 						newPlayer.close();
 					} catch (SQLException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
+						getLogger().log(Level.WARNING, "Could not close Statement newPlayer.", e1);
 					}
 				}
 
@@ -204,8 +205,7 @@ public class ExpBank extends JavaPlugin implements Listener {
 					try {
 						uidAndExp.close();
 					} catch (SQLException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
+						getLogger().log(Level.WARNING, "Could not close Statement uidAndExp.", e1);
 					}
 				}
 
@@ -213,8 +213,7 @@ public class ExpBank extends JavaPlugin implements Listener {
 					try {
 						countEntries.close();
 					} catch (SQLException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
+						getLogger().log(Level.WARNING, "Could not close Statement countEntries.", e1);;
 					}
 				}
 
@@ -222,12 +221,17 @@ public class ExpBank extends JavaPlugin implements Listener {
 					try {
 						createIfNotExists.close();
 					} catch (SQLException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
+						getLogger().log(Level.WARNING, "Could not close Statement createIfNotExists.", e1);
 					}
 				}
 
- 				msg(null,getMessage("MYSQL-CONNECT"));
+				if (connection != null) {
+					try {
+						connection.close();
+					} catch (SQLException e1) {
+						getLogger().log(Level.WARNING, "Could not close Connection.", e1);
+					}
+				}
 			}
         }
         else {
@@ -239,6 +243,7 @@ public class ExpBank extends JavaPlugin implements Listener {
                     exp_map.put(uuid, experience);
                 }
                 catch (Exception e) {
+                	getLogger().log(Level.WARNING, "Could not register Players.", e);
                 }
             }
         	msg(null,getMessage("YAML"));
@@ -411,6 +416,10 @@ public class ExpBank extends JavaPlugin implements Listener {
                         statement.executeUpdate("UPDATE "+getConfig().getString("mysql.connection.table")+" SET EXP=EXP+"+value+" WHERE UUID='"+uuid.toString()+"'");
                         statement.close();
                     } catch (SQLException e) {
+                    	getLogger().log(
+                    			Level.WARNING,
+                    			"Could not change experience level for [" + uuid.toString() + "].",
+                    			e);
                         msg(null,getMessage("MYSQL-GET"));
                     }
 
@@ -420,7 +429,14 @@ public class ExpBank extends JavaPlugin implements Listener {
 		}
 		else {
 		    exp.set(uuid.toString(), value+getExp(uuid));
-		    try { exp.save(expFile); } catch (IOException e) { }
+		    try {
+		    	exp.save(expFile);
+		    } catch (IOException e) {
+		    	getLogger().log(
+            			Level.WARNING,
+            			"Could not change experience level for [" + uuid.toString() + "].",
+            			e);
+		    }
 		}
 		exp_map.put(uuid, getExp(uuid) + value);
 	}
