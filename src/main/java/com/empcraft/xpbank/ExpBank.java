@@ -2,6 +2,9 @@ package com.empcraft.xpbank;
 
 import code.husky.mysql.MySQL;
 
+import com.empcraft.xpbank.text.MessageUtils;
+import com.empcraft.xpbank.threads.ChangeExperienceThread;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -39,11 +42,15 @@ public class ExpBank extends JavaPlugin implements Listener {
   private InSignsNano ISN;
   private Connection connection;
   private Statement statement;
-  private YamlConfiguration langYAML;
 
   private Map<UUID, Integer> expMap = new HashMap<>();
 
   public final String version = getDescription().getVersion();
+
+  /**
+   * Use ylp.getMessage("");
+   */
+  private YamlLanguageProvider ylp;
 
   String evaluate(String mystring, Player player) {
     if (mystring.contains("{player}")) {
@@ -74,21 +81,7 @@ public class ExpBank extends JavaPlugin implements Listener {
               - player.getLevel()));
     }
 
-    return colorise(mystring);
-  }
-
-  String colorise(String mystring) {
-    return ChatColor.translateAlternateColorCodes('&', mystring);
-  }
-
-  public String getMessage(String key) {
-    try {
-      return colorise(langYAML.getString(key));
-    } catch (Exception e) {
-      getLogger().log(Level.INFO, "Could get Message for key [" + key + "].", e);
-
-      return "";
-    }
+    return MessageUtils.colorise(mystring);
   }
 
   @Override
@@ -98,7 +91,7 @@ public class ExpBank extends JavaPlugin implements Listener {
 
   @Override
   public void onEnable() {
-    msg(null, "&8===&a[&7EXPBANK&a]&8===");
+    MessageUtils.sendMessageToAll(getServer(), "&8===&a[&7EXPBANK&a]&8===");
     plugin = this;
     expFile = new File(getDataFolder() + File.separator + "xplist.yml");
     exp = YamlConfiguration.loadConfiguration(expFile);
@@ -130,8 +123,10 @@ public class ExpBank extends JavaPlugin implements Listener {
     }
 
     saveConfig();
-    langYAML = YamlConfiguration.loadConfiguration(
+
+    YamlConfiguration yaml = YamlConfiguration.loadConfiguration(
         new File(getDataFolder(), getConfig().getString("language").toLowerCase() + ".yml"));
+    ylp = new YamlLanguageProvider(yaml, getLogger());
 
     if (getConfig().getBoolean("mysql.enabled")) {
       Statement createIfNotExists = null;
@@ -139,7 +134,7 @@ public class ExpBank extends JavaPlugin implements Listener {
       Statement uidAndExp = null;
       Statement newPlayer = null;
 
-      msg(null, getMessage("MYSQL"));
+      MessageUtils.sendMessageToAll(getServer(), ylp.getMessage("MYSQL"));
       MySQL MySQL = new MySQL(plugin, getConfig().getString("mysql.connection.host"),
           getConfig().getString("mysql.connection.port"),
           getConfig().getString("mysql.connection.database"),
@@ -149,7 +144,7 @@ public class ExpBank extends JavaPlugin implements Listener {
       try {
         connection = MySQL.openConnection();
         createIfNotExists = connection.createStatement();
-        msg(null, getMessage("SUCCESS"));
+        MessageUtils.sendMessageToAll(getServer(), ylp.getMessage("SUCCESS"));
         createIfNotExists.executeUpdate("CREATE TABLE IF NOT EXISTS "
             + getConfig().getString("mysql.connection.table") + " ( UUID VARCHAR(36), EXP INT )");
         createIfNotExists.close();
@@ -170,7 +165,7 @@ public class ExpBank extends JavaPlugin implements Listener {
           Set<String> players = exp.getKeys(false);
 
           if (!players.isEmpty()) {
-            msg(null, getMessage("CONVERT"));
+            MessageUtils.sendMessageToAll(getServer(), ylp.getMessage("CONVERT"));
 
             for (String player : players) {
               newPlayer = connection.createStatement();
@@ -180,7 +175,7 @@ public class ExpBank extends JavaPlugin implements Listener {
               newPlayer.close();
             }
 
-            msg(null, getMessage("DONE"));
+            MessageUtils.sendMessageToAll(getServer(), ylp.getMessage("DONE"));
             exp = null;
             expFile = null;
           }
@@ -206,7 +201,7 @@ public class ExpBank extends JavaPlugin implements Listener {
       } catch (Exception e) {
         getLogger().log(Level.SEVERE, "Clould not complete onEnable()-Queries.", e);
 
-        msg(null, getMessage("MYSQL-CONNECT"));
+        MessageUtils.sendMessageToAll(getServer(), ylp.getMessage("MYSQL-CONNECT"));
       } finally {
         if (statement != null) {
           try {
@@ -269,21 +264,21 @@ public class ExpBank extends JavaPlugin implements Listener {
           getLogger().log(Level.WARNING, "Could not register Players.", e);
         }
       }
-      msg(null, getMessage("YAML"));
+      MessageUtils.sendMessageToAll(getServer(), ylp.getMessage("YAML"));
     }
 
     boolean manual = true;
     Plugin protocolPlugin = Bukkit.getServer().getPluginManager().getPlugin("ProtocolLib");
 
     if ((protocolPlugin != null && protocolPlugin.isEnabled())) {
-      msg(null, "&aUsing ProtocolLib for packets");
+      MessageUtils.sendMessageToAll(getServer(), "&aUsing ProtocolLib for packets");
       manual = false;
     }
 
     ISN = new InSignsNano(plugin, false, manual) {
       @Override
       public String[] getValue(String[] lines, Player player, Sign sign) {
-        if (lines[0].equals(colorise(getConfig().getString("text.create")))) {
+        if (lines[0].equals(MessageUtils.colorise(getConfig().getString("text.create")))) {
           lines[0] = evaluate(getConfig().getString("text.1"), player);
           lines[1] = evaluate(getConfig().getString("text.2"), player);
           lines[2] = evaluate(getConfig().getString("text.3"), player);
@@ -318,11 +313,11 @@ public class ExpBank extends JavaPlugin implements Listener {
     if (line.contains(expLine)) {
       Player player = event.getPlayer();
       if (checkperm(player, "expbank.create")) {
-        event.setLine(0, colorise(getConfig().getString("text.create")));
-        msg(player, getMessage("CREATE"));
+        event.setLine(0, MessageUtils.colorise(getConfig().getString("text.create")));
+        MessageUtils.sendMessageToPlayer(player, ylp.getMessage("CREATE"));
       } else {
         event.setLine(0, "&4[ERROR]");
-        msg(player, getMessage("NOPERM").replace("{STRING}", "expbank.create" + ""));
+        MessageUtils.sendMessageToPlayer(player, ylp.getMessage("NOPERM").replace("{STRING}", "expbank.create" + ""));
       }
 
       ISN.scheduleUpdate(player, (Sign) event.getBlock().getState(), 6);
@@ -336,7 +331,7 @@ public class ExpBank extends JavaPlugin implements Listener {
     if ((block.getType() == Material.SIGN_POST) || (block.getType() == Material.WALL_SIGN)) {
       Sign sign = (Sign) block.getState();
 
-      if (sign.getLine(0).equals(colorise(getConfig().getString("text.create")))) {
+      if (sign.getLine(0).equals(MessageUtils.colorise(getConfig().getString("text.create")))) {
         ISN.broken_signs.add(event.getBlock().getLocation());
       }
     }
@@ -355,7 +350,7 @@ public class ExpBank extends JavaPlugin implements Listener {
       Player player = event.getPlayer();
       String[] lines = sign.getLines();
 
-      if (lines[0].equals(colorise(getConfig().getString("text.create")))) {
+      if (lines[0].equals(MessageUtils.colorise(getConfig().getString("text.create")))) {
         if (checkperm(player, "expbank.use")) {
           ExperienceManager expMan = new ExperienceManager(player);
           int amount;
@@ -378,7 +373,7 @@ public class ExpBank extends JavaPlugin implements Listener {
               int bottles = player.getInventory().getItemInMainHand().getAmount();
 
               if (bottles * 7 > myExp) {
-                msg(player, getMessage("BOTTLE-ERROR"));
+                MessageUtils.sendMessageToPlayer(player, ylp.getMessage("BOTTLE-ERROR"));
                 return;
               } else {
                 amount = bottles * 7;
@@ -404,11 +399,11 @@ public class ExpBank extends JavaPlugin implements Listener {
             int max = getMaxExp(player);
 
             if (amount == 0) {
-              msg(player, getMessage("EXP-NONE"));
+              MessageUtils.sendMessageToPlayer(player, ylp.getMessage("EXP-NONE"));
             } else if (myExp - amount > max) {
               amount = -(max - myExp);
               if (amount == 0) {
-                msg(player, getMessage("EXP-LIMIT"));
+                MessageUtils.sendMessageToPlayer(player, ylp.getMessage("EXP-LIMIT"));
               }
             }
             expMan.changeExp(amount);
@@ -417,7 +412,7 @@ public class ExpBank extends JavaPlugin implements Listener {
           changeExp(player.getUniqueId(), -amount);
           ISN.scheduleUpdate(player, sign, 1);
         } else {
-          msg(player, getMessage("NOPERM").replace("{STRING}", "expbank.use" + ""));
+          MessageUtils.sendMessageToPlayer(player, ylp.getMessage("NOPERM").replace("{STRING}", "expbank.use" + ""));
         }
       }
     }
@@ -451,22 +446,9 @@ public class ExpBank extends JavaPlugin implements Listener {
 
   public void changeExp(final UUID uuid, final int value) {
     if (exp == null) {
-      runTask(new Runnable() {
-        @Override
-        public void run() {
-          try {
-            statement.executeUpdate("UPDATE " + getConfig().getString("mysql.connection.table")
-                + " SET EXP=EXP+" + value + " WHERE UUID='" + uuid.toString() + "'");
-            statement.close();
-          } catch (SQLException e) {
-            getLogger().log(Level.WARNING,
-                "Could not change experience level for [" + uuid.toString() + "].", e);
-            msg(null, getMessage("MYSQL-GET"));
-          }
-
-          return;
-        }
-      });
+      Runnable changeExp =
+          new ChangeExperienceThread(uuid, value, getConfig(), ylp, getServer(), getLogger());
+      runTask(changeExp);
     } else {
       exp.set(uuid.toString(), value + getExp(uuid));
 
@@ -502,15 +484,4 @@ public class ExpBank extends JavaPlugin implements Listener {
     return false;
   }
 
-  public void msg(Player player, String mystring) {
-    if ("".equals(mystring)) {
-      return;
-    }
-
-    if (player == null) {
-      getServer().getConsoleSender().sendMessage(colorise(mystring));
-    } else {
-      player.sendMessage(colorise(mystring));
-    }
-  }
 }
