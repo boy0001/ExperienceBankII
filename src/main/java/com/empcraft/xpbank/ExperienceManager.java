@@ -88,7 +88,7 @@ public class ExperienceManager {
   }
 
   public void changeExp(double amt) {
-    setExp(getCurrentFractionalXP(), amt);
+    setExp(getCurrentFractionalXp(), amt);
   }
 
   public void setExp(int amt) {
@@ -127,7 +127,7 @@ public class ExperienceManager {
     return cur;
   }
 
-  private double getCurrentFractionalXP() {
+  private double getCurrentFractionalXp() {
     Player player = getPlayer();
 
     int lvl = player.getLevel();
@@ -141,7 +141,7 @@ public class ExperienceManager {
   }
 
   public boolean hasExp(double amt) {
-    return getCurrentFractionalXP() >= amt;
+    return getCurrentFractionalXp() >= amt;
   }
 
   public int getLevelForExp(int exp) {

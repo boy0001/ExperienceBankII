@@ -20,7 +20,7 @@ public abstract class Database {
   protected Plugin plugin;
 
   /**
-   * Creates a new Database
+   * Creates a new Database.
    *
    * @param plugin
    *          Plugin instance
@@ -30,7 +30,7 @@ public abstract class Database {
   }
 
   /**
-   * Opens a connection with the database
+   * Opens a connection with the database.
    *
    * @return Opened connection
    * @throws SQLException
@@ -41,7 +41,7 @@ public abstract class Database {
   public abstract Connection openConnection() throws SQLException, ClassNotFoundException;
 
   /**
-   * Checks if a connection is open with the database
+   * Checks if a connection is open with the database.
    *
    * @return true if the connection is open
    * @throws SQLException
@@ -50,14 +50,14 @@ public abstract class Database {
   public abstract boolean checkConnection() throws SQLException;
 
   /**
-   * Gets the connection with the database
+   * Gets the connection with the database.
    *
    * @return Connection with the database, null if none
    */
   public abstract Connection getConnection();
 
   /**
-   * Closes the connection with the database
+   * Closes the connection with the database.
    *
    * @return true if successful
    * @throws SQLException
@@ -68,7 +68,7 @@ public abstract class Database {
   /**
    * Executes a SQL Query<br>
    *
-   * If the connection is closed, it will be opened
+   * <p>If the connection is closed, it will be opened.</p>
    *
    * @param query
    *          Query to be run

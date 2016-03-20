@@ -170,8 +170,9 @@ public abstract class InSignsNano implements Listener {
     Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
       public void run() {
         if (player.isOnline()) {
-          if (sign.getBlock() != null && sign.getBlock().getState() instanceof Sign)
+          if (sign.getBlock() != null && sign.getBlock().getState() instanceof Sign) {
             updateSign(player, (Sign) sign.getBlock().getState());
+          }
         }
       }
     }, time);
