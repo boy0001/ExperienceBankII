@@ -1,10 +1,10 @@
 package com.empcraft.xpbank;
 
-import java.lang.ref.WeakReference;
-import java.util.Arrays;
-
 import org.apache.commons.lang.Validate;
 import org.bukkit.entity.Player;
+
+import java.lang.ref.WeakReference;
+import java.util.Arrays;
 
 /**
  * * Adapted from ExperienceUtils code originally in ScrollingMenuSign.
