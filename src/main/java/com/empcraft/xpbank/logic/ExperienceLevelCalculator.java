@@ -5,11 +5,6 @@ import org.slf4j.LoggerFactory;
 
 public class ExperienceLevelCalculator {
   /**
-   * Logger.
-   */
-  private static final Logger LOG = LoggerFactory.getLogger(ExperienceLevelCalculator.class);
-
-  /**
    * This table represents the experience points you need to gain a specific level. For example: If
    * you have 7-16 points, you have level 1.
    */
@@ -33,9 +28,6 @@ public class ExperienceLevelCalculator {
     }
 
     while (true) {
-      LOG.debug("Comparing [{}] Points to [{}] points needed for level [{}].",
-          new Object[] {experience, expList[level], level});
-
       if (experience >= expList[level]) {
         return level;
       }
