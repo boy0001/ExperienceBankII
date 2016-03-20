@@ -1,8 +1,5 @@
 package com.empcraft.xpbank.logic;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class ExperienceLevelCalculator {
   /**
    * This table represents the experience points you need to gain a specific level. For example: If
