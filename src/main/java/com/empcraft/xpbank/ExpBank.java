@@ -456,9 +456,10 @@ public class ExpBank extends JavaPlugin implements Listener {
         exp.save(expFile);
       } catch (IOException e) {
         getLogger().log(Level.WARNING,
-            "Could not change experience level for [" + uuid.toString() + "].", e);
+            "Could not save experience level for [" + uuid.toString() + "].", e);
       }
     }
+
     expMap.put(uuid, getExp(uuid) + value);
   }
 
