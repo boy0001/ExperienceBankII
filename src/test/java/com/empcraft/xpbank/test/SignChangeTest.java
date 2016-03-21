@@ -82,7 +82,6 @@ public class SignChangeTest {
     /* Set up op player */
     operator = Mockito.mock(Player.class);
     Mockito.when(operator.isOp()).thenReturn(true);
-
   }
 
   @Test

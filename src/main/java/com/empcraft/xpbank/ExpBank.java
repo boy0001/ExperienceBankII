@@ -4,6 +4,7 @@ import code.husky.mysql.MySQL;
 
 import com.empcraft.xpbank.events.SignBreakListener;
 import com.empcraft.xpbank.events.SignChangeEventListener;
+import com.empcraft.xpbank.logic.ExpBankPermission;
 import com.empcraft.xpbank.logic.PermissionsHelper;
 import com.empcraft.xpbank.text.MessageUtils;
 import com.empcraft.xpbank.threads.ChangeExperienceThread;
@@ -360,7 +361,7 @@ public class ExpBank extends JavaPlugin implements Listener {
       String[] lines = sign.getLines();
 
       if (lines[0].equals(MessageUtils.colorise(getConfig().getString("text.create")))) {
-        if (PermissionsHelper.playerHasPermission(player, "expbank.use")) {
+        if (PermissionsHelper.playerHasPermission(player, ExpBankPermission.USE)) {
           ExperienceManager expMan = new ExperienceManager(player);
           int amount;
           int myExp = getExp(player.getUniqueId());
@@ -378,7 +379,7 @@ public class ExpBank extends JavaPlugin implements Listener {
             }
 
             if (player.getInventory().getItemInMainHand().getType() == Material.GLASS_BOTTLE
-                && PermissionsHelper.playerHasPermission(player, "expbank.use.bottle")) {
+                && PermissionsHelper.playerHasPermission(player, ExpBankPermission.USE_BOTTLE)) {
               int bottles = player.getInventory().getItemInMainHand().getAmount();
 
               if (bottles * 7 > myExp) {
