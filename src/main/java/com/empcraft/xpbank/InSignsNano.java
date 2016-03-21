@@ -150,20 +150,24 @@ public abstract class InSignsNano implements Listener {
   }
 
   public void scheduleUpdate(final Player player, final Location location) {
-    if (manual) {
-      Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
-        public void run() {
-          if (player.isOnline()) {
-            updateAllSigns(player, location);
-          }
-        }
-      }, 5L);
+    if (!manual) {
+      return;
     }
+
+    // manual update.
+    Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
+      public void run() {
+        if (player.isOnline()) {
+          updateAllSigns(player, location);
+        }
+      }
+    }, 5L);
   }
 
   public void scheduleUpdate(final Player player, final Sign sign, long time) {
     if (broken_signs.contains(sign.getLocation())) {
       broken_signs = new HashSet<>();
+
       return;
     }
 

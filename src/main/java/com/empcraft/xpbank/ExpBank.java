@@ -2,6 +2,7 @@ package com.empcraft.xpbank;
 
 import code.husky.mysql.MySQL;
 
+import com.empcraft.xpbank.events.SignBreakListener;
 import com.empcraft.xpbank.events.SignChangeEventListener;
 import com.empcraft.xpbank.logic.PermissionsHelper;
 import com.empcraft.xpbank.text.MessageUtils;
@@ -289,8 +290,14 @@ public class ExpBank extends JavaPlugin implements Listener {
       }
     };
 
+    /* Register sign change event. */
     Bukkit.getServer().getPluginManager().registerEvents(
         new SignChangeEventListener(ISN, getConfig(), ylp),
+        this);
+
+    /* Register sign break event. */
+    Bukkit.getServer().getPluginManager().registerEvents(
+        new SignBreakListener(ISN, getConfig()),
         this);
     Bukkit.getServer().getPluginManager().registerEvents(this, this);
     BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
@@ -306,19 +313,6 @@ public class ExpBank extends JavaPlugin implements Listener {
 
   private void runTask(final Runnable r) {
     Bukkit.getScheduler().runTaskAsynchronously(this, r);
-  }
-
-  @EventHandler
-  public void onBlockBreak(BlockBreakEvent event) {
-    Block block = event.getBlock();
-
-    if ((block.getType() == Material.SIGN_POST) || (block.getType() == Material.WALL_SIGN)) {
-      Sign sign = (Sign) block.getState();
-
-      if (sign.getLine(0).equals(MessageUtils.colorise(getConfig().getString("text.create")))) {
-        ISN.broken_signs.add(event.getBlock().getLocation());
-      }
-    }
   }
 
   @EventHandler
