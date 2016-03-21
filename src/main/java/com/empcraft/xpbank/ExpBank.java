@@ -81,7 +81,7 @@ public class ExpBank extends JavaPlugin implements Listener {
    */
   private YamlLanguageProvider ylp;
 
-  String evaluate(String mystring, Player player) {
+  static String evaluate(String mystring, Player player, int storedPlayerExperience) {
     ExperienceManager expMan = new ExperienceManager(player);
 
     if (mystring.contains(MAGIC_KEYWORD_PLAYERNAME)) {
@@ -90,7 +90,7 @@ public class ExpBank extends JavaPlugin implements Listener {
 
     if (mystring.contains(MAGIC_KEYWORD_STORED_XP)) {
       mystring = mystring.replace(MAGIC_KEYWORD_STORED_XP,
-          Integer.toString(getExp(player.getUniqueId())));
+          Integer.toString(storedPlayerExperience));
     }
 
     if (mystring.contains(MAGIC_KEYWORD_CURRENT_XP)) {
@@ -104,13 +104,13 @@ public class ExpBank extends JavaPlugin implements Listener {
 
     if (mystring.contains(MAGIC_KEYWORD_LEVELS_IN_BANK)) {
       mystring = mystring.replace(MAGIC_KEYWORD_LEVELS_IN_BANK,
-          Integer.toString(expMan.getLevelForExp(getExp(player.getUniqueId()))));
+          Integer.toString(expMan.getLevelForExp(storedPlayerExperience)));
     }
 
     if (mystring.contains(MAGIC_KEYWORD_LEVELS_GAIN_WITHDRAW)) {
       mystring = mystring.replace(MAGIC_KEYWORD_LEVELS_GAIN_WITHDRAW,
           Integer.toString(
-              (expMan.getLevelForExp(expMan.getCurrentExp() + getExp(player.getUniqueId()))
+              (expMan.getLevelForExp(expMan.getCurrentExp() + storedPlayerExperience)
                   - player.getLevel())));
     }
 
@@ -168,10 +168,11 @@ public class ExpBank extends JavaPlugin implements Listener {
       @Override
       public String[] getValue(String[] lines, Player player, Sign sign) {
         if (lines[0].equals(MessageUtils.colorise(getConfig().getString("text.create")))) {
-          lines[0] = evaluate(getConfig().getString("text.1"), player);
-          lines[1] = evaluate(getConfig().getString("text.2"), player);
-          lines[2] = evaluate(getConfig().getString("text.3"), player);
-          lines[3] = evaluate(getConfig().getString("text.4"), player);
+          int storedPlayerExperience = getExp(player.getUniqueId());
+          lines[0] = evaluate(getConfig().getString("text.1"), player, storedPlayerExperience);
+          lines[1] = evaluate(getConfig().getString("text.2"), player, storedPlayerExperience);
+          lines[2] = evaluate(getConfig().getString("text.3"), player, storedPlayerExperience);
+          lines[3] = evaluate(getConfig().getString("text.4"), player, storedPlayerExperience);
         }
 
         return lines;
