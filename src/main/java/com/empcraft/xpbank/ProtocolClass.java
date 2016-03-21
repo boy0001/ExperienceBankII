@@ -8,6 +8,7 @@ import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
+import com.empcraft.xpbank.text.MessageUtils;
 
 import org.bukkit.entity.Player;
 
@@ -46,10 +47,10 @@ public class ProtocolClass {
             if (component[0].getJson().contains(EXP.getConfig().getString("text.create"))) {
               int storedPlayerExp = EXP.getExp(player.getUniqueId());
               String[] lines = new String[4];
-              lines[0] = JSONUtil.toJSON(EXP.evaluate(EXP.getConfig().getString("text.1"), player, storedPlayerExp));
-              lines[1] = JSONUtil.toJSON(EXP.evaluate(EXP.getConfig().getString("text.2"), player, storedPlayerExp));
-              lines[2] = JSONUtil.toJSON(EXP.evaluate(EXP.getConfig().getString("text.3"), player, storedPlayerExp));
-              lines[3] = JSONUtil.toJSON(EXP.evaluate(EXP.getConfig().getString("text.4"), player, storedPlayerExp));
+              lines[0] = JSONUtil.toJSON(MessageUtils.evaluate(EXP.getConfig().getString("text.1"), player, storedPlayerExp));
+              lines[1] = JSONUtil.toJSON(MessageUtils.evaluate(EXP.getConfig().getString("text.2"), player, storedPlayerExp));
+              lines[2] = JSONUtil.toJSON(MessageUtils.evaluate(EXP.getConfig().getString("text.3"), player, storedPlayerExp));
+              lines[3] = JSONUtil.toJSON(MessageUtils.evaluate(EXP.getConfig().getString("text.4"), player, storedPlayerExp));
               writePacket(packet, lines);
               event.setPacket(packet);
             }

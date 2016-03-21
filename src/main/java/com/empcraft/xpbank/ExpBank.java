@@ -26,7 +26,6 @@ import org.bukkit.scheduler.BukkitScheduler;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -35,36 +34,6 @@ import java.util.UUID;
 import java.util.logging.Level;
 
 public class ExpBank extends JavaPlugin implements Listener {
-  /**
-   * The levels the player would actually gain (level gain is not linear).
-   */
-  private static final String MAGIC_KEYWORD_LEVELS_GAIN_WITHDRAW = "{lvlbank2}";
-
-  /**
-   * Replaced with the levels the bank has in experience points.
-   */
-  private static final String MAGIC_KEYWORD_LEVELS_IN_BANK = "{lvlbank}";
-
-  /**
-   * Replaced with the players current level.
-   */
-  private static final String MAGIC_KEYWORD_CURRENT_LVL = "{lvl}";
-
-  /**
-   * This keyword will be replaced by the player's current xp.
-   */
-  private static final String MAGIC_KEYWORD_CURRENT_XP = "{exp}";
-
-  /**
-   * Will be replaced by the amount of XP the player has stored.
-   */
-  private static final String MAGIC_KEYWORD_STORED_XP = "{expbank}";
-
-  /**
-   * The text which will be replaced with the player's name.
-   */
-  private static final String MAGIC_KEYWORD_PLAYERNAME = "{player}";
-  ExpBank plugin;
   private YamlConfiguration exp;
   private File expFile;
   private InSignsNano signListener;
@@ -81,42 +50,6 @@ public class ExpBank extends JavaPlugin implements Listener {
    */
   private YamlLanguageProvider ylp;
 
-  static String evaluate(String mystring, Player player, int storedPlayerExperience) {
-    ExperienceManager expMan = new ExperienceManager(player);
-
-    if (mystring.contains(MAGIC_KEYWORD_PLAYERNAME)) {
-      mystring = mystring.replace(MAGIC_KEYWORD_PLAYERNAME, player.getName());
-    }
-
-    if (mystring.contains(MAGIC_KEYWORD_STORED_XP)) {
-      mystring = mystring.replace(MAGIC_KEYWORD_STORED_XP,
-          Integer.toString(storedPlayerExperience));
-    }
-
-    if (mystring.contains(MAGIC_KEYWORD_CURRENT_XP)) {
-      mystring = mystring.replace(MAGIC_KEYWORD_CURRENT_XP,
-          Integer.toString(expMan.getCurrentExp()));
-    }
-
-    if (mystring.contains(MAGIC_KEYWORD_CURRENT_LVL)) {
-      mystring = mystring.replace(MAGIC_KEYWORD_CURRENT_LVL, Integer.toString(player.getLevel()));
-    }
-
-    if (mystring.contains(MAGIC_KEYWORD_LEVELS_IN_BANK)) {
-      mystring = mystring.replace(MAGIC_KEYWORD_LEVELS_IN_BANK,
-          Integer.toString(expMan.getLevelForExp(storedPlayerExperience)));
-    }
-
-    if (mystring.contains(MAGIC_KEYWORD_LEVELS_GAIN_WITHDRAW)) {
-      mystring = mystring.replace(MAGIC_KEYWORD_LEVELS_GAIN_WITHDRAW,
-          Integer.toString(
-              (expMan.getLevelForExp(expMan.getCurrentExp() + storedPlayerExperience)
-                  - player.getLevel())));
-    }
-
-    return MessageUtils.colorise(mystring);
-  }
-
   @Override
   public void onDisable() {
     saveConfig();
@@ -125,7 +58,6 @@ public class ExpBank extends JavaPlugin implements Listener {
   @Override
   public void onEnable() {
     MessageUtils.sendMessageToAll(getServer(), "&8===&a[&7EXPBANK&a]&8===");
-    plugin = this;
     expFile = new File(getDataFolder() + File.separator + "xplist.yml");
     exp = YamlConfiguration.loadConfiguration(expFile);
     saveResource("english.yml", true);
@@ -164,15 +96,15 @@ public class ExpBank extends JavaPlugin implements Listener {
       manual = false;
     }
 
-    signListener = new InSignsNano(plugin, false, manual) {
+    signListener = new InSignsNano(this, false, manual) {
       @Override
       public String[] getValue(String[] lines, Player player, Sign sign) {
         if (lines[0].equals(MessageUtils.colorise(getConfig().getString("text.create")))) {
           int storedPlayerExperience = getExp(player.getUniqueId());
-          lines[0] = evaluate(getConfig().getString("text.1"), player, storedPlayerExperience);
-          lines[1] = evaluate(getConfig().getString("text.2"), player, storedPlayerExperience);
-          lines[2] = evaluate(getConfig().getString("text.3"), player, storedPlayerExperience);
-          lines[3] = evaluate(getConfig().getString("text.4"), player, storedPlayerExperience);
+          lines[0] = MessageUtils.evaluate(getConfig().getString("text.1"), player, storedPlayerExperience);
+          lines[1] = MessageUtils.evaluate(getConfig().getString("text.2"), player, storedPlayerExperience);
+          lines[2] = MessageUtils.evaluate(getConfig().getString("text.3"), player, storedPlayerExperience);
+          lines[3] = MessageUtils.evaluate(getConfig().getString("text.4"), player, storedPlayerExperience);
         }
 
         return lines;
@@ -205,8 +137,8 @@ public class ExpBank extends JavaPlugin implements Listener {
     options.put("storage.default", 825);
     options.put("text.create", "[EXP]");
     options.put("text.1", "&8---&aEXP&8---");
-    options.put("text.2", MAGIC_KEYWORD_PLAYERNAME);
-    options.put("text.3", MAGIC_KEYWORD_STORED_XP);
+    options.put("text.2", MessageUtils.MAGIC_KEYWORD_PLAYERNAME);
+    options.put("text.3", MessageUtils.MAGIC_KEYWORD_STORED_XP);
     options.put("text.4", "&8---&a===&8---");
     options.put("mysql.enabled", false);
     options.put("mysql.connection.port", 3306);
