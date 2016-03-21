@@ -4,6 +4,7 @@ import com.empcraft.xpbank.InSignsNano;
 import com.empcraft.xpbank.events.SignBreakListener;
 import com.empcraft.xpbank.text.MessageUtils;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -44,6 +45,14 @@ public class SignBreakTest {
 
   @Before
   public void setUp() {
+    /* Set up Bukkit */
+    try {
+      FakeServer fakeServer = new FakeServer();
+      Bukkit.setServer(fakeServer);
+    } catch (UnsupportedOperationException use) {
+      //
+    }
+
     blockBreakEvent = PowerMockito.mock(BlockBreakEvent.class);
     Plugin plugin = Mockito.mock(Plugin.class);
     signListener = new InSignsNano(plugin, false, false) {
