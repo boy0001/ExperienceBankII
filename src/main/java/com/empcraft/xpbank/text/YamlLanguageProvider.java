@@ -9,21 +9,14 @@ import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
 public class YamlLanguageProvider {
   private final YamlConfiguration langYaml;
   private final Logger logger;
 
-  public YamlLanguageProvider(final File dataFolder, final FileConfiguration config,
-      final Logger logger) throws ConfigurationException {
-    File langFile = new File(dataFolder, config.getString("language").toLowerCase() + ".yml");
-
-    if (!langFile.exists()) {
-      throw new ConfigurationException();
-    }
-
+  public YamlLanguageProvider(final File languageFile, final Logger logger)
+      throws ConfigurationException {
     try {
-      this.langYaml = YamlConfiguration.loadConfiguration(langFile);
+      this.langYaml = YamlConfiguration.loadConfiguration(languageFile);
     } catch (IllegalArgumentException iae) {
       throw new ConfigurationException(iae);
     }

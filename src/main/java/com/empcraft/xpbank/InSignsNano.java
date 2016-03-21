@@ -1,5 +1,7 @@
 package com.empcraft.xpbank;
 
+import com.empcraft.xpbank.text.MessageUtils;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
@@ -46,7 +48,7 @@ import java.util.Set;
  * THE SOFTWARE.
  */
 
-public abstract class InSignsNano implements Listener {
+public class InSignsNano implements Listener {
   // BUFFER = how many signs can be in the queue to auto-update at one time
   // lower it if you want to save a couple kilobytes of ram
   private static final int UPDATE_BUFFER = 4096;
@@ -62,10 +64,14 @@ public abstract class InSignsNano implements Listener {
   private volatile List<Sign> updateQueueSign = new ArrayList<Sign>();
   private volatile List<Player> updateQueuePlayer = new ArrayList<Player>();
 
-  public InSignsNano(Plugin plugin, boolean autoupdating, boolean manualUpdating) {
+  private ExpBankConfig expBankConfig;
+
+  public InSignsNano(Plugin plugin, boolean autoupdating, boolean manualUpdating,
+      final ExpBankConfig config) {
     this.manual = manualUpdating;
     Bukkit.getServer().getPluginManager().registerEvents(this, plugin);
     this.plugin = plugin;
+    this.expBankConfig = config;
 
     if (autoupdating) {
       Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable() {
@@ -103,8 +109,6 @@ public abstract class InSignsNano implements Listener {
       }, 0L, 1L);
     }
   }
-
-  public abstract String[] getValue(String[] lines, Player player, Sign sign);
 
   public Set<Location> getBrokenSigns() {
     return brokenSigns;
@@ -265,7 +269,9 @@ public abstract class InSignsNano implements Listener {
       return false;
     }
 
-    String[] lines = getValue(sign.getLines(), player, sign);
+    String[] lines = MessageUtils.getSignText(sign.getLines(), player, sign,
+        expBankConfig,
+        (ExpBank) this.plugin);
 
     if (lines == null) {
       return false;

@@ -23,14 +23,14 @@ import org.bukkit.event.block.SignChangeEvent;
  */
 public class SignChangeEventListener implements Listener {
 
-  private FileConfiguration config;
+  private String activationString;
   private YamlLanguageProvider ylp;
   private InSignsNano signsListener;
 
-  public SignChangeEventListener(final InSignsNano signsListener, final FileConfiguration config,
+  public SignChangeEventListener(final InSignsNano signsListener, final String activationString,
       YamlLanguageProvider ylp) {
     this.signsListener = signsListener;
-    this.config = config;
+    this.activationString = activationString;
     this.ylp = ylp;
   }
 
@@ -52,7 +52,7 @@ public class SignChangeEventListener implements Listener {
       return;
     }
 
-    event.setLine(0, MessageUtils.colorise(config.getString("text.create")));
+    event.setLine(0, MessageUtils.colorise(activationString));
     MessageUtils.sendMessageToPlayer(player, ylp.getMessage("CREATE"));
 
     signsListener.scheduleUpdate(player, (Sign) event.getBlock().getState(), 6);
@@ -65,7 +65,7 @@ public class SignChangeEventListener implements Listener {
    */
   public boolean isExpBankSign(SignChangeEvent event) {
     String line = ChatColor.stripColor(event.getLine(0)).toLowerCase();
-    String expLine = ChatColor.stripColor(config.getString("text.create").toLowerCase());
+    String expLine = ChatColor.stripColor(activationString.toLowerCase());
 
     if (line.contains(expLine)) {
       return true;

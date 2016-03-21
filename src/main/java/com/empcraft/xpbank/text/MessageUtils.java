@@ -1,9 +1,12 @@
 package com.empcraft.xpbank.text;
 
+import com.empcraft.xpbank.ExpBank;
+import com.empcraft.xpbank.ExpBankConfig;
 import com.empcraft.xpbank.ExperienceManager;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Server;
+import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 
 /**
@@ -136,4 +139,18 @@ public final class MessageUtils {
     return colorise(mystring);
   }
 
+  public static String[] getSignText(String[] lines, Player player, Sign sign,
+      final ExpBankConfig expBankConfig, final ExpBank exp) {
+    String[] signLines = expBankConfig.getSignContent();
+
+    if (lines[0].equals(MessageUtils.colorise(expBankConfig.getExperienceBankActivationString()))) {
+      int storedPlayerExperience = exp.getExp(player.getUniqueId());
+      lines[0] = evaluate(signLines[0], player, storedPlayerExperience);
+      lines[1] = evaluate(signLines[1], player, storedPlayerExperience);
+      lines[2] = evaluate(signLines[2], player, storedPlayerExperience);
+      lines[3] = evaluate(signLines[3], player, storedPlayerExperience);
+    }
+
+    return lines;
+  }
 }

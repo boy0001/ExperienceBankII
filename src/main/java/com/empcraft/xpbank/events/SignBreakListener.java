@@ -20,11 +20,11 @@ import org.bukkit.event.block.BlockBreakEvent;
 public class SignBreakListener implements Listener {
 
   private InSignsNano signListener;
-  private FileConfiguration config;
+  private String activationString;
 
-  public SignBreakListener(final InSignsNano signListener, final FileConfiguration config) {
+  public SignBreakListener(final InSignsNano signListener, final String activationString) {
     this.signListener = signListener;
-    this.config = config;
+    this.activationString = activationString;
   }
 
   @EventHandler
@@ -34,7 +34,7 @@ public class SignBreakListener implements Listener {
     if ((block.getType() == Material.SIGN_POST) || (block.getType() == Material.WALL_SIGN)) {
       Sign sign = (Sign) block.getState();
 
-      if (sign.getLine(0).equals(MessageUtils.colorise(config.getString("text.create")))) {
+      if (sign.getLine(0).equals(MessageUtils.colorise(activationString))) {
         signListener.addBrokenSign(event.getBlock().getLocation());
       }
     }

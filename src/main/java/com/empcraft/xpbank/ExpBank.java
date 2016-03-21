@@ -28,7 +28,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -43,12 +42,11 @@ public class ExpBank extends JavaPlugin implements Listener {
    */
   private final Map<UUID, Integer> expMap = new HashMap<>();
 
-  public final String version = getDescription().getVersion();
-
   /**
    * Use ylp.getMessage("");
    */
   private YamlLanguageProvider ylp;
+  private ExpBankConfig expConfig;
 
   @Override
   public void onDisable() {
@@ -64,12 +62,15 @@ public class ExpBank extends JavaPlugin implements Listener {
     saveResource("spanish.yml", true);
     saveResource("catalan.yml", true);
 
-    configureIfNotExistent();
-
-    saveConfig();
+    try {
+      this.expConfig = new ExpBankConfig(this);
+    } catch (ConfigurationException configEx) {
+      getLogger().log(Level.SEVERE, "Could not read main config file.", configEx);
+      MessageUtils.sendMessageToAll(getServer(), "Could not read main config file.");
+    }
 
     try {
-      ylp = new YamlLanguageProvider(getDataFolder(), getConfig(), getLogger());
+      ylp = new YamlLanguageProvider(expConfig.getLanguageFile(), getLogger());
     } catch (ConfigurationException configEx) {
       getLogger().log(Level.SEVERE, "Could not load Language file.", configEx);
       MessageUtils.sendMessageToAll(getServer(), "Could not get Yaml Language File.");
@@ -96,28 +97,15 @@ public class ExpBank extends JavaPlugin implements Listener {
       manual = false;
     }
 
-    signListener = new InSignsNano(this, false, manual) {
-      @Override
-      public String[] getValue(String[] lines, Player player, Sign sign) {
-        if (lines[0].equals(MessageUtils.colorise(getConfig().getString("text.create")))) {
-          int storedPlayerExperience = getExp(player.getUniqueId());
-          lines[0] = MessageUtils.evaluate(getConfig().getString("text.1"), player, storedPlayerExperience);
-          lines[1] = MessageUtils.evaluate(getConfig().getString("text.2"), player, storedPlayerExperience);
-          lines[2] = MessageUtils.evaluate(getConfig().getString("text.3"), player, storedPlayerExperience);
-          lines[3] = MessageUtils.evaluate(getConfig().getString("text.4"), player, storedPlayerExperience);
-        }
-
-        return lines;
-      }
-    };
+    signListener = new InSignsNano(this, false, manual, expConfig);
 
     /* Register sign change event. */
-    Bukkit.getServer().getPluginManager()
-        .registerEvents(new SignChangeEventListener(signListener, getConfig(), ylp), this);
+    Bukkit.getServer().getPluginManager().registerEvents(new SignChangeEventListener(signListener,
+        expConfig.getExperienceBankActivationString(), ylp), this);
 
     /* Register sign break event. */
-    Bukkit.getServer().getPluginManager()
-        .registerEvents(new SignBreakListener(signListener, getConfig()), this);
+    Bukkit.getServer().getPluginManager().registerEvents(
+        new SignBreakListener(signListener, expConfig.getExperienceBankActivationString()), this);
     Bukkit.getServer().getPluginManager().registerEvents(this, this);
     BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
 
@@ -128,31 +116,6 @@ public class ExpBank extends JavaPlugin implements Listener {
         saveConfig();
       }
     }, 24000L, 24000L);
-  }
-
-  private void configureIfNotExistent() {
-    Map<String, Object> options = new HashMap<>();
-    getConfig().set("version", version);
-    options.put("language", "english");
-    options.put("storage.default", 825);
-    options.put("text.create", "[EXP]");
-    options.put("text.1", "&8---&aEXP&8---");
-    options.put("text.2", MessageUtils.MAGIC_KEYWORD_PLAYERNAME);
-    options.put("text.3", MessageUtils.MAGIC_KEYWORD_STORED_XP);
-    options.put("text.4", "&8---&a===&8---");
-    options.put("mysql.enabled", false);
-    options.put("mysql.connection.port", 3306);
-    options.put("mysql.connection.host", "localhost");
-    options.put("mysql.connection.username", "root");
-    options.put("mysql.connection.password", "");
-    options.put("mysql.connection.database", "mysql");
-    options.put("mysql.connection.table", "expbank");
-
-    for (final Entry<String, Object> node : options.entrySet()) {
-      if (!getConfig().contains(node.getKey())) {
-        getConfig().set(node.getKey(), node.getValue());
-      }
-    }
   }
 
   private Map<UUID, Integer> loadSavedExperience() throws ConfigurationException {
@@ -192,8 +155,8 @@ public class ExpBank extends JavaPlugin implements Listener {
 
     if (length == 0) {
       /*
-       * If there are no players in the database yet,
-       * see, if we can migrate player's exp from the yaml config.
+       * If there are no players in the database yet, see, if we can migrate player's exp from the
+       * yaml config.
        */
       dh.converToDbIfPlayersFound(exp);
     }
