@@ -35,7 +35,7 @@ public class SignBreakListener implements Listener {
       Sign sign = (Sign) block.getState();
 
       if (sign.getLine(0).equals(MessageUtils.colorise(config.getString("text.create")))) {
-        signListener.broken_signs.add(event.getBlock().getLocation());
+        signListener.addBrokenSign(event.getBlock().getLocation());
       }
     }
   }

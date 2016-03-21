@@ -63,6 +63,16 @@ public abstract class InSignsNano implements Listener {
   private volatile List<Sign> updateQueueSign = new ArrayList<Sign>();
   private volatile List<Player> updateQueuePlayer = new ArrayList<Player>();
 
+  public HashSet<Location> getBrokenSigns() {
+    return broken_signs;
+  }
+
+  public boolean addBrokenSign(Location loc) {
+    return broken_signs.add(loc);
+  }
+
+  public InSignsNano() {}
+
   public InSignsNano(Plugin plugin, boolean autoupdating, boolean manualUpdating) {
     this.manual = manualUpdating;
     Bukkit.getServer().getPluginManager().registerEvents(this, plugin);
