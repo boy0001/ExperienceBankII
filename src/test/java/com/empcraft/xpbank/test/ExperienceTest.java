@@ -1,5 +1,7 @@
 package com.empcraft.xpbank.test;
 
+import com.empcraft.xpbank.ExpBank;
+
 import org.bukkit.World.Environment;
 import org.bukkit.entity.Player;
 import org.junit.Assert;
@@ -25,7 +27,7 @@ public class ExperienceTest {
   }
 
   @Test
-  public void test() {
+  public void testPlayerNoXp() {
     Player offlinePlayer = server.getPlayer(PLAYERNAME);
     int totalExperience = offlinePlayer.getTotalExperience();
 
@@ -33,4 +35,8 @@ public class ExperienceTest {
     LOG.debug("Expierience for Player [{}]: [{}].", offlinePlayer.toString(), totalExperience);
   }
 
+  @Test
+  public void testExpBank() {
+    // TODO: Test Listeners...
+  }
 }

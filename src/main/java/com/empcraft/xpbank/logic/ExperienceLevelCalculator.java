@@ -1,6 +1,12 @@
 package com.empcraft.xpbank.logic;
 
-public class ExperienceLevelCalculator {
+public final class ExperienceLevelCalculator {
+
+  /**
+   * Hidden private utility constructor for tool class.
+   */
+  private ExperienceLevelCalculator() {}
+
   /**
    * This table represents the experience points you need to gain a specific level. For example: If
    * you have 7-16 points, you have level 1.
@@ -31,5 +37,22 @@ public class ExperienceLevelCalculator {
 
       level--;
     }
+  }
+
+  /**
+   * Returns the minimum amount of experience needed for the given level.
+   * @param level the level to check.
+   * @return 0 on invalid inputs, otherwise the experience needed for the given level.
+   */
+  public static int getMinExperienceForLevel(int level) {
+    if (level <= 0) {
+      return 0;
+    }
+
+    if (level > expList.length - 1) {
+      return expList[expList.length - 1];
+    }
+
+    return expList[level];
   }
 }

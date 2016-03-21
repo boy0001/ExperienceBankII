@@ -2,11 +2,12 @@ package com.empcraft.xpbank;
 
 import code.husky.mysql.MySQL;
 
+import com.empcraft.xpbank.events.SignChangeEventListener;
+import com.empcraft.xpbank.logic.PermissionsHelper;
 import com.empcraft.xpbank.text.MessageUtils;
 import com.empcraft.xpbank.threads.ChangeExperienceThread;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
@@ -16,7 +17,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -289,6 +289,9 @@ public class ExpBank extends JavaPlugin implements Listener {
       }
     };
 
+    Bukkit.getServer().getPluginManager().registerEvents(
+        new SignChangeEventListener(ISN, getConfig(), ylp),
+        this);
     Bukkit.getServer().getPluginManager().registerEvents(this, this);
     BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
 
@@ -303,26 +306,6 @@ public class ExpBank extends JavaPlugin implements Listener {
 
   private void runTask(final Runnable r) {
     Bukkit.getScheduler().runTaskAsynchronously(this, r);
-  }
-
-  @EventHandler
-  public void onSignChange(SignChangeEvent event) {
-    String line = ChatColor.stripColor(event.getLine(0)).toLowerCase();
-    String expLine = ChatColor.stripColor(getConfig().getString("text.create").toLowerCase());
-
-    if (line.contains(expLine)) {
-      Player player = event.getPlayer();
-      if (checkperm(player, "expbank.create")) {
-        event.setLine(0, MessageUtils.colorise(getConfig().getString("text.create")));
-        MessageUtils.sendMessageToPlayer(player, ylp.getMessage("CREATE"));
-      } else {
-        event.setLine(0, "&4[ERROR]");
-        MessageUtils.sendMessageToPlayer(player,
-            ylp.getMessage("NOPERM").replace("{STRING}", "expbank.create" + ""));
-      }
-
-      ISN.scheduleUpdate(player, (Sign) event.getBlock().getState(), 6);
-    }
   }
 
   @EventHandler
@@ -352,7 +335,7 @@ public class ExpBank extends JavaPlugin implements Listener {
       String[] lines = sign.getLines();
 
       if (lines[0].equals(MessageUtils.colorise(getConfig().getString("text.create")))) {
-        if (checkperm(player, "expbank.use")) {
+        if (PermissionsHelper.playerHasPermission(player, "expbank.use")) {
           ExperienceManager expMan = new ExperienceManager(player);
           int amount;
           int myExp = getExp(player.getUniqueId());
@@ -370,7 +353,7 @@ public class ExpBank extends JavaPlugin implements Listener {
             }
 
             if (player.getInventory().getItemInMainHand().getType() == Material.GLASS_BOTTLE
-                && checkperm(player, "expbank.use.bottle")) {
+                && PermissionsHelper.playerHasPermission(player, "expbank.use.bottle")) {
               int bottles = player.getInventory().getItemInMainHand().getAmount();
 
               if (bottles * 7 > myExp) {
@@ -425,7 +408,7 @@ public class ExpBank extends JavaPlugin implements Listener {
     int max = 0;
 
     for (String perm : nodes) {
-      if ("default".equals(perm) || checkperm(player, "expbank.limit." + perm)) {
+      if ("default".equals(perm) || PermissionsHelper.playerHasPermission(player, "expbank.limit." + perm)) {
         int value = getConfig().getInt("storage." + perm);
 
         if (value > max) {
@@ -463,28 +446,6 @@ public class ExpBank extends JavaPlugin implements Listener {
     }
 
     expMap.put(uuid, getExp(uuid) + value);
-  }
-
-  public boolean checkperm(Player player, String perm) {
-    String[] nodes = perm.split("\\.");
-    String node = "";
-
-    if (player == null) {
-      return true;
-    } else if (player.hasPermission(perm)) {
-      return true;
-    } else if (player.isOp() == true) {
-      return true;
-    } else {
-      for (int i = 0; i < nodes.length - 1; i++) {
-        node += nodes[i] + ".";
-        if (player.hasPermission(node + "*")) {
-          return true;
-        }
-      }
-    }
-
-    return false;
   }
 
 }
