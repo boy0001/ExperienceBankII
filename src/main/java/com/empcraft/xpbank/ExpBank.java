@@ -1,7 +1,6 @@
 package com.empcraft.xpbank;
 
-import code.husky.mysql.MySQL;
-
+import com.empcraft.xpbank.err.ConfigurationException;
 import com.empcraft.xpbank.events.SignBreakListener;
 import com.empcraft.xpbank.events.SignChangeEventListener;
 import com.empcraft.xpbank.logic.DataHelper;
@@ -28,9 +27,6 @@ import org.bukkit.scheduler.BukkitScheduler;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -72,9 +68,11 @@ public class ExpBank extends JavaPlugin implements Listener {
   private YamlConfiguration exp;
   private File expFile;
   private InSignsNano signListener;
-  private Connection connection;
 
-  private Map<UUID, Integer> expMap = new HashMap<>();
+  /**
+   * In-Memory storage of players and their experience. Might reduce disk IO.
+   */
+  private final Map<UUID, Integer> expMap = new HashMap<>();
 
   public final String version = getDescription().getVersion();
 
@@ -134,140 +132,28 @@ public class ExpBank extends JavaPlugin implements Listener {
     saveResource("spanish.yml", true);
     saveResource("catalan.yml", true);
 
-    Map<String, Object> options = new HashMap<>();
-    getConfig().set("version", version);
-    options.put("language", "english");
-    options.put("storage.default", 825);
-    options.put("text.create", "[EXP]");
-    options.put("text.1", "&8---&aEXP&8---");
-    options.put("text.2", MAGIC_KEYWORD_PLAYERNAME);
-    options.put("text.3", MAGIC_KEYWORD_STORED_XP);
-    options.put("text.4", "&8---&a===&8---");
-    options.put("mysql.enabled", false);
-    options.put("mysql.connection.port", 3306);
-    options.put("mysql.connection.host", "localhost");
-    options.put("mysql.connection.username", "root");
-    options.put("mysql.connection.password", "");
-    options.put("mysql.connection.database", "mysql");
-    options.put("mysql.connection.table", "expbank");
-
-    for (final Entry<String, Object> node : options.entrySet()) {
-      if (!getConfig().contains(node.getKey())) {
-        getConfig().set(node.getKey(), node.getValue());
-      }
-    }
+    configureIfNotExistent();
 
     saveConfig();
 
-    YamlConfiguration yaml = YamlConfiguration.loadConfiguration(
-        new File(getDataFolder(), getConfig().getString("language").toLowerCase() + ".yml"));
-    ylp = new YamlLanguageProvider(yaml, getLogger());
+    try {
+      ylp = new YamlLanguageProvider(getDataFolder(), getConfig(), getLogger());
+    } catch (ConfigurationException configEx) {
+      getLogger().log(Level.SEVERE, "Could not load Language file.", configEx);
+      MessageUtils.sendMessageToAll(getServer(), "Could not get Yaml Language File.");
 
-    if (getConfig().getBoolean("mysql.enabled")) {
-      Statement createIfNotExists = null;
-      Statement countEntries = null;
-      Statement uidAndExp = null;
-      Statement newPlayer = null;
+      // do not proceed: Can't work without ylp defined.
+      return;
+    }
 
-      MessageUtils.sendMessageToAll(getServer(), ylp.getMessage("MYSQL"));
-      MySQL MySQL = new MySQL(
-          getConfig().getString("mysql.connection.host"),
-          getConfig().getString("mysql.connection.port"),
-          getConfig().getString("mysql.connection.database"),
-          getConfig().getString("mysql.connection.username"),
-          getConfig().getString("mysql.connection.password"));
-      DataHelper dh = new DataHelper(ylp, getConfig(), getLogger());
+    try {
+      expMap.putAll(loadSavedExperience());
+    } catch (ConfigurationException configEx) {
+      getLogger().log(Level.SEVERE, "Clould not load saved data or save.", configEx);
+      MessageUtils.sendMessageToAll(getServer(), ylp.getMessage("MYSQL-CONNECT"));
 
-      try {
-        connection = MySQL.openConnection();
-        createIfNotExists = connection.createStatement();
-        MessageUtils.sendMessageToAll(getServer(), ylp.getMessage("SUCCESS"));
-        createIfNotExists.executeUpdate("CREATE TABLE IF NOT EXISTS "
-            + getConfig().getString("mysql.connection.table") + " ( UUID VARCHAR(36), EXP INT )");
-        createIfNotExists.close();
-
-        int length = dh.countPlayersInDatabase();
-
-        if (length == 0) {
-          dh.converToDbIfPlayersFound(exp);
-        }
-
-        uidAndExp = connection.createStatement();
-        ResultSet result = uidAndExp.executeQuery(
-            "SELECT UUID, EXP FROM " + getConfig().getString("mysql.connection.table") + ";");
-        while (result.next()) {
-          try {
-            int experience = result.getInt("EXP");
-            String uuid_s = result.getString("UUID");
-            UUID uuid = UUID.fromString(uuid_s);
-            expMap.put(uuid, experience);
-          } catch (Exception e) {
-            getLogger().log(Level.SEVERE, "Could not get exp for players.", e);
-          }
-        }
-
-        result.close();
-        uidAndExp.close();
-        connection.close();
-      } catch (Exception e) {
-        getLogger().log(Level.SEVERE, "Clould not complete onEnable()-Queries.", e);
-
-        MessageUtils.sendMessageToAll(getServer(), ylp.getMessage("MYSQL-CONNECT"));
-      } finally {
-        if (newPlayer != null) {
-          try {
-            newPlayer.close();
-          } catch (SQLException e1) {
-            getLogger().log(Level.WARNING, "Could not close Statement newPlayer.", e1);
-          }
-        }
-
-        if (uidAndExp != null) {
-          try {
-            uidAndExp.close();
-          } catch (SQLException e1) {
-            getLogger().log(Level.WARNING, "Could not close Statement uidAndExp.", e1);
-          }
-        }
-
-        if (countEntries != null) {
-          try {
-            countEntries.close();
-          } catch (SQLException e1) {
-            getLogger().log(Level.WARNING, "Could not close Statement countEntries.", e1);
-            ;
-          }
-        }
-
-        if (createIfNotExists != null) {
-          try {
-            createIfNotExists.close();
-          } catch (SQLException e1) {
-            getLogger().log(Level.WARNING, "Could not close Statement createIfNotExists.", e1);
-          }
-        }
-
-        if (connection != null) {
-          try {
-            connection.close();
-          } catch (SQLException e1) {
-            getLogger().log(Level.WARNING, "Could not close Connection.", e1);
-          }
-        }
-      }
-    } else {
-      Set<String> players = exp.getKeys(false);
-
-      for (String player : players) {
-        try {
-          int experience = exp.getInt(player);
-          UUID uuid = UUID.fromString(player);
-          expMap.put(uuid, experience);
-        } catch (Exception e) {
-          getLogger().log(Level.WARNING, "Could not register Players.", e);
-        }
-      }
-      MessageUtils.sendMessageToAll(getServer(), ylp.getMessage("YAML"));
+      // do not proceed: Don't register defunct listeners!
+      return;
     }
 
     boolean manual = true;
@@ -309,6 +195,77 @@ public class ExpBank extends JavaPlugin implements Listener {
         saveConfig();
       }
     }, 24000L, 24000L);
+  }
+
+  private void configureIfNotExistent() {
+    Map<String, Object> options = new HashMap<>();
+    getConfig().set("version", version);
+    options.put("language", "english");
+    options.put("storage.default", 825);
+    options.put("text.create", "[EXP]");
+    options.put("text.1", "&8---&aEXP&8---");
+    options.put("text.2", MAGIC_KEYWORD_PLAYERNAME);
+    options.put("text.3", MAGIC_KEYWORD_STORED_XP);
+    options.put("text.4", "&8---&a===&8---");
+    options.put("mysql.enabled", false);
+    options.put("mysql.connection.port", 3306);
+    options.put("mysql.connection.host", "localhost");
+    options.put("mysql.connection.username", "root");
+    options.put("mysql.connection.password", "");
+    options.put("mysql.connection.database", "mysql");
+    options.put("mysql.connection.table", "expbank");
+
+    for (final Entry<String, Object> node : options.entrySet()) {
+      if (!getConfig().contains(node.getKey())) {
+        getConfig().set(node.getKey(), node.getValue());
+      }
+    }
+  }
+
+  private Map<UUID, Integer> loadSavedExperience() throws ConfigurationException {
+    Map<UUID, Integer> experience = new HashMap<UUID, Integer>();
+
+    if (getConfig().getBoolean("mysql.enabled")) {
+      experience = loadExperienceFromSql();
+
+      return experience;
+    }
+
+    // load from config.
+    Set<String> players = exp.getKeys(false);
+
+    for (String player : players) {
+      int playerExp = exp.getInt(player);
+      UUID uuid = UUID.fromString(player);
+      experience.put(uuid, playerExp);
+    }
+
+    MessageUtils.sendMessageToAll(getServer(), ylp.getMessage("YAML"));
+
+    return experience;
+  }
+
+  private Map<UUID, Integer> loadExperienceFromSql() throws ConfigurationException {
+    MessageUtils.sendMessageToAll(getServer(), ylp.getMessage("MYSQL"));
+    DataHelper dh = new DataHelper(ylp, getConfig(), getLogger());
+
+    boolean exists = dh.createTableIfNotExists();
+
+    if (!exists) {
+      throw new ConfigurationException();
+    }
+
+    int length = dh.countPlayersInDatabase();
+
+    if (length == 0) {
+      /*
+       * If there are no players in the database yet,
+       * see, if we can migrate player's exp from the yaml config.
+       */
+      dh.converToDbIfPlayersFound(exp);
+    }
+
+    return dh.getSavedExperience();
   }
 
   private void runTask(final Runnable r) {

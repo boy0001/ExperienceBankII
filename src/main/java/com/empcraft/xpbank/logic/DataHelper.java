@@ -4,6 +4,7 @@ import code.husky.mysql.MySQL;
 
 import com.empcraft.xpbank.dao.PlayerExperienceDao;
 import com.empcraft.xpbank.dao.impl.mysql.MySqlPlayerExperienceDao;
+import com.empcraft.xpbank.err.ConfigurationException;
 import com.empcraft.xpbank.text.MessageUtils;
 import com.empcraft.xpbank.text.YamlLanguageProvider;
 
@@ -12,6 +13,8 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -87,7 +90,7 @@ public class DataHelper {
 
       MessageUtils.sendMessageToAll(null, ylp.getMessage("DONE"));
     } catch (SQLException sqlEx) {
-      logger.log(Level.SEVERE, "Could not open Connection to MySQL Database.", sqlEx);
+      logger.log(Level.SEVERE, "Could not insert players into Database.", sqlEx);
     }
 
     return;
@@ -100,15 +103,50 @@ public class DataHelper {
       PlayerExperienceDao ped = getDao(connection);
       playercount = ped.countPlayers();
     } catch (SQLException sqlEx) {
-      logger.log(Level.SEVERE, "Could not open Connection to MySQL Database.", sqlEx);
+      logger.log(Level.SEVERE, "Could not count players in Database.", sqlEx);
     }
 
     return playercount;
   }
 
-  public boolean updatePlayerExperience(UUID uuid, int value) {
-    // TODO Auto-generated method stub
-    return false;
+  public boolean updatePlayerExperience(UUID uuid, int newExperience) {
+    boolean success = false;
+
+    try (Connection connection = getConnection()) {
+      PlayerExperienceDao ped = getDao(connection);
+      success = ped.updatePlayerExperience(uuid, newExperience);
+    } catch (SQLException sqlEx) {
+      logger.log(Level.SEVERE, "Could not update player experience.", sqlEx);
+    }
+
+    return success;
+  }
+
+  public boolean createTableIfNotExists() {
+    boolean success = false;
+
+    try (Connection connection = getConnection()) {
+      PlayerExperienceDao ped = getDao(connection);
+      success = ped.createTable();
+    } catch (SQLException sqlEx) {
+      logger.log(Level.SEVERE, "Could not create Table in Database.", sqlEx);
+    }
+
+    return success;
+  }
+
+  public Map<UUID, Integer> getSavedExperience() throws ConfigurationException {
+    Map<UUID, Integer> results = new HashMap<UUID, Integer>();
+
+    try (Connection connection = getConnection()) {
+      PlayerExperienceDao ped = getDao(connection);
+      results.putAll(ped.getSavedExperience());
+    } catch (SQLException sqlEx) {
+      logger.log(Level.SEVERE, "Could not read existing saved exp from Database.", sqlEx);
+      throw new ConfigurationException(sqlEx);
+    }
+
+    return results;
   }
 
 }

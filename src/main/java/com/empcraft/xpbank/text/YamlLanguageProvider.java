@@ -1,16 +1,33 @@
 package com.empcraft.xpbank.text;
 
+import com.empcraft.xpbank.err.ConfigurationException;
+
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
+import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 
 public class YamlLanguageProvider {
   private final YamlConfiguration langYaml;
   private final Logger logger;
 
-  public YamlLanguageProvider(final YamlConfiguration yaml, final Logger logger) {
-    this.langYaml = yaml;
+  public YamlLanguageProvider(final File dataFolder, final FileConfiguration config,
+      final Logger logger) throws ConfigurationException {
+    File langFile = new File(dataFolder, config.getString("language").toLowerCase() + ".yml");
+
+    if (!langFile.exists()) {
+      throw new ConfigurationException();
+    }
+
+    try {
+      this.langYaml = YamlConfiguration.loadConfiguration(langFile);
+    } catch (IllegalArgumentException iae) {
+      throw new ConfigurationException(iae);
+    }
+
     this.logger = logger;
   }
 

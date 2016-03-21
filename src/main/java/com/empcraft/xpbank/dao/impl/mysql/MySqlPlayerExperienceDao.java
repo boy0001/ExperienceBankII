@@ -1,6 +1,7 @@
 package com.empcraft.xpbank.dao.impl.mysql;
 
 import com.empcraft.xpbank.dao.PlayerExperienceDao;
+import com.empcraft.xpbank.err.ConfigurationException;
 
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -9,22 +10,44 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class MySqlPlayerExperienceDao extends PlayerExperienceDao {
 
+  private static final String SQL_CREATE = "CREATE TABLE IF NOT EXISTS "
+      + "? ( UUID VARCHAR(36), EXP INT )";
+
   private static final String SQL_INSERT = "INSERT INTO ? VALUES(?, ?)";
 
   private static final String SQL_COUNT = "SELECT COUNT(UUID) from ?";
 
-  private static final String SQL_UPDATE = "UPDATE ? SET EXP = ? "
-      + "WHERE UUID = ?";
+  private static final String SQL_UPDATE = "UPDATE ? SET EXP = ? " + "WHERE UUID = ?";
+
+  private static final String SQL_SELECT_ALL = "SELECT UUID, EXP FROM ?";
 
   public MySqlPlayerExperienceDao(final Connection conn, final FileConfiguration config,
       final Logger logger) {
     super(conn, config, logger);
+  }
+
+  @Override
+  public boolean createTable() {
+    boolean success = false;
+
+    try {
+      PreparedStatement st = getConnection().prepareStatement(SQL_CREATE);
+      st.setString(1, getTable());
+      st.executeUpdate();
+      success = true;
+    } catch (SQLException sqlEx) {
+      getLogger().log(Level.SEVERE, "Could not create player table [" + getTable() + "].", sqlEx);
+    }
+
+    return success;
   }
 
   @Override
@@ -64,8 +87,7 @@ public class MySqlPlayerExperienceDao extends PlayerExperienceDao {
         changed = true;
       }
     } catch (SQLException sqlException) {
-      getLogger().log(Level.SEVERE, "Could not insert player [" + playerUuid + "].",
-          sqlException);
+      getLogger().log(Level.SEVERE, "Could not insert player [" + playerUuid + "].", sqlException);
     }
 
     return changed;
@@ -86,8 +108,7 @@ public class MySqlPlayerExperienceDao extends PlayerExperienceDao {
 
       rs.close();
     } catch (SQLException sqlException) {
-      getLogger().log(Level.SEVERE, "Could not count players.",
-          sqlException);
+      getLogger().log(Level.SEVERE, "Could not count players.", sqlException);
     }
 
     return playercount;
@@ -108,11 +129,32 @@ public class MySqlPlayerExperienceDao extends PlayerExperienceDao {
         success = true;
       }
     } catch (SQLException sqlException) {
-      getLogger().log(Level.SEVERE, "Could not count players.",
-          sqlException);
+      getLogger().log(Level.SEVERE, "Could not count players.", sqlException);
     }
 
     return success;
+  }
+
+  @Override
+  public Map<UUID, Integer> getSavedExperience() throws ConfigurationException {
+    Map<UUID, Integer> savedExperience = new HashMap<>();
+
+    try {
+      PreparedStatement st = getConnection().prepareStatement(SQL_SELECT_ALL);
+      st.setString(1, getTable());
+      ResultSet rs = st.executeQuery();
+
+      while (rs.next()) {
+        UUID uuid = UUID.fromString(rs.getString(1));
+        Integer experience = Integer.valueOf(rs.getString(2));
+        savedExperience.put(uuid, experience);
+      }
+    } catch (SQLException sqlException) {
+      getLogger().log(Level.SEVERE, "Could not count players.", sqlException);
+      throw new ConfigurationException(sqlException);
+    }
+
+    return savedExperience;
   }
 
   private String getTable() {
