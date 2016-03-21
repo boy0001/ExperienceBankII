@@ -55,7 +55,7 @@ public abstract class InSignsNano implements Listener {
 
   public abstract String[] getValue(String[] lines, Player player, Sign sign);
 
-  public HashSet<Location> broken_signs = new HashSet<>();
+  private final HashSet<Location> brokenSigns = new HashSet<>();
 
   private boolean manual;
   private Plugin plugin;
@@ -64,11 +64,11 @@ public abstract class InSignsNano implements Listener {
   private volatile List<Player> updateQueuePlayer = new ArrayList<Player>();
 
   public HashSet<Location> getBrokenSigns() {
-    return broken_signs;
+    return brokenSigns;
   }
 
   public boolean addBrokenSign(Location loc) {
-    return broken_signs.add(loc);
+    return brokenSigns.add(loc);
   }
 
   public InSignsNano() {}
@@ -175,8 +175,8 @@ public abstract class InSignsNano implements Listener {
   }
 
   public void scheduleUpdate(final Player player, final Sign sign, long time) {
-    if (broken_signs.contains(sign.getLocation())) {
-      broken_signs = new HashSet<>();
+    if (brokenSigns.contains(sign.getLocation())) {
+      brokenSigns.clear();
 
       return;
     }
