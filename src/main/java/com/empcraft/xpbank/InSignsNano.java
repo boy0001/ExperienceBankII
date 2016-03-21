@@ -49,12 +49,10 @@ import java.util.Set;
 public abstract class InSignsNano implements Listener {
   // BUFFER = how many signs can be in the queue to auto-update at one time
   // lower it if you want to save a couple kilobytes of ram
-  final int UPDATE_BUFFER = 4096;
+  private static final int UPDATE_BUFFER = 4096;
 
   // AMOUNT = how many signs (MAX) to update each tick
-  final int UPDATE_AMOUNT = 16;
-
-  public abstract String[] getValue(String[] lines, Player player, Sign sign);
+  private static final int UPDATE_AMOUNT = 16;
 
   private final HashSet<Location> brokenSigns = new HashSet<>();
 
@@ -63,8 +61,6 @@ public abstract class InSignsNano implements Listener {
   private int counter = 0;
   private volatile List<Sign> updateQueueSign = new ArrayList<Sign>();
   private volatile List<Player> updateQueuePlayer = new ArrayList<Player>();
-
-  public InSignsNano() {}
 
   public InSignsNano(Plugin plugin, boolean autoupdating, boolean manualUpdating) {
     this.manual = manualUpdating;
@@ -107,6 +103,8 @@ public abstract class InSignsNano implements Listener {
       }, 0L, 1L);
     }
   }
+
+  public abstract String[] getValue(String[] lines, Player player, Sign sign);
 
   public Set<Location> getBrokenSigns() {
     return brokenSigns;

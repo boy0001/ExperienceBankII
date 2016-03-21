@@ -5,6 +5,7 @@ package com.empcraft.xpbank.events;
 
 import com.empcraft.xpbank.InSignsNano;
 import com.empcraft.xpbank.YamlLanguageProvider;
+import com.empcraft.xpbank.logic.ExpBankPermission;
 import com.empcraft.xpbank.logic.PermissionsHelper;
 import com.empcraft.xpbank.text.MessageUtils;
 
@@ -35,22 +36,27 @@ public class SignChangeEventListener implements Listener {
 
   @EventHandler
   public void onSignChange(SignChangeEvent event) {
+    Player player = event.getPlayer();
     String line = ChatColor.stripColor(event.getLine(0)).toLowerCase();
     String expLine = ChatColor.stripColor(config.getString("text.create").toLowerCase());
 
-    if (line.contains(expLine)) {
-      Player player = event.getPlayer();
-
-      if (PermissionsHelper.playerHasPermission(player, "expbank.create")) {
-        event.setLine(0, MessageUtils.colorise(config.getString("text.create")));
-        MessageUtils.sendMessageToPlayer(player, ylp.getMessage("CREATE"));
-      } else {
-        event.setLine(0, "&4[ERROR]");
-        MessageUtils.sendMessageToPlayer(player,
-            ylp.getMessage("NOPERM").replace("{STRING}", "expbank.create" + ""));
-      }
-
-      signsListener.scheduleUpdate(player, (Sign) event.getBlock().getState(), 6);
+    if (!line.contains(expLine)) {
+      // this is not a sign we actually care about.
+      return;
     }
+
+    if (!PermissionsHelper.playerHasPermission(player, ExpBankPermission.EXPBANK_CREATE)) {
+      // this player does not have the permission to create such a sign.
+      event.setLine(0, "&4[ERROR]");
+      MessageUtils.sendMessageToPlayer(player,
+          ylp.getMessage("NOPERM").replace("{STRING}", "expbank.create" + ""));
+
+      return;
+    }
+
+    event.setLine(0, MessageUtils.colorise(config.getString("text.create")));
+    MessageUtils.sendMessageToPlayer(player, ylp.getMessage("CREATE"));
+
+    signsListener.scheduleUpdate(player, (Sign) event.getBlock().getState(), 6);
   }
 }

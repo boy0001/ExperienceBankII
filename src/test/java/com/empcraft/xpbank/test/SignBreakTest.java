@@ -11,6 +11,7 @@ import org.bukkit.block.Sign;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.plugin.Plugin;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,8 +45,8 @@ public class SignBreakTest {
   @Before
   public void setUp() {
     blockBreakEvent = PowerMockito.mock(BlockBreakEvent.class);
-
-    signListener = new InSignsNano() {
+    Plugin plugin = Mockito.mock(Plugin.class);
+    signListener = new InSignsNano(plugin, false, false) {
       @Override
       public String[] getValue(String[] lines, Player player, Sign sign) {
         return lines;

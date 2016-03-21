@@ -55,6 +55,8 @@ import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scheduler.BukkitWorker;
 import org.bukkit.scoreboard.ScoreboardManager;
 import org.bukkit.util.CachedServerIcon;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -67,9 +69,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
-import java.util.logging.Logger;
 
 public class FakeServer implements Server {
+  private static final Logger LOG = LoggerFactory.getLogger(FakeServer.class);
   private List<Player> players = new ArrayList<Player>();
   private final List<World> worlds = new ArrayList<World>();
   PluginManager pluginManager = new FakePluginManager();
@@ -186,7 +188,10 @@ public class FakeServer implements Server {
     return new BukkitScheduler() {
       @Override
       public int scheduleSyncDelayedTask(Plugin plugin, Runnable r, long l) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        LOG.debug("Got scheduled sync delayed task for plugin [{}], runnable [{}] after [{}] tick.",
+            new Object[] {plugin.toString(), r.toString(), l});
+
+        return 0;
       }
 
       @Override
@@ -382,8 +387,8 @@ public class FakeServer implements Server {
   }
 
   @Override
-  public Logger getLogger() {
-    return Logger.getLogger("Minecraft");
+  public java.util.logging.Logger getLogger() {
+    return java.util.logging.Logger.getLogger("Minecraft");
   }
 
   @Override
@@ -1046,7 +1051,7 @@ public class FakeServer implements Server {
 
     @Override
     public void callEvent(Event event) throws IllegalStateException {
-      Logger.getLogger("Minecraft").info("Called event " + event.getEventName());
+      java.util.logging.Logger.getLogger("Minecraft").info("Called event " + event.getEventName());
       if (event instanceof PlayerJoinEvent) {
         for (RegisteredListener listener : listeners) {
           // TODO: implement.

@@ -1,6 +1,7 @@
 /**
  *
  */
+
 package com.empcraft.xpbank.logic;
 
 import org.bukkit.entity.Player;
@@ -16,7 +17,7 @@ public final class PermissionsHelper {
   private PermissionsHelper() {}
 
   /**
-   * Cheks, if player player has the permission perm.
+   * Checks, if player player has the permission perm.
    * @param player The player to check.
    * @param perm the permission to check.
    * @return true, if player has the specified permission (directly or indirectly).
@@ -41,6 +42,16 @@ public final class PermissionsHelper {
     }
 
     return false;
+  }
+
+  /**
+   * Checks, if player player has the permission perm.
+   * @param player The player to check.
+   * @param permisson the permission to check.
+   * @return true, if player has the specified permission (directly or indirectly).
+   */
+  public static boolean playerHasPermission(Player player, ExpBankPermission permission) {
+    return playerHasPermission(player, permission.getPermissionNode());
   }
 
 }

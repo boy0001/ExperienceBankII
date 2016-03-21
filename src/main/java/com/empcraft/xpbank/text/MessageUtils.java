@@ -23,7 +23,7 @@ public final class MessageUtils {
    * @param text The text you'd like to send. Being colorized.
    */
   public static void sendMessageToPlayer(final Player player, final String text) {
-    if ("".equals(text)) {
+    if (text == null || "".equals(text)) {
       return;
     }
 
