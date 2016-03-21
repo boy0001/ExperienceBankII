@@ -3,11 +3,11 @@ package com.empcraft.xpbank.test;
 import com.empcraft.xpbank.InSignsNano;
 import com.empcraft.xpbank.YamlLanguageProvider;
 import com.empcraft.xpbank.events.SignChangeEventListener;
+import com.empcraft.xpbank.test.helpers.RunnableOfPlugin;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -21,6 +21,8 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+
+import java.util.Set;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(SignChangeEvent.class)
@@ -85,7 +87,7 @@ public class SignChangeTest {
   }
 
   @Test
-  public void testOnSignChange_operator_noline() {
+  public void testOnSignChange_operator_noline_valid() {
     Mockito.when(validSignChangeEvent.getPlayer()).thenReturn(operator);
     boolean expBankSign = signChangeEventListener.isExpBankSign(invalidSignChangeEvent);
 
@@ -93,11 +95,31 @@ public class SignChangeTest {
   }
 
   @Test
-  public void testOnSignChange_operator_line() {
+  public void testOnSignChange_operator_noline_runnable() {
+    Mockito.when(invalidSignChangeEvent.getPlayer()).thenReturn(operator);
+    signChangeEventListener.onSignChange(invalidSignChangeEvent);
+
+    Set<RunnableOfPlugin> tasks = ((FakeServer) Bukkit.getServer()).getTasks();
+    Assert.assertEquals(0, tasks.size());
+    tasks.clear();
+  }
+
+  @Test
+  public void testOnSignChange_operator_line_valid() {
     Mockito.when(validSignChangeEvent.getPlayer()).thenReturn(operator);
     boolean expBankSign = signChangeEventListener.isExpBankSign(validSignChangeEvent);
 
     Assert.assertTrue(expBankSign);
+  }
+
+  @Test
+  public void testOnSignChange_operator_line_runnable() {
+    Mockito.when(validSignChangeEvent.getPlayer()).thenReturn(operator);
+    signChangeEventListener.onSignChange(validSignChangeEvent);
+
+    Set<RunnableOfPlugin> tasks = ((FakeServer) Bukkit.getServer()).getTasks();
+    Assert.assertEquals(1, tasks.size());
+    tasks.clear();
   }
 
 }

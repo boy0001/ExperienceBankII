@@ -1,6 +1,7 @@
 package com.empcraft.xpbank.test;
 
 import com.avaje.ebean.config.ServerConfig;
+import com.empcraft.xpbank.test.helpers.RunnableOfPlugin;
 
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
@@ -62,6 +63,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -75,6 +77,11 @@ public class FakeServer implements Server {
   private List<Player> players = new ArrayList<Player>();
   private final List<World> worlds = new ArrayList<World>();
   PluginManager pluginManager = new FakePluginManager();
+  private final Set<RunnableOfPlugin> tasks = new HashSet<>();
+
+  public Set<RunnableOfPlugin> getTasks() {
+    return tasks;
+  }
 
   public FakeServer() {
     if (Bukkit.getServer() == null) {
@@ -190,6 +197,8 @@ public class FakeServer implements Server {
       public int scheduleSyncDelayedTask(Plugin plugin, Runnable r, long l) {
         LOG.debug("Got scheduled sync delayed task for plugin [{}], runnable [{}] after [{}] tick.",
             new Object[] {plugin.toString(), r.toString(), l});
+
+        tasks.add(new RunnableOfPlugin(plugin, r));
 
         return 0;
       }
