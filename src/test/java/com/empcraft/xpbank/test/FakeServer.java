@@ -526,6 +526,24 @@ public class FakeServer implements Server {
   }
 
   @Override
+  public OfflinePlayer[] getOfflinePlayers() {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+
+  @Override
+  public org.bukkit.OfflinePlayer getOfflinePlayer(UUID arg0) {
+    if (arg0.toString().equalsIgnoreCase("3c9ebe1a-9098-43fd-bc0c-a369b76817ba")) {
+      return createOPlayer("testPlayer1");
+    }
+
+    if (arg0.toString().equalsIgnoreCase("f4a37409-5c40-3b2c-9cd6-57d3c5abdc76")) {
+      return createOPlayer("npc1");
+    }
+
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+
+  @Override
   public org.bukkit.OfflinePlayer getOfflinePlayer(final String string) {
     return createOPlayer(string);
   }
@@ -786,11 +804,6 @@ public class FakeServer implements Server {
   }
 
   @Override
-  public OfflinePlayer[] getOfflinePlayers() {
-    throw new UnsupportedOperationException("Not supported yet.");
-  }
-
-  @Override
   public boolean getAllowEnd() {
     throw new UnsupportedOperationException("Not supported yet.");
   }
@@ -852,6 +865,11 @@ public class FakeServer implements Server {
 
   @Override
   public Inventory createInventory(InventoryHolder ih, InventoryType it) {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+
+  @Override
+  public Inventory createInventory(InventoryHolder arg0, InventoryType arg1, String arg2) {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 
@@ -974,22 +992,6 @@ public class FakeServer implements Server {
       }
     }
     return null;
-  }
-
-  @Override
-  public org.bukkit.OfflinePlayer getOfflinePlayer(UUID arg0) {
-    if (arg0.toString().equalsIgnoreCase("3c9ebe1a-9098-43fd-bc0c-a369b76817ba")) {
-      return createOPlayer("testPlayer1");
-    }
-    if (arg0.toString().equalsIgnoreCase("f4a37409-5c40-3b2c-9cd6-57d3c5abdc76")) {
-      return createOPlayer("npc1");
-    }
-    throw new UnsupportedOperationException("Not supported yet.");
-  }
-
-  @Override
-  public Inventory createInventory(InventoryHolder arg0, InventoryType arg1, String arg2) {
-    throw new UnsupportedOperationException("Not supported yet.");
   }
 
   class FakePluginManager implements PluginManager {

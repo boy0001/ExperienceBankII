@@ -82,6 +82,12 @@ public class OfflinePlayer implements Player {
 
   @Override
   public void sendMessage(final String string) {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+
+  @Override
+  public void sendMessage(String[] strings) {
+    throw new UnsupportedOperationException("Not supported yet.");
   }
 
   @Override
@@ -502,25 +508,25 @@ public class OfflinePlayer implements Player {
   }
 
   @Override
-  public void decrementStatistic(Statistic statistic, EntityType entityType)
-      throws IllegalArgumentException {
-    throw new UnsupportedOperationException("notSupportedYet");
-  }
-
-  @Override
-  public int getStatistic(Statistic statistic, EntityType entityType)
-      throws IllegalArgumentException {
-    throw new UnsupportedOperationException("notSupportedYet");
-  }
-
-  @Override
   public void incrementStatistic(Statistic statistic, EntityType entityType, int i)
       throws IllegalArgumentException {
     throw new UnsupportedOperationException("notSupportedYet");
   }
 
   @Override
+  public void decrementStatistic(Statistic statistic, EntityType entityType)
+      throws IllegalArgumentException {
+    throw new UnsupportedOperationException("notSupportedYet");
+  }
+
+  @Override
   public void decrementStatistic(Statistic statistic, EntityType entityType, int i) {
+    throw new UnsupportedOperationException("notSupportedYet");
+  }
+
+  @Override
+  public int getStatistic(Statistic statistic, EntityType entityType)
+      throws IllegalArgumentException {
     throw new UnsupportedOperationException("notSupportedYet");
   }
 
@@ -820,6 +826,11 @@ public class OfflinePlayer implements Player {
   }
 
   @Override
+  public <T> void playEffect(Location lctn, Effect effect, T t) {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+
+  @Override
   public void hidePlayer(Player player) {
     throw new UnsupportedOperationException("Not supported yet.");
   }
@@ -870,13 +881,13 @@ public class OfflinePlayer implements Player {
   }
 
   @Override
-  public EntityType getType() {
-    return EntityType.PLAYER;
+  public <T extends Projectile> T launchProjectile(Class<? extends T> type, Vector vector) {
+    throw new UnsupportedOperationException("Not supported yet.");
   }
 
   @Override
-  public <T> void playEffect(Location lctn, Effect effect, T t) {
-    throw new UnsupportedOperationException("Not supported yet.");
+  public EntityType getType() {
+    return EntityType.PLAYER;
   }
 
   @Override
@@ -895,17 +906,17 @@ public class OfflinePlayer implements Player {
   }
 
   @Override
+  public void openInventory(InventoryView iv) {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+
+  @Override
   public InventoryView openWorkbench(Location lctn, boolean bln) {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 
   @Override
   public InventoryView openEnchanting(Location lctn, boolean bln) {
-    throw new UnsupportedOperationException("Not supported yet.");
-  }
-
-  @Override
-  public void openInventory(InventoryView iv) {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 
@@ -961,11 +972,6 @@ public class OfflinePlayer implements Player {
 
   @Override
   public void abandonConversation(Conversation c) {
-    throw new UnsupportedOperationException("Not supported yet.");
-  }
-
-  @Override
-  public void sendMessage(String[] strings) {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 
@@ -1217,11 +1223,6 @@ public class OfflinePlayer implements Player {
 
   @Override
   public boolean setLeashHolder(Entity arg0) {
-    throw new UnsupportedOperationException("Not supported yet.");
-  }
-
-  @Override
-  public <T extends Projectile> T launchProjectile(Class<? extends T> type, Vector vector) {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 

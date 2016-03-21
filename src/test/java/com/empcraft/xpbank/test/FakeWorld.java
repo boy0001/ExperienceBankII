@@ -96,17 +96,17 @@ public class FakeWorld implements World {
   }
 
   @Override
+  public boolean isChunkLoaded(int i, int i1) {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+
+  @Override
   public Chunk[] getLoadedChunks() {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 
   @Override
   public void loadChunk(Chunk chunk) {
-    throw new UnsupportedOperationException("Not supported yet.");
-  }
-
-  @Override
-  public boolean isChunkLoaded(int i, int i1) {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 
@@ -599,6 +599,11 @@ public class FakeWorld implements World {
   }
 
   @Override
+  public void playSound(Location location, String sound, float volume, float pitch) {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+
+  @Override
   public int getAmbientSpawnLimit() {
     throw new UnsupportedOperationException("Not supported yet.");
   }
@@ -650,11 +655,6 @@ public class FakeWorld implements World {
 
   @Override
   public Collection<Entity> getNearbyEntities(Location location, double x, double y, double z) {
-    throw new UnsupportedOperationException("Not supported yet.");
-  }
-
-  @Override
-  public void playSound(Location location, String sound, float volume, float pitch) {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 

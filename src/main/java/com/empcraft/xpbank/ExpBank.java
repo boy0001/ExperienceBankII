@@ -317,7 +317,8 @@ public class ExpBank extends JavaPlugin implements Listener {
         MessageUtils.sendMessageToPlayer(player, ylp.getMessage("CREATE"));
       } else {
         event.setLine(0, "&4[ERROR]");
-        MessageUtils.sendMessageToPlayer(player, ylp.getMessage("NOPERM").replace("{STRING}", "expbank.create" + ""));
+        MessageUtils.sendMessageToPlayer(player,
+            ylp.getMessage("NOPERM").replace("{STRING}", "expbank.create" + ""));
       }
 
       ISN.scheduleUpdate(player, (Sign) event.getBlock().getState(), 6);
@@ -412,7 +413,8 @@ public class ExpBank extends JavaPlugin implements Listener {
           changeExp(player.getUniqueId(), -amount);
           ISN.scheduleUpdate(player, sign, 1);
         } else {
-          MessageUtils.sendMessageToPlayer(player, ylp.getMessage("NOPERM").replace("{STRING}", "expbank.use" + ""));
+          MessageUtils.sendMessageToPlayer(player,
+              ylp.getMessage("NOPERM").replace("{STRING}", "expbank.use" + ""));
         }
       }
     }
@@ -446,8 +448,8 @@ public class ExpBank extends JavaPlugin implements Listener {
 
   public void changeExp(final UUID uuid, final int value) {
     if (exp == null) {
-      Runnable changeExp =
-          new ChangeExperienceThread(uuid, value, getConfig(), ylp, getServer(), getLogger());
+      Runnable changeExp = new ChangeExperienceThread(uuid, value, getConfig(), ylp, getServer(),
+          getLogger());
       runTask(changeExp);
     } else {
       exp.set(uuid.toString(), value + getExp(uuid));
