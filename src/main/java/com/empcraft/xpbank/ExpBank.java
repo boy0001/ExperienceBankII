@@ -2,10 +2,9 @@ package com.empcraft.xpbank;
 
 import code.husky.mysql.MySQL;
 
-import com.empcraft.xpbank.dao.PlayerExperienceDao;
-import com.empcraft.xpbank.dao.impl.mysql.MySqlPlayerExperienceDao;
 import com.empcraft.xpbank.events.SignBreakListener;
 import com.empcraft.xpbank.events.SignChangeEventListener;
+import com.empcraft.xpbank.logic.DataHelper;
 import com.empcraft.xpbank.logic.ExpBankPermission;
 import com.empcraft.xpbank.logic.PermissionsHelper;
 import com.empcraft.xpbank.text.MessageUtils;
@@ -74,7 +73,6 @@ public class ExpBank extends JavaPlugin implements Listener {
   private File expFile;
   private InSignsNano signListener;
   private Connection connection;
-  private Statement statement;
 
   private Map<UUID, Integer> expMap = new HashMap<>();
 
@@ -172,11 +170,13 @@ public class ExpBank extends JavaPlugin implements Listener {
       Statement newPlayer = null;
 
       MessageUtils.sendMessageToAll(getServer(), ylp.getMessage("MYSQL"));
-      MySQL MySQL = new MySQL(plugin, getConfig().getString("mysql.connection.host"),
+      MySQL MySQL = new MySQL(
+          getConfig().getString("mysql.connection.host"),
           getConfig().getString("mysql.connection.port"),
           getConfig().getString("mysql.connection.database"),
           getConfig().getString("mysql.connection.username"),
           getConfig().getString("mysql.connection.password"));
+      DataHelper dh = new DataHelper(ylp, getConfig(), getLogger());
 
       try {
         connection = MySQL.openConnection();
@@ -186,40 +186,14 @@ public class ExpBank extends JavaPlugin implements Listener {
             + getConfig().getString("mysql.connection.table") + " ( UUID VARCHAR(36), EXP INT )");
         createIfNotExists.close();
 
-        countEntries = connection.createStatement();
-        ResultSet result = countEntries.executeQuery(
-            "SELECT COUNT(*) FROM " + getConfig().getString("mysql.connection.table"));
-        int length = 0;
-
-        if (result.next()) {
-          length = result.getInt(1);
-        }
-
-        result.close();
-        countEntries.close();
+        int length = dh.countPlayersInDatabase();
 
         if (length == 0) {
-          Set<String> players = exp.getKeys(false);
-
-          if (!players.isEmpty()) {
-            MessageUtils.sendMessageToAll(getServer(), ylp.getMessage("CONVERT"));
-            PlayerExperienceDao ped = new MySqlPlayerExperienceDao(connection, getConfig(),
-                getLogger());
-
-            for (String player : players) {
-              UUID uuid = UUID.fromString(player);
-              int oldExperience = exp.getInt(player);
-              ped.insertPlayerAndExperience(uuid, Integer.valueOf(oldExperience));
-            }
-
-            MessageUtils.sendMessageToAll(getServer(), ylp.getMessage("DONE"));
-            exp = null;
-            expFile = null;
-          }
+          dh.converToDbIfPlayersFound(exp);
         }
 
         uidAndExp = connection.createStatement();
-        result = uidAndExp.executeQuery(
+        ResultSet result = uidAndExp.executeQuery(
             "SELECT UUID, EXP FROM " + getConfig().getString("mysql.connection.table") + ";");
         while (result.next()) {
           try {
@@ -240,14 +214,6 @@ public class ExpBank extends JavaPlugin implements Listener {
 
         MessageUtils.sendMessageToAll(getServer(), ylp.getMessage("MYSQL-CONNECT"));
       } finally {
-        if (statement != null) {
-          try {
-            statement.close();
-          } catch (SQLException e1) {
-            getLogger().log(Level.WARNING, "Could not close Statement statement.", e1);
-          }
-        }
-
         if (newPlayer != null) {
           try {
             newPlayer.close();

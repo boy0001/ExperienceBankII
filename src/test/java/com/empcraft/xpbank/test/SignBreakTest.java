@@ -2,7 +2,6 @@ package com.empcraft.xpbank.test;
 
 import com.empcraft.xpbank.InSignsNano;
 import com.empcraft.xpbank.events.SignBreakListener;
-import com.empcraft.xpbank.text.MessageUtils;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;

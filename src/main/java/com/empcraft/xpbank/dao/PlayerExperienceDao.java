@@ -24,4 +24,8 @@ public abstract class PlayerExperienceDao extends BaseDao {
   public abstract boolean insertPlayerAndExperience(Player player, int experience);
 
   public abstract boolean insertPlayerAndExperience(UUID playerUuid, int experience);
+
+  public abstract int countPlayers();
+
+  public abstract boolean updatePlayerExperience(UUID player, int newExperience);
 }

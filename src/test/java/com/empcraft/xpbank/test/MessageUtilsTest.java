@@ -1,7 +1,5 @@
 package com.empcraft.xpbank.test;
 
-import static org.junit.Assert.fail;
-
 import com.empcraft.xpbank.text.MessageUtils;
 
 import org.junit.Assert;

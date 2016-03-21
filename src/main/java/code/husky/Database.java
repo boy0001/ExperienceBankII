@@ -1,7 +1,5 @@
 package code.husky;
 
-import org.bukkit.plugin.Plugin;
-
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -12,22 +10,7 @@ import java.sql.SQLException;
  * @author -_Husky_-
  * @author tips48
  */
-public abstract class Database {
-
-  /**
-   * Plugin instance, use for plugin.getDataFolder()
-   */
-  protected Plugin plugin;
-
-  /**
-   * Creates a new Database.
-   *
-   * @param plugin
-   *          Plugin instance
-   */
-  protected Database(Plugin plugin) {
-    this.plugin = plugin;
-  }
+public interface Database {
 
   /**
    * Opens a connection with the database.
@@ -38,7 +21,7 @@ public abstract class Database {
    * @throws ClassNotFoundException
    *           if the driver cannot be found
    */
-  public abstract Connection openConnection() throws SQLException, ClassNotFoundException;
+  public Connection openConnection() throws SQLException, ClassNotFoundException;
 
   /**
    * Checks if a connection is open with the database.
@@ -47,14 +30,14 @@ public abstract class Database {
    * @throws SQLException
    *           if the connection cannot be checked
    */
-  public abstract boolean checkConnection() throws SQLException;
+  public boolean checkConnection() throws SQLException;
 
   /**
    * Gets the connection with the database.
    *
    * @return Connection with the database, null if none
    */
-  public abstract Connection getConnection();
+  public Connection getConnection();
 
   /**
    * Closes the connection with the database.
@@ -63,7 +46,7 @@ public abstract class Database {
    * @throws SQLException
    *           if the connection cannot be closed
    */
-  public abstract boolean closeConnection() throws SQLException;
+  public boolean closeConnection() throws SQLException;
 
   /**
    * Executes a SQL Query<br>
@@ -78,7 +61,7 @@ public abstract class Database {
    * @throws ClassNotFoundException
    *           If the driver cannot be found; see {@link #openConnection()}
    */
-  public abstract ResultSet querySQL(String query) throws SQLException, ClassNotFoundException;
+  public ResultSet querySQL(String query) throws SQLException, ClassNotFoundException;
 
   /**
    * Executes an Update SQL Query<br>
@@ -93,5 +76,5 @@ public abstract class Database {
    * @throws ClassNotFoundException
    *           If the driver cannot be found; see {@link #openConnection()}
    */
-  public abstract int updateSQL(String query) throws SQLException, ClassNotFoundException;
+  public int updateSQL(String query) throws SQLException, ClassNotFoundException;
 }

@@ -7,6 +7,7 @@ import org.bukkit.entity.Player;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -14,7 +15,12 @@ import java.util.logging.Logger;
 
 public class MySqlPlayerExperienceDao extends PlayerExperienceDao {
 
-  private static final String SQL_INSERT = "INSERT INTO :table VALUES(:player, :experience)";
+  private static final String SQL_INSERT = "INSERT INTO ? VALUES(?, ?)";
+
+  private static final String SQL_COUNT = "SELECT COUNT(UUID) from ?";
+
+  private static final String SQL_UPDATE = "UPDATE ? SET EXP = ? "
+      + "WHERE UUID = ?";
 
   public MySqlPlayerExperienceDao(final Connection conn, final FileConfiguration config,
       final Logger logger) {
@@ -27,9 +33,9 @@ public class MySqlPlayerExperienceDao extends PlayerExperienceDao {
 
     try {
       PreparedStatement st = getConnection().prepareStatement(SQL_INSERT);
-      st.setString(0, getConfig().getString("mysql.connection.table"));
-      st.setString(1, player.getUniqueId().toString());
-      st.setInt(2, experience);
+      st.setString(1, getTable());
+      st.setString(2, player.getUniqueId().toString());
+      st.setInt(3, experience);
       int executeUpdate = st.executeUpdate();
 
       if (executeUpdate == 1) {
@@ -49,9 +55,9 @@ public class MySqlPlayerExperienceDao extends PlayerExperienceDao {
 
     try {
       PreparedStatement st = getConnection().prepareStatement(SQL_INSERT);
-      st.setString(0, getConfig().getString("mysql.connection.table"));
-      st.setString(1, playerUuid.toString());
-      st.setInt(2, experience);
+      st.setString(1, getTable());
+      st.setString(2, playerUuid.toString());
+      st.setInt(3, experience);
       int executeUpdate = st.executeUpdate();
 
       if (executeUpdate == 1) {
@@ -63,6 +69,54 @@ public class MySqlPlayerExperienceDao extends PlayerExperienceDao {
     }
 
     return changed;
+  }
+
+  @Override
+  public int countPlayers() {
+    int playercount = 0;
+
+    try {
+      PreparedStatement st = getConnection().prepareStatement(SQL_COUNT);
+      st.setString(1, getTable());
+      ResultSet rs = st.executeQuery();
+
+      if (rs.next()) {
+        playercount = rs.getInt("UUID");
+      }
+
+      rs.close();
+    } catch (SQLException sqlException) {
+      getLogger().log(Level.SEVERE, "Could not count players.",
+          sqlException);
+    }
+
+    return playercount;
+  }
+
+  @Override
+  public boolean updatePlayerExperience(UUID player, int newExperience) {
+    boolean success = false;
+
+    try {
+      PreparedStatement st = getConnection().prepareStatement(SQL_UPDATE);
+      st.setString(1, getTable());
+      st.setString(2, player.toString());
+      st.setInt(3, newExperience);
+      int changed = st.executeUpdate();
+
+      if (changed > 0) {
+        success = true;
+      }
+    } catch (SQLException sqlException) {
+      getLogger().log(Level.SEVERE, "Could not count players.",
+          sqlException);
+    }
+
+    return success;
+  }
+
+  private String getTable() {
+    return getConfig().getString("mysql.connection.table");
   }
 
 }

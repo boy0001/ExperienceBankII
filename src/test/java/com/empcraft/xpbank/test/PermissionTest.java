@@ -1,7 +1,5 @@
 package com.empcraft.xpbank.test;
 
-import static org.junit.Assert.fail;
-
 import com.empcraft.xpbank.logic.PermissionsHelper;
 
 import org.bukkit.entity.Player;
