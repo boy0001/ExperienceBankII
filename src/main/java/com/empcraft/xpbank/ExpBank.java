@@ -36,12 +36,24 @@ import java.util.UUID;
 import java.util.logging.Level;
 
 public class ExpBank extends JavaPlugin implements Listener {
+  /**
+   * The levels the player would actually gain (level gain is not linear).
+   */
   private static final String MAGIC_KEYWORD_LEVELS_GAIN_WITHDRAW = "{lvlbank2}";
 
+  /**
+   * Replaced with the levels the bank has in experience points.
+   */
   private static final String MAGIC_KEYWORD_LEVELS_IN_BANK = "{lvlbank}";
 
+  /**
+   * Replaced with the players current level.
+   */
   private static final String MAGIC_KEYWORD_CURRENT_LVL = "{lvl}";
 
+  /**
+   * This keyword will be replaced by the player's current xp.
+   */
   private static final String MAGIC_KEYWORD_CURRENT_XP = "{exp}";
 
   /**
@@ -56,7 +68,7 @@ public class ExpBank extends JavaPlugin implements Listener {
   ExpBank plugin;
   private YamlConfiguration exp;
   private File expFile;
-  private InSignsNano ISN;
+  private InSignsNano signListener;
   private Connection connection;
   private Statement statement;
 
@@ -293,7 +305,7 @@ public class ExpBank extends JavaPlugin implements Listener {
       manual = false;
     }
 
-    ISN = new InSignsNano(plugin, false, manual) {
+    signListener = new InSignsNano(plugin, false, manual) {
       @Override
       public String[] getValue(String[] lines, Player player, Sign sign) {
         if (lines[0].equals(MessageUtils.colorise(getConfig().getString("text.create")))) {
@@ -309,12 +321,12 @@ public class ExpBank extends JavaPlugin implements Listener {
 
     /* Register sign change event. */
     Bukkit.getServer().getPluginManager().registerEvents(
-        new SignChangeEventListener(ISN, getConfig(), ylp),
+        new SignChangeEventListener(signListener, getConfig(), ylp),
         this);
 
     /* Register sign break event. */
     Bukkit.getServer().getPluginManager().registerEvents(
-        new SignBreakListener(ISN, getConfig()),
+        new SignBreakListener(signListener, getConfig()),
         this);
     Bukkit.getServer().getPluginManager().registerEvents(this, this);
     BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
@@ -405,7 +417,7 @@ public class ExpBank extends JavaPlugin implements Listener {
           }
 
           changeExp(player.getUniqueId(), -amount);
-          ISN.scheduleUpdate(player, sign, 1);
+          signListener.scheduleUpdate(player, sign, 1);
         } else {
           MessageUtils.sendMessageToPlayer(player,
               ylp.getMessage("NOPERM").replace("{STRING}", "expbank.use" + ""));
