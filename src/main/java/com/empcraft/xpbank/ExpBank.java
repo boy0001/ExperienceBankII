@@ -2,6 +2,8 @@ package com.empcraft.xpbank;
 
 import code.husky.mysql.MySQL;
 
+import com.empcraft.xpbank.dao.PlayerExperienceDao;
+import com.empcraft.xpbank.dao.impl.mysql.MySqlPlayerExperienceDao;
 import com.empcraft.xpbank.events.SignBreakListener;
 import com.empcraft.xpbank.events.SignChangeEventListener;
 import com.empcraft.xpbank.logic.ExpBankPermission;
@@ -101,8 +103,7 @@ public class ExpBank extends JavaPlugin implements Listener {
     }
 
     if (mystring.contains(MAGIC_KEYWORD_CURRENT_LVL)) {
-      mystring = mystring.replace(MAGIC_KEYWORD_CURRENT_LVL,
-          Integer.toString(player.getLevel()));
+      mystring = mystring.replace(MAGIC_KEYWORD_CURRENT_LVL, Integer.toString(player.getLevel()));
     }
 
     if (mystring.contains(MAGIC_KEYWORD_LEVELS_IN_BANK)) {
@@ -114,7 +115,7 @@ public class ExpBank extends JavaPlugin implements Listener {
       mystring = mystring.replace(MAGIC_KEYWORD_LEVELS_GAIN_WITHDRAW,
           Integer.toString(
               (expMan.getLevelForExp(expMan.getCurrentExp() + getExp(player.getUniqueId()))
-              - player.getLevel())));
+                  - player.getLevel())));
     }
 
     return MessageUtils.colorise(mystring);
@@ -202,13 +203,13 @@ public class ExpBank extends JavaPlugin implements Listener {
 
           if (!players.isEmpty()) {
             MessageUtils.sendMessageToAll(getServer(), ylp.getMessage("CONVERT"));
+            PlayerExperienceDao ped = new MySqlPlayerExperienceDao(connection, getConfig(),
+                getLogger());
 
             for (String player : players) {
-              newPlayer = connection.createStatement();
-              newPlayer
-                  .executeUpdate("INSERT INTO " + getConfig().getString("mysql.connection.table")
-                      + " VALUES('" + player + "'," + exp.get(player) + ")");
-              newPlayer.close();
+              UUID uuid = UUID.fromString(player);
+              int oldExperience = exp.getInt(player);
+              ped.insertPlayerAndExperience(uuid, Integer.valueOf(oldExperience));
             }
 
             MessageUtils.sendMessageToAll(getServer(), ylp.getMessage("DONE"));
