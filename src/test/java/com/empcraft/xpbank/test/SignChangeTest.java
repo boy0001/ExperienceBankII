@@ -1,9 +1,9 @@
 package com.empcraft.xpbank.test;
 
 import com.empcraft.xpbank.InSignsNano;
-import com.empcraft.xpbank.YamlLanguageProvider;
 import com.empcraft.xpbank.events.SignChangeEventListener;
 import com.empcraft.xpbank.test.helpers.RunnableOfPlugin;
+import com.empcraft.xpbank.text.YamlLanguageProvider;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;

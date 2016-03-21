@@ -1,6 +1,4 @@
-package com.empcraft.xpbank;
-
-import com.empcraft.xpbank.text.MessageUtils;
+package com.empcraft.xpbank.text;
 
 import org.bukkit.configuration.file.YamlConfiguration;
 

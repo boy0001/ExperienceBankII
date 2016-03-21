@@ -7,6 +7,7 @@ import com.empcraft.xpbank.events.SignChangeEventListener;
 import com.empcraft.xpbank.logic.ExpBankPermission;
 import com.empcraft.xpbank.logic.PermissionsHelper;
 import com.empcraft.xpbank.text.MessageUtils;
+import com.empcraft.xpbank.text.YamlLanguageProvider;
 import com.empcraft.xpbank.threads.ChangeExperienceThread;
 
 import org.bukkit.Bukkit;

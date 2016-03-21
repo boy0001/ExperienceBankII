@@ -4,10 +4,10 @@
 package com.empcraft.xpbank.events;
 
 import com.empcraft.xpbank.InSignsNano;
-import com.empcraft.xpbank.YamlLanguageProvider;
 import com.empcraft.xpbank.logic.ExpBankPermission;
 import com.empcraft.xpbank.logic.PermissionsHelper;
 import com.empcraft.xpbank.text.MessageUtils;
+import com.empcraft.xpbank.text.YamlLanguageProvider;
 
 import org.bukkit.ChatColor;
 import org.bukkit.block.Sign;

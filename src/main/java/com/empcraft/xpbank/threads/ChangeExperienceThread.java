@@ -4,8 +4,8 @@
 
 package com.empcraft.xpbank.threads;
 
-import com.empcraft.xpbank.YamlLanguageProvider;
 import com.empcraft.xpbank.text.MessageUtils;
+import com.empcraft.xpbank.text.YamlLanguageProvider;
 
 import org.bukkit.Server;
 import org.bukkit.configuration.file.FileConfiguration;
