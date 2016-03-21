@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /*
  * Copyright (c) 2014 Jesse Boyd (http://empcraft.com/)
@@ -62,14 +63,6 @@ public abstract class InSignsNano implements Listener {
   private int counter = 0;
   private volatile List<Sign> updateQueueSign = new ArrayList<Sign>();
   private volatile List<Player> updateQueuePlayer = new ArrayList<Player>();
-
-  public HashSet<Location> getBrokenSigns() {
-    return brokenSigns;
-  }
-
-  public boolean addBrokenSign(Location loc) {
-    return brokenSigns.add(loc);
-  }
 
   public InSignsNano() {}
 
@@ -113,6 +106,14 @@ public abstract class InSignsNano implements Listener {
         }
       }, 0L, 1L);
     }
+  }
+
+  public Set<Location> getBrokenSigns() {
+    return brokenSigns;
+  }
+
+  public boolean addBrokenSign(Location loc) {
+    return brokenSigns.add(loc);
   }
 
   @EventHandler

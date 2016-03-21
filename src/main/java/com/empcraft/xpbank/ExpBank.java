@@ -36,6 +36,23 @@ import java.util.UUID;
 import java.util.logging.Level;
 
 public class ExpBank extends JavaPlugin implements Listener {
+  private static final String MAGIC_KEYWORD_LEVELS_GAIN_WITHDRAW = "{lvlbank2}";
+
+  private static final String MAGIC_KEYWORD_LEVELS_IN_BANK = "{lvlbank}";
+
+  private static final String MAGIC_KEYWORD_CURRENT_LVL = "{lvl}";
+
+  private static final String MAGIC_KEYWORD_CURRENT_XP = "{exp}";
+
+  /**
+   * Will be replaced by the amount of XP the player has stored.
+   */
+  private static final String MAGIC_KEYWORD_STORED_XP = "{expbank}";
+
+  /**
+   * The text which will be replaced with the player's name.
+   */
+  private static final String MAGIC_KEYWORD_PLAYERNAME = "{player}";
   ExpBank plugin;
   private YamlConfiguration exp;
   private File expFile;
@@ -53,30 +70,31 @@ public class ExpBank extends JavaPlugin implements Listener {
   private YamlLanguageProvider ylp;
 
   String evaluate(String mystring, Player player) {
-    if (mystring.contains("{player}")) {
-      mystring = mystring.replace("{player}", player.getName());
-    }
-
-    if (mystring.contains("{expbank}")) {
-      mystring = mystring.replace("{expbank}", "" + getExp(player.getUniqueId()));
-    }
-
     ExperienceManager expMan = new ExperienceManager(player);
-    if (mystring.contains("{exp}")) {
-      mystring = mystring.replace("{exp}", "" + expMan.getCurrentExp());
+
+    if (mystring.contains(MAGIC_KEYWORD_PLAYERNAME)) {
+      mystring = mystring.replace(MAGIC_KEYWORD_PLAYERNAME, player.getName());
     }
 
-    if (mystring.contains("{lvl}")) {
-      mystring = mystring.replace("{lvl}", "" + player.getLevel());
+    if (mystring.contains(MAGIC_KEYWORD_STORED_XP)) {
+      mystring = mystring.replace(MAGIC_KEYWORD_STORED_XP, "" + getExp(player.getUniqueId()));
     }
 
-    if (mystring.contains("{lvlbank}")) {
-      mystring = mystring.replace("{lvlbank}",
+    if (mystring.contains(MAGIC_KEYWORD_CURRENT_XP)) {
+      mystring = mystring.replace(MAGIC_KEYWORD_CURRENT_XP, "" + expMan.getCurrentExp());
+    }
+
+    if (mystring.contains(MAGIC_KEYWORD_CURRENT_LVL)) {
+      mystring = mystring.replace(MAGIC_KEYWORD_CURRENT_LVL, "" + player.getLevel());
+    }
+
+    if (mystring.contains(MAGIC_KEYWORD_LEVELS_IN_BANK)) {
+      mystring = mystring.replace(MAGIC_KEYWORD_LEVELS_IN_BANK,
           "" + expMan.getLevelForExp(getExp(player.getUniqueId())));
     }
 
-    if (mystring.contains("{lvlbank2}")) {
-      mystring = mystring.replace("{lvlbank2}",
+    if (mystring.contains(MAGIC_KEYWORD_LEVELS_GAIN_WITHDRAW)) {
+      mystring = mystring.replace(MAGIC_KEYWORD_LEVELS_GAIN_WITHDRAW,
           "" + (expMan.getLevelForExp(expMan.getCurrentExp() + getExp(player.getUniqueId()))
               - player.getLevel()));
     }
@@ -105,8 +123,8 @@ public class ExpBank extends JavaPlugin implements Listener {
     options.put("storage.default", 825);
     options.put("text.create", "[EXP]");
     options.put("text.1", "&8---&aEXP&8---");
-    options.put("text.2", "{player}");
-    options.put("text.3", "{expbank}");
+    options.put("text.2", MAGIC_KEYWORD_PLAYERNAME);
+    options.put("text.3", MAGIC_KEYWORD_STORED_XP);
     options.put("text.4", "&8---&a===&8---");
     options.put("mysql.enabled", false);
     options.put("mysql.connection.port", 3306);
