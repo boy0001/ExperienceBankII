@@ -37,10 +37,8 @@ public class SignChangeEventListener implements Listener {
   @EventHandler
   public void onSignChange(SignChangeEvent event) {
     Player player = event.getPlayer();
-    String line = ChatColor.stripColor(event.getLine(0)).toLowerCase();
-    String expLine = ChatColor.stripColor(config.getString("text.create").toLowerCase());
 
-    if (!line.contains(expLine)) {
+    if (!isExpBankSign(event)) {
       // this is not a sign we actually care about.
       return;
     }
@@ -58,5 +56,21 @@ public class SignChangeEventListener implements Listener {
     MessageUtils.sendMessageToPlayer(player, ylp.getMessage("CREATE"));
 
     signsListener.scheduleUpdate(player, (Sign) event.getBlock().getState(), 6);
+  }
+
+  /**
+   * Determines if this sign change event is to be checked.
+   * @param event the sign change event by minecraft.
+   * @return true if this sign has [EXP] or so on its top line.
+   */
+  public boolean isExpBankSign(SignChangeEvent event) {
+    String line = ChatColor.stripColor(event.getLine(0)).toLowerCase();
+    String expLine = ChatColor.stripColor(config.getString("text.create").toLowerCase());
+
+    if (line.contains(expLine)) {
+      return true;
+    }
+
+    return false;
   }
 }

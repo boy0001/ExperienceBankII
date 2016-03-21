@@ -13,6 +13,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.plugin.Plugin;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,6 +33,7 @@ public class SignChangeTest {
   private Player operator;
 
   private SignChangeEvent validSignChangeEvent;
+  private SignChangeEvent invalidSignChangeEvent;
 
   @Before
   public void setUp() {
@@ -64,6 +66,9 @@ public class SignChangeTest {
     PowerMockito.when(sign.getState()).thenReturn(state);
 
     /* Set up not-[exp] change event */
+    invalidSignChangeEvent = PowerMockito.mock(SignChangeEvent.class);
+    Mockito.when(invalidSignChangeEvent.getLine(0)).thenReturn("bla");
+    Mockito.when(invalidSignChangeEvent.getBlock()).thenReturn(sign);
 
     /* Set up correct change event */
     validSignChangeEvent = PowerMockito.mock(SignChangeEvent.class);
@@ -81,9 +86,19 @@ public class SignChangeTest {
   }
 
   @Test
+  public void testOnSignChange_operator_noline() {
+    Mockito.when(validSignChangeEvent.getPlayer()).thenReturn(operator);
+    boolean expBankSign = signChangeEventListener.isExpBankSign(invalidSignChangeEvent);
+
+    Assert.assertFalse(expBankSign);
+  }
+
+  @Test
   public void testOnSignChange_operator_line() {
     Mockito.when(validSignChangeEvent.getPlayer()).thenReturn(operator);
-    signChangeEventListener.onSignChange(validSignChangeEvent);
+    boolean expBankSign = signChangeEventListener.isExpBankSign(validSignChangeEvent);
+
+    Assert.assertTrue(expBankSign);
   }
 
 }
