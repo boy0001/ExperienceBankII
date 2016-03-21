@@ -89,26 +89,30 @@ public class ExpBank extends JavaPlugin implements Listener {
     }
 
     if (mystring.contains(MAGIC_KEYWORD_STORED_XP)) {
-      mystring = mystring.replace(MAGIC_KEYWORD_STORED_XP, "" + getExp(player.getUniqueId()));
+      mystring = mystring.replace(MAGIC_KEYWORD_STORED_XP,
+          Integer.toString(getExp(player.getUniqueId())));
     }
 
     if (mystring.contains(MAGIC_KEYWORD_CURRENT_XP)) {
-      mystring = mystring.replace(MAGIC_KEYWORD_CURRENT_XP, "" + expMan.getCurrentExp());
+      mystring = mystring.replace(MAGIC_KEYWORD_CURRENT_XP,
+          Integer.toString(expMan.getCurrentExp()));
     }
 
     if (mystring.contains(MAGIC_KEYWORD_CURRENT_LVL)) {
-      mystring = mystring.replace(MAGIC_KEYWORD_CURRENT_LVL, "" + player.getLevel());
+      mystring = mystring.replace(MAGIC_KEYWORD_CURRENT_LVL,
+          Integer.toString(player.getLevel()));
     }
 
     if (mystring.contains(MAGIC_KEYWORD_LEVELS_IN_BANK)) {
       mystring = mystring.replace(MAGIC_KEYWORD_LEVELS_IN_BANK,
-          "" + expMan.getLevelForExp(getExp(player.getUniqueId())));
+          Integer.toString(expMan.getLevelForExp(getExp(player.getUniqueId()))));
     }
 
     if (mystring.contains(MAGIC_KEYWORD_LEVELS_GAIN_WITHDRAW)) {
       mystring = mystring.replace(MAGIC_KEYWORD_LEVELS_GAIN_WITHDRAW,
-          "" + (expMan.getLevelForExp(expMan.getCurrentExp() + getExp(player.getUniqueId()))
-              - player.getLevel()));
+          Integer.toString(
+              (expMan.getLevelForExp(expMan.getCurrentExp() + getExp(player.getUniqueId()))
+              - player.getLevel())));
     }
 
     return MessageUtils.colorise(mystring);
@@ -320,14 +324,12 @@ public class ExpBank extends JavaPlugin implements Listener {
     };
 
     /* Register sign change event. */
-    Bukkit.getServer().getPluginManager().registerEvents(
-        new SignChangeEventListener(signListener, getConfig(), ylp),
-        this);
+    Bukkit.getServer().getPluginManager()
+        .registerEvents(new SignChangeEventListener(signListener, getConfig(), ylp), this);
 
     /* Register sign break event. */
-    Bukkit.getServer().getPluginManager().registerEvents(
-        new SignBreakListener(signListener, getConfig()),
-        this);
+    Bukkit.getServer().getPluginManager()
+        .registerEvents(new SignBreakListener(signListener, getConfig()), this);
     Bukkit.getServer().getPluginManager().registerEvents(this, this);
     BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
 
@@ -431,7 +433,8 @@ public class ExpBank extends JavaPlugin implements Listener {
     int max = 0;
 
     for (String perm : nodes) {
-      if ("default".equals(perm) || PermissionsHelper.playerHasPermission(player, "expbank.limit." + perm)) {
+      if ("default".equals(perm)
+          || PermissionsHelper.playerHasPermission(player, "expbank.limit." + perm)) {
         int value = getConfig().getInt("storage." + perm);
 
         if (value > max) {
