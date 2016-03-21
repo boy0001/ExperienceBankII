@@ -25,11 +25,10 @@ public final class PermissionsHelper {
     String[] nodes = perm.split("\\.");
     String node = "";
 
-    if (player == null) {
+    if (player == null || player.isOp()) {
+      // console users and operators.
       return true;
     } else if (player.hasPermission(perm)) {
-      return true;
-    } else if (player.isOp() == true) {
       return true;
     } else {
       for (int i = 0; i < nodes.length - 1; i++) {
