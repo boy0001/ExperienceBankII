@@ -13,7 +13,16 @@ public final class MessageUtils {
    */
   private MessageUtils() { }
 
+  /**
+   * Null safe implementation of colorise method.
+   * @param mystring the string to be colorized with ampersand sign.
+   * @return a string, empty on null input, colorized on text input. But never null.
+   */
   public static String colorise(String mystring) {
+    if (null == mystring) {
+      return "";
+    }
+
     return ChatColor.translateAlternateColorCodes('&', mystring);
   }
 
