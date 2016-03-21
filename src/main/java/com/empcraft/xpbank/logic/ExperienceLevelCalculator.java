@@ -55,4 +55,12 @@ public final class ExperienceLevelCalculator {
 
     return expList[level];
   }
+
+  /**
+   * Returns the maximum available level.
+   * @return the level as int.
+   */
+  public static int getMaxLevel() {
+    return expList.length - 1;
+  }
 }

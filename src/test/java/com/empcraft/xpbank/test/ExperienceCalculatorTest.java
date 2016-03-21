@@ -39,4 +39,34 @@ public class ExperienceCalculatorTest {
     Assert.assertTrue(level == 1);
   }
 
+  @Test
+  public void testGetLevel_Negative() {
+    int level = ExperienceLevelCalculator.getLevel(-10);
+
+    Assert.assertEquals(0, level);
+  }
+
+  @Test
+  public void testGetMinimumRequiredXpForLevel_0() {
+    int minXp = ExperienceLevelCalculator.getMinExperienceForLevel(0);
+
+    Assert.assertEquals(0, minXp);
+  }
+
+  @Test
+  public void testGetMinimumRequiredXpForLevel_MaxLevel() {
+    int minXp = ExperienceLevelCalculator.getMinExperienceForLevel(
+        ExperienceLevelCalculator.getMaxLevel());
+
+    Assert.assertEquals(2920, minXp);
+  }
+
+  @Test
+  public void testGetMinimumRequiredXpForLevel_MaxInt() {
+    int minXp = ExperienceLevelCalculator.getMinExperienceForLevel(
+        Integer.MAX_VALUE);
+
+    Assert.assertEquals(2920, minXp);
+  }
+
 }
