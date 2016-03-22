@@ -57,7 +57,7 @@ public class SingleSignUpdateThread implements Runnable {
       return;
     }
 
-    String[] lines = SignHelper.getSignText(sign.getLines(), player, sign, config);
+    String[] lines = SignHelper.getSignText(sign.getLines(), player, config);
 
     if (lines == null) {
       return;

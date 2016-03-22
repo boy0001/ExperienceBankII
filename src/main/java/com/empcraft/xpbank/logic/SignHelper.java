@@ -18,6 +18,12 @@ import java.util.logging.Level;
 public final class SignHelper {
 
   /**
+   * Utility class.
+   */
+  private SignHelper() {
+  }
+
+  /**
    * Updates a specific sign if a player is near.
    *
    * @param player
@@ -54,46 +60,26 @@ public final class SignHelper {
     return expBankSign;
   }
 
-  public static String renderSignLines(String mystring, Player player, int storedPlayerExperience) {
+  public static String renderSignLines(String unrenderedLine, Player player,
+      int storedPlayerExperience) {
     int playerCurrentXp = player.getTotalExperience();
+    int levelsInBank = ExperienceLevelCalculator.getLevel(storedPlayerExperience);
+    int levelafterWithdraw = ExperienceLevelCalculator
+        .getLevel(storedPlayerExperience + playerCurrentXp);
+    int leveldelta = levelafterWithdraw - player.getLevel();
 
-    if (mystring.contains(MessageUtils.MAGIC_KEYWORD_PLAYERNAME)) {
-      mystring = mystring.replace(MessageUtils.MAGIC_KEYWORD_PLAYERNAME, player.getName());
-    }
+    String renderedLine = unrenderedLine
+        .replace(MessageUtils.MAGIC_KEYWORD_PLAYERNAME, player.getName())
+        .replace(MessageUtils.MAGIC_KEYWORD_STORED_XP, Integer.toString(storedPlayerExperience))
+        .replace(MessageUtils.MAGIC_KEYWORD_CURRENT_XP, Integer.toString(playerCurrentXp))
+        .replace(MessageUtils.MAGIC_KEYWORD_CURRENT_LVL, Integer.toString(player.getLevel()))
+        .replace(MessageUtils.MAGIC_KEYWORD_LEVELS_IN_BANK, Integer.toString(levelsInBank))
+        .replace(MessageUtils.MAGIC_KEYWORD_LEVELS_GAIN_WITHDRAW, Integer.toString(leveldelta));
 
-    if (mystring.contains(MessageUtils.MAGIC_KEYWORD_STORED_XP)) {
-      mystring = mystring.replace(MessageUtils.MAGIC_KEYWORD_STORED_XP,
-          Integer.toString(storedPlayerExperience));
-    }
-
-    if (mystring.contains(MessageUtils.MAGIC_KEYWORD_CURRENT_XP)) {
-      mystring = mystring.replace(MessageUtils.MAGIC_KEYWORD_CURRENT_XP,
-          Integer.toString(playerCurrentXp));
-    }
-
-    if (mystring.contains(MessageUtils.MAGIC_KEYWORD_CURRENT_LVL)) {
-      mystring = mystring.replace(MessageUtils.MAGIC_KEYWORD_CURRENT_LVL, Integer.toString(player.getLevel()));
-    }
-
-    if (mystring.contains(MessageUtils.MAGIC_KEYWORD_LEVELS_IN_BANK)) {
-      int levelsInBank = ExperienceLevelCalculator.getLevel(storedPlayerExperience);
-      mystring = mystring.replace(MessageUtils.MAGIC_KEYWORD_LEVELS_IN_BANK,
-          Integer.toString(levelsInBank));
-    }
-
-    if (mystring.contains(MessageUtils.MAGIC_KEYWORD_LEVELS_GAIN_WITHDRAW)) {
-      int levelafterWithdraw = ExperienceLevelCalculator
-          .getLevel(storedPlayerExperience + playerCurrentXp);
-      int leveldelta = levelafterWithdraw - player.getLevel();
-
-      mystring = mystring.replace(MessageUtils.MAGIC_KEYWORD_LEVELS_GAIN_WITHDRAW,
-          Integer.toString(leveldelta));
-    }
-
-    return MessageUtils.colorise(mystring);
+    return MessageUtils.colorise(renderedLine);
   }
 
-  public static String[] getSignText(String[] lines, Player player, Sign sign,
+  public static String[] getSignText(String[] lines, Player player,
       final ExpBankConfig expBankConfig) {
     int storedPlayerExperience = 0;
     List<String> signLines = expBankConfig.getSignContent();
@@ -113,8 +99,7 @@ public final class SignHelper {
     }
 
     for (int line = 0; line < 4; line++) {
-      String evaluatedLine = renderSignLines(signLines.get(line), player,
-          storedPlayerExperience);
+      String evaluatedLine = renderSignLines(signLines.get(line), player, storedPlayerExperience);
       lines[line] = JSONUtil.toJSON(evaluatedLine);
     }
 
