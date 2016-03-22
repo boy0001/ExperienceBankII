@@ -1,6 +1,6 @@
 package com.empcraft.xpbank;
 
-import com.empcraft.xpbank.threads.UpdateAllSignsThread;
+import com.empcraft.xpbank.logic.SignHelper;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -13,7 +13,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.event.player.PlayerTeleportEvent;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,14 +52,7 @@ public class InSignsNano implements Listener {
   @EventHandler
   public void onPlayerMove(PlayerMoveEvent event) {
     if (!event.getFrom().getChunk().equals(event.getTo().getChunk())) {
-      scheduleUpdate(event.getPlayer(), event.getTo());
-    }
-  }
-
-  @EventHandler
-  public void onPlayerTeleport(PlayerTeleportEvent event) {
-    if (!event.getFrom().getChunk().equals(event.getTo().getChunk())) {
-      scheduleUpdate(event.getPlayer(), event.getTo());
+      SignHelper.scheduleUpdate(event.getPlayer(), event.getTo(), expBankConfig);
     }
   }
 
@@ -86,27 +78,13 @@ public class InSignsNano implements Listener {
       }
     }
     for (final Player user : myplayers) {
-      scheduleUpdate(user, loc);
+      SignHelper.scheduleUpdate(user, loc, expBankConfig);
     }
     return;
   }
 
   @EventHandler
   public void onPlayerJoin(PlayerJoinEvent event) {
-    scheduleUpdate(event.getPlayer(), event.getPlayer().getLocation());
-  }
-
-  /**
-   * Updates all Chunks around the location.
-   *
-   * @param player
-   *          the player at the location which must be online.
-   * @param location
-   *          the location to update including nearby chunks.
-   */
-  public void scheduleUpdate(final Player player, final Location location) {
-    // manual update.
-    Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(expBankConfig.getPlugin(),
-        new UpdateAllSignsThread(player, location, expBankConfig), 5L);
+    SignHelper.scheduleUpdate(event.getPlayer(), event.getPlayer().getLocation(), expBankConfig);
   }
 }

@@ -5,8 +5,10 @@ import com.empcraft.xpbank.JSONUtil;
 import com.empcraft.xpbank.err.ConfigurationException;
 import com.empcraft.xpbank.text.MessageUtils;
 import com.empcraft.xpbank.threads.SingleSignUpdateThread;
+import com.empcraft.xpbank.threads.UpdateAllSignsThread;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
@@ -104,5 +106,20 @@ public final class SignHelper {
     }
 
     return lines;
+  }
+
+  /**
+   * Updates all Chunks around the location.
+   *
+   * @param player
+   *          the player at the location which must be online.
+   * @param location
+   *          the location to update including nearby chunks.
+   */
+  public static void scheduleUpdate(final Player player, final Location location,
+      final ExpBankConfig expBankConfig) {
+    // manual update.
+    Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(expBankConfig.getPlugin(),
+        new UpdateAllSignsThread(player, location, expBankConfig), 5L);
   }
 }

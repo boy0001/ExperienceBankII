@@ -1,6 +1,7 @@
 package com.empcraft.xpbank;
 
 import com.empcraft.xpbank.err.ConfigurationException;
+import com.empcraft.xpbank.listeners.PlayerTeleportListener;
 import com.empcraft.xpbank.listeners.SignChangeEventListener;
 import com.empcraft.xpbank.listeners.SignLeftClickDepositListener;
 import com.empcraft.xpbank.listeners.SignRightClickWithDrawBottleListener;
@@ -84,6 +85,10 @@ public class ExpBank extends JavaPlugin {
     /* Register sign change event. */
     Bukkit.getServer().getPluginManager().registerEvents(
         new SignChangeEventListener(expConfig, ylp), this);
+
+    /* Register player movement events */
+    Bukkit.getServer().getPluginManager().registerEvents(new PlayerTeleportListener(expConfig),
+        this);
 
     /* Registere player leftclick event */
     Bukkit.getServer().getPluginManager()
