@@ -43,6 +43,20 @@ public abstract class AbstractExperienceSignListener implements Listener {
     }
 
     Player player = event.getPlayer();
+    if (!isBottleRequirementSatisfied(bottleRequiredInHand, player)) {
+      return false;
+    }
+
+    if (sneekingRequired.isPresent()
+        && sneekingRequired.get().booleanValue() != player.isSneaking()) {
+      return false;
+    }
+
+    return true;
+  }
+
+  private static boolean isBottleRequirementSatisfied(Optional<Boolean> bottleRequiredInHand,
+      Player player) {
     if (bottleRequiredInHand.isPresent() && bottleRequiredInHand.get().booleanValue()
         && !(player.getInventory().getItemInMainHand().getType() == Material.GLASS_BOTTLE)) {
       // if we require to have a glass in hand and it is not…
@@ -52,11 +66,6 @@ public abstract class AbstractExperienceSignListener implements Listener {
     if (bottleRequiredInHand.isPresent() && !bottleRequiredInHand.get().booleanValue()
         && (player.getInventory().getItemInMainHand().getType() == Material.GLASS_BOTTLE)) {
       // We require him not to have a glass in hand.
-      return false;
-    }
-
-    if (sneekingRequired.isPresent()
-        && sneekingRequired.get().booleanValue() != player.isSneaking()) {
       return false;
     }
 
