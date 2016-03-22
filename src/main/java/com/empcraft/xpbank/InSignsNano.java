@@ -45,7 +45,7 @@ public class InSignsNano implements Listener {
 
   private ExpBankConfig expBankConfig;
 
-  public InSignsNano(boolean autoupdating, boolean manualUpdating, final ExpBankConfig config) {
+  public InSignsNano(final ExpBankConfig config) {
     Bukkit.getServer().getPluginManager().registerEvents(this, config.getPlugin());
     this.expBankConfig = config;
   }
@@ -96,6 +96,14 @@ public class InSignsNano implements Listener {
     scheduleUpdate(event.getPlayer(), event.getPlayer().getLocation());
   }
 
+  /**
+   * Updates all Chunks around the location.
+   *
+   * @param player
+   *          the player at the location which must be online.
+   * @param location
+   *          the location to update including nearby chunks.
+   */
   public void scheduleUpdate(final Player player, final Location location) {
     // manual update.
     Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(expBankConfig.getPlugin(),

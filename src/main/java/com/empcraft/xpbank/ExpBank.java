@@ -1,7 +1,5 @@
 package com.empcraft.xpbank;
 
-import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.ProtocolManager;
 import com.empcraft.xpbank.err.ConfigurationException;
 import com.empcraft.xpbank.events.SignChangeEventListener;
 import com.empcraft.xpbank.events.SignLeftClickDepositListener;
@@ -15,7 +13,6 @@ import com.empcraft.xpbank.text.YamlLanguageProvider;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -60,17 +57,7 @@ public class ExpBank extends JavaPlugin {
       return;
     }
 
-    boolean manual = true;
-    Plugin protocolPlugin = Bukkit.getServer().getPluginManager().getPlugin("ProtocolLib");
-
-    if (protocolPlugin != null && protocolPlugin.isEnabled()) {
-      MessageUtils.sendMessageToConsole("&aUsing ProtocolLib for packets");
-      manual = false;
-      ProtocolManager protocolmanager = ProtocolLibrary.getProtocolManager();
-      protocolmanager.addPacketListener(new SignInterceptor(this, ylp, expConfig));
-    }
-
-    signListener = new InSignsNano(false, manual, expConfig);
+    signListener = new InSignsNano(expConfig);
 
     registerEvents();
   }
