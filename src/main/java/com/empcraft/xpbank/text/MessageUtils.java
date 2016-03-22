@@ -103,7 +103,7 @@ public final class MessageUtils {
     Bukkit.getServer().getConsoleSender().sendMessage(MessageUtils.colorise(text));
   }
 
-  public static String evaluate(String mystring, Player player, int storedPlayerExperience) {
+  public static String renderSignLines(String mystring, Player player, int storedPlayerExperience) {
     int playerCurrentXp = player.getTotalExperience();
 
     if (mystring.contains(MAGIC_KEYWORD_PLAYERNAME)) {
@@ -162,7 +162,7 @@ public final class MessageUtils {
     }
 
     for (int line = 0; line < 4; line++) {
-      String evaluatedLine = MessageUtils.evaluate(signLines.get(line), player,
+      String evaluatedLine = MessageUtils.renderSignLines(signLines.get(line), player,
           storedPlayerExperience);
       lines[line] = JSONUtil.toJSON(evaluatedLine);
     }

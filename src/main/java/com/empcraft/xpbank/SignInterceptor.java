@@ -55,7 +55,7 @@ public class SignInterceptor extends PacketAdapter {
       List<String> signLines = config.getSignContent();
 
       for (int line = 0; line < 4; line++) {
-        String evaluatedLine = MessageUtils.evaluate(signLines.get(line), player, storedPlayerExp);
+        String evaluatedLine = MessageUtils.renderSignLines(signLines.get(line), player, storedPlayerExp);
         lines[line] = JSONUtil.toJSON(evaluatedLine);
       }
 
