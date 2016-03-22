@@ -12,7 +12,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -47,13 +46,6 @@ public class InSignsNano implements Listener {
   public InSignsNano(final ExpBankConfig config) {
     Bukkit.getServer().getPluginManager().registerEvents(this, config.getPlugin());
     this.expBankConfig = config;
-  }
-
-  @EventHandler
-  public void onPlayerMove(PlayerMoveEvent event) {
-    if (!event.getFrom().getChunk().equals(event.getTo().getChunk())) {
-      SignHelper.scheduleUpdate(event.getPlayer(), event.getTo(), expBankConfig);
-    }
   }
 
   @EventHandler
