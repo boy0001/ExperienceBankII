@@ -71,10 +71,8 @@ public class DataHelper {
    * @param experienceFile
    *          the experience storage file.
    */
-  public void converToDbIfPlayersFound(final YamlConfiguration experienceFile) {
-    Set<String> players = experienceFile.getKeys(false);
-
-    if (null == players || players.isEmpty()) {
+  public void builkSaveEntriesToDb(Map<UUID, Integer> yamlentries) {
+    if (null == yamlentries || yamlentries.isEmpty()) {
       // nothing to do.
       return;
     }
@@ -83,9 +81,9 @@ public class DataHelper {
       MessageUtils.sendMessageToAll(null, ylp.getMessage("CONVERT"));
       PlayerExperienceDao ped = getDao(connection);
 
-      for (String player : players) {
-        UUID uuid = UUID.fromString(player);
-        int oldExperience = experienceFile.getInt(player);
+      for (Map.Entry<UUID, Integer> player : yamlentries.entrySet()) {
+        UUID uuid = player.getKey();
+        int oldExperience = player.getValue();
         ped.insertPlayerAndExperience(uuid, Integer.valueOf(oldExperience));
       }
 

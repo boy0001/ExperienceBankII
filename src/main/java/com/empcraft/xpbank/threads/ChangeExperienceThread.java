@@ -5,6 +5,7 @@
 package com.empcraft.xpbank.threads;
 
 import com.empcraft.xpbank.ExpBankConfig;
+import com.empcraft.xpbank.err.ConfigurationException;
 import com.empcraft.xpbank.logic.DataHelper;
 import com.empcraft.xpbank.text.MessageUtils;
 import com.empcraft.xpbank.text.YamlLanguageProvider;
@@ -53,8 +54,15 @@ public class ChangeExperienceThread implements Runnable {
 
   @Override
   public void run() {
-    DataHelper dh = new DataHelper(ylp, config, logger);
-    boolean success = dh.updatePlayerExperience(uuid, value);
+    boolean success = false;
+    try {
+      DataHelper dh = new DataHelper(ylp, config, logger);
+      int savedXp = dh.getSavedExperience(uuid);
+      success = dh.updatePlayerExperience(uuid, savedXp + value);
+    } catch (ConfigurationException confEx) {
+      logger.log(Level.WARNING, "Could not change experience level for [" + uuid.toString() + "].");
+      MessageUtils.sendMessageToAll(server, ylp.getMessage("MYSQL-GET"));
+    }
 
     if (!success) {
       logger.log(Level.WARNING, "Could not change experience level for [" + uuid.toString() + "].");

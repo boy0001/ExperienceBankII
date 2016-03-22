@@ -7,12 +7,16 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 public final class ExpBankConfig {
   private static final String TEXT_CREATE = "text.create";
+
+  private static final String[] SIGN_LINES = { "text.1", "text.2", "text.3", "text.4" };
 
   public final String version;
 
@@ -34,6 +38,10 @@ public final class ExpBankConfig {
 
   private String mySqlUserTable;
 
+  private File experienceYmlFile;
+
+  private final List<String> signContent = new ArrayList<>();
+
   public ExpBankConfig(final JavaPlugin plugin) throws ConfigurationException {
     this.plugin = plugin;
     this.version = plugin.getDescription().getVersion();
@@ -49,6 +57,10 @@ public final class ExpBankConfig {
 
   public String getExperienceBankActivationString() {
     return this.experienceBankActivationString;
+  }
+
+  public List<String> getSignContent() {
+    return this.signContent;
   }
 
   public void saveConfig() {
@@ -83,6 +95,10 @@ public final class ExpBankConfig {
     return this.mySqlUserTable;
   }
 
+  public File getExperienceYmlFile() {
+    return this.experienceYmlFile;
+  }
+
   /**
    * Initialises this Config Object by reading elements from it.
    *
@@ -106,7 +122,16 @@ public final class ExpBankConfig {
       throw new ConfigurationException();
     }
 
+    /* Text Strings */
     this.experienceBankActivationString = config.getString(TEXT_CREATE);
+
+    /* What will actually appear */
+    for (String signline : SIGN_LINES) {
+      this.signContent.add(config.getString(signline));
+    }
+
+    /* Old yml file backend */
+    this.experienceYmlFile = new File(plugin.getDataFolder() + File.separator + "xplist.yml");
 
     /* MySQL related */
     this.mySqlEnabled = config.getBoolean("mysql.enabled");
@@ -141,16 +166,6 @@ public final class ExpBankConfig {
         config.set(node.getKey(), node.getValue());
       }
     }
-  }
-
-  public String[] getSignContent() {
-    String[] signContent = new String[4];
-
-    for (int ii = 1; ii <= 4; ii++) {
-      signContent[ii] = config.getString("text." + ii);
-    }
-
-    return signContent;
   }
 
 }

@@ -1,5 +1,7 @@
 package com.empcraft.xpbank;
 
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolManager;
 import com.empcraft.xpbank.err.ConfigurationException;
 import com.empcraft.xpbank.events.SignBreakListener;
 import com.empcraft.xpbank.events.SignChangeEventListener;
@@ -33,14 +35,7 @@ import java.util.UUID;
 import java.util.logging.Level;
 
 public class ExpBank extends JavaPlugin implements Listener {
-  private YamlConfiguration exp;
-  private File expFile;
   private InSignsNano signListener;
-
-  /**
-   * In-Memory storage of players and their experience. Might reduce disk IO.
-   */
-  private final Map<UUID, Integer> expMap = new HashMap<>();
 
   /**
    * Use ylp.getMessage("");
@@ -56,8 +51,6 @@ public class ExpBank extends JavaPlugin implements Listener {
   @Override
   public void onEnable() {
     MessageUtils.sendMessageToAll(getServer(), "&8===&a[&7EXPBANK&a]&8===");
-    expFile = new File(getDataFolder() + File.separator + "xplist.yml");
-    exp = YamlConfiguration.loadConfiguration(expFile);
     saveResource("english.yml", true);
     saveResource("spanish.yml", true);
     saveResource("catalan.yml", true);
@@ -80,7 +73,21 @@ public class ExpBank extends JavaPlugin implements Listener {
     }
 
     try {
-      expMap.putAll(loadSavedExperience());
+      prepareDatabase();
+    } catch (ConfigurationException configEx) {
+      getLogger().log(Level.SEVERE, "Clould not load saved data or save.", configEx);
+      MessageUtils.sendMessageToAll(getServer(), ylp.getMessage("MYSQL-CONNECT"));
+
+      // do not proceed: Don't register defunct listeners!
+      return;
+    }
+
+    /* Migrate from yaml */
+    try {
+      // See if we need to migrate.
+      Map<UUID, Integer> fromYaml = loadExperienceFromYaml();
+      convertToDatabase(fromYaml);
+      moveOldExperienceYmlFile();
     } catch (ConfigurationException configEx) {
       getLogger().log(Level.SEVERE, "Clould not load saved data or save.", configEx);
       MessageUtils.sendMessageToAll(getServer(), ylp.getMessage("MYSQL-CONNECT"));
@@ -95,6 +102,8 @@ public class ExpBank extends JavaPlugin implements Listener {
     if ((protocolPlugin != null && protocolPlugin.isEnabled())) {
       MessageUtils.sendMessageToAll(getServer(), "&aUsing ProtocolLib for packets");
       manual = false;
+      ProtocolManager protocolmanager = ProtocolLibrary.getProtocolManager();
+      protocolmanager.addPacketListener(new SignInterceptor(this, ylp, expConfig, getLogger()));
     }
 
     signListener = new InSignsNano(this, false, manual, expConfig);
@@ -118,16 +127,30 @@ public class ExpBank extends JavaPlugin implements Listener {
     }, 24000L, 24000L);
   }
 
-  private Map<UUID, Integer> loadSavedExperience() throws ConfigurationException {
+  private void moveOldExperienceYmlFile() {
+    File expFile = expConfig.getExperienceYmlFile();
+
+    if (null == expFile || !expFile.exists()) {
+      return;
+    }
+
+    File buFile = new File(expConfig.getExperienceYmlFile().getAbsolutePath() + ".bu");
+    expFile.renameTo(buFile);
+  }
+
+  private Map<UUID, Integer> loadExperienceFromYaml() {
     Map<UUID, Integer> experience = new HashMap<UUID, Integer>();
+    File expFile = expConfig.getExperienceYmlFile();
 
-    if (getConfig().getBoolean("mysql.enabled")) {
-      experience = loadExperienceFromSql();
-
+    if (null == expFile || !expFile.exists()) {
       return experience;
     }
 
-    // load from config.
+    if (!expFile.canRead()) {
+      return experience;
+    }
+
+    YamlConfiguration exp = YamlConfiguration.loadConfiguration(expFile);
     Set<String> players = exp.getKeys(false);
 
     for (String player : players) {
@@ -141,8 +164,7 @@ public class ExpBank extends JavaPlugin implements Listener {
     return experience;
   }
 
-  private Map<UUID, Integer> loadExperienceFromSql() throws ConfigurationException {
-    MessageUtils.sendMessageToAll(getServer(), ylp.getMessage("MYSQL"));
+  private void prepareDatabase() throws ConfigurationException {
     DataHelper dh = new DataHelper(ylp, expConfig, getLogger());
 
     boolean exists = dh.createTableIfNotExists();
@@ -151,17 +173,24 @@ public class ExpBank extends JavaPlugin implements Listener {
       throw new ConfigurationException();
     }
 
+    return;
+  }
+
+  private void convertToDatabase(Map<UUID, Integer> yamlentries) throws ConfigurationException {
+    MessageUtils.sendMessageToAll(getServer(), ylp.getMessage("MYSQL"));
+    DataHelper dh = new DataHelper(ylp, expConfig, getLogger());
+
     int length = dh.countPlayersInDatabase();
 
-    if (length == 0) {
-      /*
-       * If there are no players in the database yet, see, if we can migrate player's exp from the
-       * yaml config.
-       */
-      dh.converToDbIfPlayersFound(exp);
+    if (length != 0) {
+      return;
     }
 
-    return dh.getSavedExperience();
+    /*
+     * If there are no players in the database yet, see, if we can migrate player's exp from the
+     * yaml config.
+     */
+    dh.builkSaveEntriesToDb(yamlentries);
   }
 
   private void runTask(final Runnable r) {
@@ -185,7 +214,7 @@ public class ExpBank extends JavaPlugin implements Listener {
         if (PermissionsHelper.playerHasPermission(player, ExpBankPermission.USE)) {
           ExperienceManager expMan = new ExperienceManager(player);
           int amount;
-          int myExp = getExp(player.getUniqueId());
+          int myExp = 0; // TODO: getExp(player.getUniqueId());
 
           if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
 
@@ -240,7 +269,7 @@ public class ExpBank extends JavaPlugin implements Listener {
             expMan.changeExp(amount);
           }
 
-          changeExp(player.getUniqueId(), -amount);
+          changeExpOnBank(player.getUniqueId(), -amount);
           signListener.scheduleUpdate(player, sign, 1);
         } else {
           MessageUtils.sendMessageToPlayer(player,
@@ -267,33 +296,10 @@ public class ExpBank extends JavaPlugin implements Listener {
     return max;
   }
 
-  public int getExp(UUID uuid) {
-    Integer value = expMap.get(uuid);
-
-    if (value == null) {
-      return 0;
-    }
-
-    return value;
-  }
-
-  public void changeExp(final UUID uuid, final int value) {
-    if (exp == null) {
-      Runnable changeExp = new ChangeExperienceThread(uuid, value, expConfig, ylp, getServer(),
-          getLogger());
-      runTask(changeExp);
-    } else {
-      exp.set(uuid.toString(), value + getExp(uuid));
-
-      try {
-        exp.save(expFile);
-      } catch (IOException e) {
-        getLogger().log(Level.WARNING,
-            "Could not save experience level for [" + uuid.toString() + "].", e);
-      }
-    }
-
-    expMap.put(uuid, getExp(uuid) + value);
+  public void changeExpOnBank(final UUID uuid, final int delta) {
+    Runnable changeExp = new ChangeExperienceThread(uuid, delta, expConfig, ylp, getServer(),
+        getLogger());
+    runTask(changeExp);
   }
 
 }

@@ -1,0 +1,80 @@
+package com.empcraft.xpbank;
+
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.ProtocolManager;
+import com.comphenix.protocol.events.ListenerPriority;
+import com.comphenix.protocol.events.PacketAdapter;
+import com.comphenix.protocol.events.PacketContainer;
+import com.comphenix.protocol.events.PacketEvent;
+import com.comphenix.protocol.wrappers.WrappedChatComponent;
+import com.empcraft.xpbank.err.ConfigurationException;
+import com.empcraft.xpbank.logic.DataHelper;
+import com.empcraft.xpbank.text.MessageUtils;
+import com.empcraft.xpbank.text.YamlLanguageProvider;
+
+import org.bukkit.entity.Player;
+
+import java.util.List;
+import java.util.logging.Logger;
+
+public class SignInterceptor extends PacketAdapter {
+  ProtocolManager protocolmanager = null;
+  private YamlLanguageProvider ylp;
+  private ExpBankConfig config;
+  private Logger logger;
+
+  public void writePacket(PacketContainer packet, String[] lines) {
+    WrappedChatComponent[] component = new WrappedChatComponent[4];
+    for (int j = 3; j >= 0; j--) {
+      if (!lines[j].equals("")) {
+        component[j] = WrappedChatComponent.fromJson(lines[j]);
+      }
+    }
+
+    packet.getChatComponentArrays().write(0, component);
+  }
+
+  public SignInterceptor(ExpBank plugin, YamlLanguageProvider ylp, ExpBankConfig config,
+      Logger logger) {
+    super(plugin, ListenerPriority.LOW, PacketType.Play.Server.UPDATE_SIGN);
+    this.ylp = ylp;
+    this.config = config;
+    this.logger = logger;
+  }
+
+  @Override
+  public void onPacketSending(PacketEvent event) {
+    PacketContainer oldpacket = event.getPacket();
+    PacketContainer packet = oldpacket.shallowClone();
+
+    Player player = event.getPlayer();
+    WrappedChatComponent[] component = packet.getChatComponentArrays().read(0);
+
+    if (component.length == 0 || component[0] == null) {
+      return;
+    }
+
+    if (component[0].getJson().contains(config.getExperienceBankActivationString())) {
+      int storedPlayerExp = 0;
+
+      try {
+        DataHelper dh = new DataHelper(ylp, config, logger);
+        storedPlayerExp = dh.getSavedExperience(player);
+      } catch (ConfigurationException confEx) {
+        // sadly, players experience is gone.
+      }
+
+      String[] lines = new String[4];
+      List<String> signLines = config.getSignContent();
+
+      for (int line = 0; line < 4; line++) {
+        String evaluatedLine = MessageUtils.evaluate(signLines.get(line), player, storedPlayerExp);
+        lines[line] = JSONUtil.toJSON(evaluatedLine);
+      }
+
+      writePacket(packet, lines);
+      event.setPacket(packet);
+    }
+
+  }
+}

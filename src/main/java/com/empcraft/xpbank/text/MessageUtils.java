@@ -1,8 +1,8 @@
 package com.empcraft.xpbank.text;
 
-import com.empcraft.xpbank.ExpBank;
 import com.empcraft.xpbank.ExpBankConfig;
 import com.empcraft.xpbank.ExperienceManager;
+import com.empcraft.xpbank.JSONUtil;
 import com.empcraft.xpbank.err.ConfigurationException;
 import com.empcraft.xpbank.logic.DataHelper;
 
@@ -10,6 +10,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.Server;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
+
+import java.util.List;
 
 /**
  * Text formatter.
@@ -144,20 +146,25 @@ public final class MessageUtils {
   public static String[] getSignText(String[] lines, Player player, Sign sign,
       final ExpBankConfig expBankConfig) {
     int storedPlayerExperience = 0;
-    String[] signLines = expBankConfig.getSignContent();
+    List<String> signLines = expBankConfig.getSignContent();
 
-    if (lines[0].equals(MessageUtils.colorise(expBankConfig.getExperienceBankActivationString()))) {
-      try {
-        DataHelper dh = new DataHelper(null, expBankConfig, null);
-        storedPlayerExperience = dh.getSavedExperience(player);
-      } catch (ConfigurationException confEx) {
-        // player now has 0 exp :(.
-      }
+    if (!MessageUtils.colorise(expBankConfig.getExperienceBankActivationString())
+        .equals(lines[0])) {
+      // this is not an ExpBank-Sign.
+      return lines;
+    }
 
-      lines[0] = evaluate(signLines[0], player, storedPlayerExperience);
-      lines[1] = evaluate(signLines[1], player, storedPlayerExperience);
-      lines[2] = evaluate(signLines[2], player, storedPlayerExperience);
-      lines[3] = evaluate(signLines[3], player, storedPlayerExperience);
+    try {
+      DataHelper dh = new DataHelper(null, expBankConfig, null);
+      storedPlayerExperience = dh.getSavedExperience(player);
+    } catch (ConfigurationException confEx) {
+      // player now has 0 exp :(.
+    }
+
+    for (int line = 0; line < 4; line++) {
+      String evaluatedLine = MessageUtils.evaluate(signLines.get(line), player,
+          storedPlayerExperience);
+      lines[line] = JSONUtil.toJSON(evaluatedLine);
     }
 
     return lines;
