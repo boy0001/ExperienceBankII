@@ -27,7 +27,6 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitScheduler;
 
 import java.io.File;
 import java.util.HashMap;
@@ -128,15 +127,6 @@ public class ExpBank extends JavaPlugin implements Listener {
      * All other events. TODO: Remove.
      */
     Bukkit.getServer().getPluginManager().registerEvents(this, this);
-
-    // Save any changes to the config
-    BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
-    scheduler.scheduleSyncRepeatingTask(this, new Runnable() {
-      @Override
-      public void run() {
-        saveConfig();
-      }
-    }, 24000L, 24000L);
   }
 
   private void moveOldExperienceYmlFile() {
