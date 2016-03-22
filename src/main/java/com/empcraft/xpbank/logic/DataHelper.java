@@ -150,18 +150,26 @@ public class DataHelper {
     return results;
   }
 
-  public int getSavedExperience(Player player) throws ConfigurationException {
+  public int getSavedExperience(UUID uuid) throws ConfigurationException {
     int result = 0;
 
     try (Connection connection = getConnection()) {
       PlayerExperienceDao ped = getDao(connection);
-      result = ped.getSavedExperience(player.getUniqueId());
+      result = ped.getSavedExperience(uuid);
     } catch (SQLException sqlEx) {
       logger.log(Level.SEVERE, "Could not read existing saved exp from Database.", sqlEx);
       throw new ConfigurationException(sqlEx);
     }
 
     return result;
+  }
+
+  public int getSavedExperience(Player player) throws ConfigurationException {
+    if (player == null) {
+      return 0;
+    }
+
+    return getSavedExperience(player.getUniqueId());
   }
 
 }
