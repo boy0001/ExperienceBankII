@@ -71,7 +71,7 @@ public class SignBreakTest {
     PowerMockito.when(expBankConfig.getExperienceBankActivationString()).thenReturn(EXP_BANK);
 
     /* Set up signListener */
-    signListener = new InSignsNano(plugin, false, false, expBankConfig);
+    signListener = new InSignsNano(false, false, expBankConfig);
 
     /* The actual Break event */
     signBreakEvent = new SignBreakListener(signListener,

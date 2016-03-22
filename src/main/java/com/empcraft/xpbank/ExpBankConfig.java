@@ -119,20 +119,17 @@ public final class ExpBankConfig {
   public int getMaxStorageForPlayer(Player player) {
     int maxStorage = 0;
 
-    for (String permissionnode : limits.keySet()) {
-      if (!"default".equals(permissionnode)
-          && !PermissionsHelper.playerHasPermission(player, "expbank.limit." + permissionnode)) {
+    for (Entry<String, Integer> permissionnode : limits.entrySet()) {
+      if (!"default".equals(permissionnode.getKey()) && !PermissionsHelper
+          .playerHasPermission(player, "expbank.limit." + permissionnode.getKey())) {
         continue;
       }
 
-      int currentPermissionMax = limits.get(permissionnode);
-      if (currentPermissionMax <= maxStorage) {
-        // the max permission for this user's role limit
-        // is not higher either.
-        continue;
-      }
+      int currentPermissionMax = permissionnode.getValue();
 
-      maxStorage = currentPermissionMax;
+      if (currentPermissionMax > maxStorage) {
+        maxStorage = currentPermissionMax;
+      }
     }
 
     return maxStorage;

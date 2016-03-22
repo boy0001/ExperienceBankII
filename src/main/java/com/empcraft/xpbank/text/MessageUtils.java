@@ -1,10 +1,10 @@
 package com.empcraft.xpbank.text;
 
 import com.empcraft.xpbank.ExpBankConfig;
-import com.empcraft.xpbank.ExperienceManager;
 import com.empcraft.xpbank.JSONUtil;
 import com.empcraft.xpbank.err.ConfigurationException;
 import com.empcraft.xpbank.logic.DataHelper;
+import com.empcraft.xpbank.logic.ExperienceLevelCalculator;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -104,7 +104,7 @@ public final class MessageUtils {
   }
 
   public static String evaluate(String mystring, Player player, int storedPlayerExperience) {
-    ExperienceManager expMan = new ExperienceManager(player);
+    int playerCurrentXp = player.getTotalExperience();
 
     if (mystring.contains(MAGIC_KEYWORD_PLAYERNAME)) {
       mystring = mystring.replace(MAGIC_KEYWORD_PLAYERNAME, player.getName());
@@ -117,7 +117,7 @@ public final class MessageUtils {
 
     if (mystring.contains(MAGIC_KEYWORD_CURRENT_XP)) {
       mystring = mystring.replace(MAGIC_KEYWORD_CURRENT_XP,
-          Integer.toString(expMan.getCurrentExp()));
+          Integer.toString(playerCurrentXp));
     }
 
     if (mystring.contains(MAGIC_KEYWORD_CURRENT_LVL)) {
@@ -125,14 +125,18 @@ public final class MessageUtils {
     }
 
     if (mystring.contains(MAGIC_KEYWORD_LEVELS_IN_BANK)) {
+      int levelsInBank = ExperienceLevelCalculator.getLevel(storedPlayerExperience);
       mystring = mystring.replace(MAGIC_KEYWORD_LEVELS_IN_BANK,
-          Integer.toString(expMan.getLevelForExp(storedPlayerExperience)));
+          Integer.toString(levelsInBank));
     }
 
     if (mystring.contains(MAGIC_KEYWORD_LEVELS_GAIN_WITHDRAW)) {
+      int levelafterWithdraw = ExperienceLevelCalculator
+          .getLevel(storedPlayerExperience + playerCurrentXp);
+      int leveldelta = levelafterWithdraw - player.getLevel();
+
       mystring = mystring.replace(MAGIC_KEYWORD_LEVELS_GAIN_WITHDRAW,
-          Integer.toString((expMan.getLevelForExp(expMan.getCurrentExp() + storedPlayerExperience)
-              - player.getLevel())));
+          Integer.toString(leveldelta));
     }
 
     return colorise(mystring);

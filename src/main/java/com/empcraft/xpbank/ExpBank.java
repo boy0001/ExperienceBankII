@@ -52,46 +52,19 @@ public class ExpBank extends JavaPlugin implements Listener {
   @Override
   public void onEnable() {
     MessageUtils.sendMessageToConsole("&8===&a[&7EXPBANK&a]&8===");
-    saveResource("english.yml", true);
-    saveResource("spanish.yml", true);
-    saveResource("catalan.yml", true);
 
     try {
+      saveResources();
       this.expConfig = new ExpBankConfig(this);
-    } catch (ConfigurationException configEx) {
-      getLogger().log(Level.SEVERE, "Could not read main config file.", configEx);
-      MessageUtils.sendMessageToConsole("Could not read main config file.");
-    }
+      this.ylp = new YamlLanguageProvider(expConfig);
 
-    try {
-      ylp = new YamlLanguageProvider(expConfig);
-    } catch (ConfigurationException configEx) {
-      getLogger().log(Level.SEVERE, "Could not load Language file.", configEx);
-      MessageUtils.sendMessageToConsole("Could not get Yaml Language File.");
-
-      // do not proceed: Can't work without ylp defined.
-      return;
-    }
-
-    try {
       prepareDatabase();
-    } catch (ConfigurationException configEx) {
-      getLogger().log(Level.SEVERE, "Clould not load saved data or save.", configEx);
-      MessageUtils.sendMessageToConsole(ylp.getMessage("MYSQL-CONNECT"));
 
-      // do not proceed: Don't register defunct listeners!
-      return;
-    }
-
-    /* Migrate from yaml */
-    try {
-      // See if we need to migrate.
-      Map<UUID, Integer> fromYaml = loadExperienceFromYaml();
-      convertToDatabase(fromYaml);
-      moveOldExperienceYmlFile();
+      /* Migrate from yaml */
+      migrateFromYaml();
     } catch (ConfigurationException configEx) {
-      getLogger().log(Level.SEVERE, "Clould not load saved data or save.", configEx);
-      MessageUtils.sendMessageToConsole(ylp.getMessage("MYSQL-CONNECT"));
+      getLogger().log(Level.SEVERE, "Clould not initialize plugin.", configEx);
+      MessageUtils.sendMessageToConsole("Could not initialize plugin.");
 
       // do not proceed: Don't register defunct listeners!
       return;
@@ -107,8 +80,32 @@ public class ExpBank extends JavaPlugin implements Listener {
       protocolmanager.addPacketListener(new SignInterceptor(this, ylp, expConfig));
     }
 
-    signListener = new InSignsNano(this, false, manual, expConfig);
+    signListener = new InSignsNano(false, manual, expConfig);
 
+    registerEvents();
+  }
+
+  private void saveResources() {
+    saveResource("english.yml", true);
+    saveResource("spanish.yml", true);
+    saveResource("catalan.yml", true);
+  }
+
+  private void migrateFromYaml() throws ConfigurationException {
+    try {
+      // See if we need to migrate.
+      Map<UUID, Integer> fromYaml = loadExperienceFromYaml();
+      convertToDatabase(fromYaml);
+      moveOldExperienceYmlFile();
+    } catch (ConfigurationException configEx) {
+      getLogger().log(Level.SEVERE, "Clould not load saved data or save.", configEx);
+      MessageUtils.sendMessageToConsole(ylp.getMessage("MYSQL-CONNECT"));
+
+      throw configEx;
+    }
+  }
+
+  private void registerEvents() {
     /* Register sign change event. */
     Bukkit.getServer().getPluginManager().registerEvents(
         new SignChangeEventListener(expConfig, ylp), this);

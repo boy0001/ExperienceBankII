@@ -16,7 +16,6 @@ import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
-import org.bukkit.plugin.Plugin;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -57,52 +56,51 @@ public class InSignsNano implements Listener {
   private final HashSet<Location> brokenSigns = new HashSet<>();
 
   private boolean manual;
-  private Plugin plugin;
   private int counter = 0;
   private volatile List<Sign> updateQueueSign = new ArrayList<Sign>();
   private volatile List<Player> updateQueuePlayer = new ArrayList<Player>();
 
   private ExpBankConfig expBankConfig;
 
-  public InSignsNano(Plugin plugin, boolean autoupdating, boolean manualUpdating,
-      final ExpBankConfig config) {
+  public InSignsNano(boolean autoupdating, boolean manualUpdating, final ExpBankConfig config) {
     this.manual = manualUpdating;
-    Bukkit.getServer().getPluginManager().registerEvents(this, plugin);
-    this.plugin = plugin;
+    Bukkit.getServer().getPluginManager().registerEvents(this, config.getPlugin());
     this.expBankConfig = config;
 
     if (autoupdating) {
-      Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable() {
-        public void run() {
-          int size = updateQueuePlayer.size();
+      Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(config.getPlugin(),
+          new Runnable() {
+            @Override
+            public void run() {
+              int size = updateQueuePlayer.size();
 
-          if (size > UPDATE_BUFFER) {
-            updateQueuePlayer.remove(size - 1);
-            updateQueueSign.remove(size - 1);
-            size -= 1;
-          }
+              if (size > UPDATE_BUFFER) {
+                updateQueuePlayer.remove(size - 1);
+                updateQueueSign.remove(size - 1);
+                size -= 1;
+              }
 
-          ArrayList<Sign> toRemoveSign = new ArrayList<Sign>();
-          ArrayList<Player> toRemovePlayer = new ArrayList<Player>();
+              ArrayList<Sign> toRemoveSign = new ArrayList<Sign>();
+              ArrayList<Player> toRemovePlayer = new ArrayList<Player>();
 
-          for (int i = 0; i < Math.min(UPDATE_AMOUNT, size); i++) {
-            if (counter >= size) {
-              counter = 0;
+              for (int i = 0; i < Math.min(UPDATE_AMOUNT, size); i++) {
+                if (counter >= size) {
+                  counter = 0;
+                }
+
+                Player player = updateQueuePlayer.get(counter);
+                Sign sign = updateQueueSign.get(counter);
+                SignHelper.updateSign(player, sign, expBankConfig);
+
+                toRemovePlayer.add(player);
+                toRemoveSign.add(sign);
+                counter++;
+              }
+
+              updateQueuePlayer.removeAll(toRemovePlayer);
+              updateQueueSign.removeAll(toRemoveSign);
             }
-
-            Player player = updateQueuePlayer.get(counter);
-            Sign sign = updateQueueSign.get(counter);
-            SignHelper.updateSign(player, sign, expBankConfig);
-
-            toRemovePlayer.add(player);
-            toRemoveSign.add(sign);
-            counter++;
-          }
-
-          updateQueuePlayer.removeAll(toRemovePlayer);
-          updateQueueSign.removeAll(toRemoveSign);
-        }
-      }, 0L, 1L);
+          }, 0L, 1L);
     }
   }
 
@@ -142,7 +140,7 @@ public class InSignsNano implements Listener {
     List<Player> myplayers = new ArrayList<Player>();
     for (Chunk chunk : chunks) {
       for (Entity entity : chunk.getEntities()) {
-        if (((entity instanceof Player)) && (!myplayers.contains((Player) entity))) {
+        if (((entity instanceof Player)) && (!myplayers.contains(entity))) {
           myplayers.add((Player) entity);
         }
       }
@@ -164,7 +162,7 @@ public class InSignsNano implements Listener {
     }
 
     // manual update.
-    Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin,
+    Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(expBankConfig.getPlugin(),
         new UpdateAllSignsThread(player, location, expBankConfig), 5L);
   }
 

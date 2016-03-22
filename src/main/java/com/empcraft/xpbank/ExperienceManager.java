@@ -35,7 +35,7 @@ public class ExperienceManager {
 
   public ExperienceManager(Player player) {
     if (player != null) {
-      this.player = new WeakReference<Player>(player);
+      this.player = new WeakReference<>(player);
       this.playerName = player.getName();
     } else {
       this.player = null;
@@ -91,38 +91,30 @@ public class ExperienceManager {
     setExp(getCurrentFractionalXp(), amt);
   }
 
-  public void setExp(int amt) {
-    setExp(0, amt);
-  }
-
-  public void setExp(double amt) {
-    setExp(0, amt);
-  }
-
   private void setExp(double base, double amt) {
     int xp = (int) Math.max(base + amt, 0);
 
-    Player player = getPlayer();
-    int curLvl = player.getLevel();
+    Player onlineplayer = getPlayer();
+    int curLvl = onlineplayer.getLevel();
     int newLvl = getLevelForExp(xp);
 
     if (curLvl != newLvl) {
-      player.setLevel(newLvl);
+      onlineplayer.setLevel(newLvl);
     }
 
     if (xp > base) {
-      player.setTotalExperience(player.getTotalExperience() + xp - (int) base);
+      onlineplayer.setTotalExperience(onlineplayer.getTotalExperience() + xp - (int) base);
     }
 
-    double pct = (base - getXpForLevel(newLvl) + amt) / (double) (getXpNeededToLevelUp(newLvl));
-    player.setExp((float) pct);
+    double pct = (base - getXpForLevel(newLvl) + amt) / (getXpNeededToLevelUp(newLvl));
+    onlineplayer.setExp((float) pct);
   }
 
   public int getCurrentExp() {
     Player player = getPlayer();
 
     int lvl = player.getLevel();
-    int cur = getXpForLevel(lvl) + (int) Math.round(getXpNeededToLevelUp(lvl) * player.getExp());
+    int cur = getXpForLevel(lvl) + Math.round(getXpNeededToLevelUp(lvl) * player.getExp());
 
     return cur;
   }
