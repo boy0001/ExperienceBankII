@@ -26,7 +26,6 @@ public class ChangeExperienceThread implements Runnable {
   private final Logger logger;
   private ExpBankConfig config;
   private YamlLanguageProvider ylp;
-  private Server server;
 
   /**
    * Handle experience changes for the bank.
@@ -34,7 +33,6 @@ public class ChangeExperienceThread implements Runnable {
    * @param value the new experience value in the bank.
    * @param config the config.
    * @param ylp the translation messages.
-   * @param server the server.
    * @param logger the logger.
    */
   public ChangeExperienceThread(
@@ -42,14 +40,12 @@ public class ChangeExperienceThread implements Runnable {
       final int value,
       final ExpBankConfig config,
       YamlLanguageProvider ylp,
-      final Server server,
       Logger logger) {
     this.uuid = uuid;
     this.value = value;
     this.logger = logger;
     this.config = config;
     this.ylp = ylp;
-    this.server = server;
   }
 
   @Override
@@ -61,12 +57,12 @@ public class ChangeExperienceThread implements Runnable {
       success = dh.updatePlayerExperience(uuid, savedXp + value);
     } catch (ConfigurationException confEx) {
       logger.log(Level.WARNING, "Could not change experience level for [" + uuid.toString() + "].");
-      MessageUtils.sendMessageToAll(server, ylp.getMessage("MYSQL-GET"));
+      MessageUtils.sendMessageToConsole(ylp.getMessage("MYSQL-GET"));
     }
 
     if (!success) {
       logger.log(Level.WARNING, "Could not change experience level for [" + uuid.toString() + "].");
-      MessageUtils.sendMessageToAll(server, ylp.getMessage("MYSQL-GET"));
+      MessageUtils.sendMessageToConsole(ylp.getMessage("MYSQL-GET"));
     }
 
     return;

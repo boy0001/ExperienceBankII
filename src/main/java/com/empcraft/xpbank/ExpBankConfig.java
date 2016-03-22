@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Logger;
 
 public final class ExpBankConfig {
   private static final String TEXT_CREATE = "text.create";
@@ -42,13 +43,20 @@ public final class ExpBankConfig {
 
   private final List<String> signContent = new ArrayList<>();
 
+  private final Logger logger;
+
   public ExpBankConfig(final JavaPlugin plugin) throws ConfigurationException {
     this.plugin = plugin;
     this.version = plugin.getDescription().getVersion();
     this.config = plugin.getConfig();
+    this.logger = plugin.getLogger();
 
     initEmptyconfig();
     readConfig();
+  }
+
+  public Logger getLogger() {
+    return logger;
   }
 
   public File getLanguageFile() {

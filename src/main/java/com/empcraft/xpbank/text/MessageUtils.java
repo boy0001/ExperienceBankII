@@ -6,6 +6,7 @@ import com.empcraft.xpbank.JSONUtil;
 import com.empcraft.xpbank.err.ConfigurationException;
 import com.empcraft.xpbank.logic.DataHelper;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Server;
 import org.bukkit.block.Sign;
@@ -91,21 +92,15 @@ public final class MessageUtils {
   /**
    * Send a message to all/console, if it is not empty.
    *
-   * @param server
-   *          the bukkit server.
    * @param text
    *          The text you'd like to send. Being colorized.
    */
-  public static void sendMessageToAll(final Server server, final String text) {
+  public static void sendMessageToConsole(final String text) {
     if ("".equals(text)) {
       return;
     }
 
-    if (server == null) {
-      return;
-    }
-
-    server.getConsoleSender().sendMessage(MessageUtils.colorise(text));
+    Bukkit.getServer().getConsoleSender().sendMessage(MessageUtils.colorise(text));
   }
 
   public static String evaluate(String mystring, Player player, int storedPlayerExperience) {

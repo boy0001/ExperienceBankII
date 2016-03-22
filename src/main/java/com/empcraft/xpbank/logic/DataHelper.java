@@ -9,14 +9,12 @@ import com.empcraft.xpbank.err.ConfigurationException;
 import com.empcraft.xpbank.text.MessageUtils;
 import com.empcraft.xpbank.text.YamlLanguageProvider;
 
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -68,8 +66,8 @@ public class DataHelper {
   /**
    * Searches the bank storage yaml file. If players were found, insert them into the database.
    *
-   * @param experienceFile
-   *          the experience storage file.
+   * @param yamlentries
+   *          the previously stored experience in a yaml file.
    */
   public void builkSaveEntriesToDb(Map<UUID, Integer> yamlentries) {
     if (null == yamlentries || yamlentries.isEmpty()) {
@@ -78,7 +76,7 @@ public class DataHelper {
     }
 
     try (Connection connection = getConnection()) {
-      MessageUtils.sendMessageToAll(null, ylp.getMessage("CONVERT"));
+      MessageUtils.sendMessageToConsole(ylp.getMessage("CONVERT"));
       PlayerExperienceDao ped = getDao(connection);
 
       for (Map.Entry<UUID, Integer> player : yamlentries.entrySet()) {
@@ -87,7 +85,7 @@ public class DataHelper {
         ped.insertPlayerAndExperience(uuid, Integer.valueOf(oldExperience));
       }
 
-      MessageUtils.sendMessageToAll(null, ylp.getMessage("DONE"));
+      MessageUtils.sendMessageToConsole(ylp.getMessage("DONE"));
     } catch (SQLException sqlEx) {
       logger.log(Level.SEVERE, "Could not insert players into Database.", sqlEx);
     }

@@ -50,7 +50,7 @@ public class ExpBank extends JavaPlugin implements Listener {
 
   @Override
   public void onEnable() {
-    MessageUtils.sendMessageToAll(getServer(), "&8===&a[&7EXPBANK&a]&8===");
+    MessageUtils.sendMessageToConsole("&8===&a[&7EXPBANK&a]&8===");
     saveResource("english.yml", true);
     saveResource("spanish.yml", true);
     saveResource("catalan.yml", true);
@@ -59,14 +59,14 @@ public class ExpBank extends JavaPlugin implements Listener {
       this.expConfig = new ExpBankConfig(this);
     } catch (ConfigurationException configEx) {
       getLogger().log(Level.SEVERE, "Could not read main config file.", configEx);
-      MessageUtils.sendMessageToAll(getServer(), "Could not read main config file.");
+      MessageUtils.sendMessageToConsole( "Could not read main config file.");
     }
 
     try {
       ylp = new YamlLanguageProvider(expConfig.getLanguageFile(), getLogger());
     } catch (ConfigurationException configEx) {
       getLogger().log(Level.SEVERE, "Could not load Language file.", configEx);
-      MessageUtils.sendMessageToAll(getServer(), "Could not get Yaml Language File.");
+      MessageUtils.sendMessageToConsole("Could not get Yaml Language File.");
 
       // do not proceed: Can't work without ylp defined.
       return;
@@ -76,7 +76,7 @@ public class ExpBank extends JavaPlugin implements Listener {
       prepareDatabase();
     } catch (ConfigurationException configEx) {
       getLogger().log(Level.SEVERE, "Clould not load saved data or save.", configEx);
-      MessageUtils.sendMessageToAll(getServer(), ylp.getMessage("MYSQL-CONNECT"));
+      MessageUtils.sendMessageToConsole(ylp.getMessage("MYSQL-CONNECT"));
 
       // do not proceed: Don't register defunct listeners!
       return;
@@ -90,7 +90,7 @@ public class ExpBank extends JavaPlugin implements Listener {
       moveOldExperienceYmlFile();
     } catch (ConfigurationException configEx) {
       getLogger().log(Level.SEVERE, "Clould not load saved data or save.", configEx);
-      MessageUtils.sendMessageToAll(getServer(), ylp.getMessage("MYSQL-CONNECT"));
+      MessageUtils.sendMessageToConsole(ylp.getMessage("MYSQL-CONNECT"));
 
       // do not proceed: Don't register defunct listeners!
       return;
@@ -100,7 +100,7 @@ public class ExpBank extends JavaPlugin implements Listener {
     Plugin protocolPlugin = Bukkit.getServer().getPluginManager().getPlugin("ProtocolLib");
 
     if ((protocolPlugin != null && protocolPlugin.isEnabled())) {
-      MessageUtils.sendMessageToAll(getServer(), "&aUsing ProtocolLib for packets");
+      MessageUtils.sendMessageToConsole("&aUsing ProtocolLib for packets");
       manual = false;
       ProtocolManager protocolmanager = ProtocolLibrary.getProtocolManager();
       protocolmanager.addPacketListener(new SignInterceptor(this, ylp, expConfig, getLogger()));
@@ -159,7 +159,7 @@ public class ExpBank extends JavaPlugin implements Listener {
       experience.put(uuid, playerExp);
     }
 
-    MessageUtils.sendMessageToAll(getServer(), ylp.getMessage("YAML"));
+    MessageUtils.sendMessageToConsole(ylp.getMessage("YAML"));
 
     return experience;
   }
@@ -177,7 +177,7 @@ public class ExpBank extends JavaPlugin implements Listener {
   }
 
   private void convertToDatabase(Map<UUID, Integer> yamlentries) throws ConfigurationException {
-    MessageUtils.sendMessageToAll(getServer(), ylp.getMessage("MYSQL"));
+    MessageUtils.sendMessageToConsole(ylp.getMessage("MYSQL"));
     DataHelper dh = new DataHelper(ylp, expConfig, getLogger());
 
     int length = dh.countPlayersInDatabase();
@@ -297,8 +297,7 @@ public class ExpBank extends JavaPlugin implements Listener {
   }
 
   public void changeExpOnBank(final UUID uuid, final int delta) {
-    Runnable changeExp = new ChangeExperienceThread(uuid, delta, expConfig, ylp, getServer(),
-        getLogger());
+    Runnable changeExp = new ChangeExperienceThread(uuid, delta, expConfig, ylp, getLogger());
     runTask(changeExp);
   }
 
