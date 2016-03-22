@@ -3,7 +3,6 @@ package com.empcraft.xpbank;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.empcraft.xpbank.err.ConfigurationException;
-import com.empcraft.xpbank.events.SignBreakListener;
 import com.empcraft.xpbank.events.SignChangeEventListener;
 import com.empcraft.xpbank.events.SignLeftClickDepositListener;
 import com.empcraft.xpbank.events.SignRightClickWithDrawBottleListener;
@@ -100,10 +99,6 @@ public class ExpBank extends JavaPlugin {
     /* Register sign change event. */
     Bukkit.getServer().getPluginManager().registerEvents(
         new SignChangeEventListener(expConfig, ylp), this);
-
-    /* Register sign break event. */
-    Bukkit.getServer().getPluginManager().registerEvents(
-        new SignBreakListener(signListener, expConfig.getExperienceBankActivationString()), this);
 
     /* Registere player leftclick event */
     Bukkit.getServer().getPluginManager()
