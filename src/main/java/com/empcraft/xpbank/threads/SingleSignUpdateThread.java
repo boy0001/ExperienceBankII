@@ -65,22 +65,18 @@ public class SingleSignUpdateThread implements Runnable {
 
     for (int i = 0; i < 4; i++) {
       if (lines[i].contains("\n")) {
-        if ((i < 3)) {
-          if (lines[i + 1].isEmpty()) {
-            lines[i + 1] = ChatColor.getLastColors(lines[i].substring(0, 15))
-                + lines[i].substring(lines[i].indexOf("\n") + 1);
-          }
+        if (i < 3 && lines[i + 1].isEmpty()) {
+          lines[i + 1] = ChatColor.getLastColors(lines[i].substring(0, 15))
+              + lines[i].substring(lines[i].indexOf("\n") + 1);
         }
 
         lines[i] = lines[i].substring(0, lines[i].indexOf("\n"));
       }
 
       if (lines[i].length() > 15) {
-        if ((i < 3)) {
-          if (lines[i + 1].isEmpty()) {
-            lines[i + 1] = ChatColor.getLastColors(lines[i].substring(0, 15))
-                + lines[i].substring(15);
-          }
+        if (i < 3 && lines[i + 1].isEmpty()) {
+          lines[i + 1] = ChatColor.getLastColors(lines[i].substring(0, 15))
+              + lines[i].substring(15);
         }
 
         lines[i] = lines[i].substring(0, 15);

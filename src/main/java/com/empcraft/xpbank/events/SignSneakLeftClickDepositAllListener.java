@@ -39,14 +39,14 @@ public class SignSneakLeftClickDepositAllListener extends AbstractExperienceSign
     }
 
     /*
-     * we need to deposit currentxp - xp for currentlevel - 1;
+     * Try to depoist everything. The limit check is done in the thread.
      */
     int amountToDeposit = player.getTotalExperience();
 
     if (amountToDeposit <= 0) {
       MessageUtils.sendMessageToPlayer(player, getYlp().getMessage("EXP-NONE"));
 
-      // nothing to do;
+      // nothing to deposit.
       return;
     }
 

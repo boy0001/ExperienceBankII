@@ -39,7 +39,9 @@ public class SignLeftClickDepositListener extends AbstractExperienceSignListener
     }
 
     /*
-     * we need to deposit currentxp - xp for currentlevel - 1;
+     * We need to deposit the delta to the next lower level. If this is just the start of a level,
+     * deposit a whole level. If this is in the middle of a level, deposit until we reach the
+     * minimum for this level.
      */
     int playerExperience = player.getTotalExperience();
     int amountToDeposit = ExperienceLevelCalculator
@@ -48,7 +50,7 @@ public class SignLeftClickDepositListener extends AbstractExperienceSignListener
     if (amountToDeposit <= 0) {
       MessageUtils.sendMessageToPlayer(player, getYlp().getMessage("EXP-NONE"));
 
-      // nothing to do;
+      // nothing to deposit.
       return;
     }
 

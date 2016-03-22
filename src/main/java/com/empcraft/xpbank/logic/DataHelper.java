@@ -76,7 +76,7 @@ public class DataHelper {
       for (Map.Entry<UUID, Integer> player : yamlentries.entrySet()) {
         UUID uuid = player.getKey();
         int oldExperience = player.getValue();
-        ped.insertPlayerAndExperience(uuid, Integer.valueOf(oldExperience));
+        ped.insertPlayerAndExperience(uuid, oldExperience);
       }
 
       MessageUtils.sendMessageToConsole(ylp.getMessage("DONE"));
@@ -127,7 +127,7 @@ public class DataHelper {
   }
 
   public Map<UUID, Integer> getSavedExperience() throws ConfigurationException {
-    Map<UUID, Integer> results = new HashMap<UUID, Integer>();
+    Map<UUID, Integer> results = new HashMap<>();
 
     try (Connection connection = getConnection()) {
       PlayerExperienceDao ped = getDao(connection);

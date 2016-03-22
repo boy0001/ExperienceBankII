@@ -71,7 +71,7 @@ public class ChangeExperienceThread implements Runnable {
   @Override
   public void run() {
     boolean success = false;
-    int actualValue = 0;
+    int actualValue;
 
     if (delta < 0) {
       // player withdraws xp.

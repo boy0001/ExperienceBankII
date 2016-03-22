@@ -20,7 +20,8 @@ public class UpdateAllSignsThread implements Runnable {
   private final Location location;
   private ExpBankConfig expBankConfig;
 
-  public UpdateAllSignsThread(final Player player, final Location location, final ExpBankConfig expBankConfig) {
+  public UpdateAllSignsThread(final Player player, final Location location,
+      final ExpBankConfig expBankConfig) {
     this.player = player;
     this.location = location;
     this.expBankConfig = expBankConfig;
@@ -32,7 +33,7 @@ public class UpdateAllSignsThread implements Runnable {
       return;
     }
 
-    List<BlockState> states = new ArrayList<BlockState>();
+    List<BlockState> states = new ArrayList<>();
     World world = player.getWorld();
     List<Chunk> chunks = Arrays.asList(
         new Chunk[] { location.getChunk(), world.getChunkAt(location.add(16.0D, 0.0D, 0.0D)),
@@ -51,12 +52,10 @@ public class UpdateAllSignsThread implements Runnable {
     }
 
     for (BlockState current : states) {
-      if ((current instanceof Sign)) {
+      if (current instanceof Sign) {
         SignHelper.updateSign(player, (Sign) current, expBankConfig);
       }
     }
-
-    states = null;
   }
 
 }
