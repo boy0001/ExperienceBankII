@@ -15,23 +15,13 @@ import com.empcraft.xpbank.text.YamlLanguageProvider;
 import org.bukkit.entity.Player;
 
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class SignInterceptor extends PacketAdapter {
   ProtocolManager protocolmanager = null;
   private YamlLanguageProvider ylp;
   private ExpBankConfig config;
-
-  public void writePacket(PacketContainer packet, String[] lines) {
-    WrappedChatComponent[] component = new WrappedChatComponent[4];
-    for (int j = 3; j >= 0; j--) {
-      if (!lines[j].equals("")) {
-        component[j] = WrappedChatComponent.fromJson(lines[j]);
-      }
-    }
-
-    packet.getChatComponentArrays().write(0, component);
-  }
 
   public SignInterceptor(ExpBank plugin, YamlLanguageProvider ylp, ExpBankConfig config) {
     super(plugin, ListenerPriority.LOW, PacketType.Play.Server.UPDATE_SIGN);
@@ -58,7 +48,8 @@ public class SignInterceptor extends PacketAdapter {
         DataHelper dh = new DataHelper(ylp, config);
         storedPlayerExp = dh.getSavedExperience(player);
       } catch (ConfigurationException confEx) {
-        // sadly, players experience is gone.
+        config.getLogger().log(Level.WARNING,
+            "Could not load experience for player [" + player.getName() + "].", confEx);
       }
 
       String[] lines = new String[4];
@@ -73,5 +64,16 @@ public class SignInterceptor extends PacketAdapter {
       event.setPacket(packet);
     }
 
+  }
+
+  public void writePacket(PacketContainer packet, String[] lines) {
+    WrappedChatComponent[] component = new WrappedChatComponent[4];
+    for (int j = 3; j >= 0; j--) {
+      if (!lines[j].equals("")) {
+        component[j] = WrappedChatComponent.fromJson(lines[j]);
+      }
+    }
+
+    packet.getChatComponentArrays().write(0, component);
   }
 }

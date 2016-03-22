@@ -13,6 +13,7 @@ import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 
 import java.util.List;
+import java.util.logging.Level;
 
 /**
  * Text formatter.
@@ -153,7 +154,8 @@ public final class MessageUtils {
       DataHelper dh = new DataHelper(null, expBankConfig);
       storedPlayerExperience = dh.getSavedExperience(player);
     } catch (ConfigurationException confEx) {
-      // player now has 0 exp :(.
+      expBankConfig.getLogger().log(Level.WARNING,
+          "Could not load experience for player [" + player.getName() + "].", confEx);
     }
 
     for (int line = 0; line < 4; line++) {

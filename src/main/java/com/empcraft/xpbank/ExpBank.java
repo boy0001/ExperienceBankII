@@ -5,6 +5,7 @@ import com.comphenix.protocol.ProtocolManager;
 import com.empcraft.xpbank.err.ConfigurationException;
 import com.empcraft.xpbank.events.SignBreakListener;
 import com.empcraft.xpbank.events.SignChangeEventListener;
+import com.empcraft.xpbank.events.SignLeftClickDepositListener;
 import com.empcraft.xpbank.logic.DataHelper;
 import com.empcraft.xpbank.logic.ExpBankPermission;
 import com.empcraft.xpbank.logic.PermissionsHelper;
@@ -27,7 +28,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -115,10 +115,19 @@ public class ExpBank extends JavaPlugin implements Listener {
     /* Register sign break event. */
     Bukkit.getServer().getPluginManager().registerEvents(
         new SignBreakListener(signListener, expConfig.getExperienceBankActivationString()), this);
+
+    /* Registere player leftclick event */
+    Bukkit.getServer().getPluginManager().registerEvents(
+        new SignLeftClickDepositListener(ylp, expConfig), this);
+
+    /*
+     * All other events.
+     * TODO: Remove.
+     */
     Bukkit.getServer().getPluginManager().registerEvents(this, this);
-    BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
 
     // Save any changes to the config
+    BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
     scheduler.scheduleSyncRepeatingTask(this, new Runnable() {
       @Override
       public void run() {
@@ -204,10 +213,16 @@ public class ExpBank extends JavaPlugin implements Listener {
       return;
     }
 
+    Player player = event.getPlayer();
+
+    if (event.getAction() == Action.LEFT_CLICK_BLOCK && !player.isSneaking()) {
+      // handled by SignLeftClipDepositListener.
+      return;
+    }
+
     Block block = event.getClickedBlock();
-    if ((block.getType() == Material.SIGN_POST) || (block.getType() == Material.WALL_SIGN)) {
+    if (block.getType() == Material.SIGN_POST || block.getType() == Material.WALL_SIGN) {
       Sign sign = (Sign) block.getState();
-      Player player = event.getPlayer();
       String[] lines = sign.getLines();
 
       if (lines[0].equals(MessageUtils.colorise(getConfig().getString("text.create")))) {
@@ -245,9 +260,12 @@ public class ExpBank extends JavaPlugin implements Listener {
               expMan.changeExp(amount);
             }
           } else {
+            // Left Click
             if (player.isSneaking()) {
+              // deposit everythuing
               amount = -expMan.getCurrentExp();
             } else {
+              // deposit one level.
               if (expMan.getCurrentExp() > 17) {
                 amount = -(expMan.getCurrentExp()
                     - expMan.getXpForLevel(expMan.getLevelForExp(expMan.getCurrentExp()) - 1));
@@ -256,20 +274,22 @@ public class ExpBank extends JavaPlugin implements Listener {
               }
             }
 
-            int max = getMaxExp(player);
+            int max = expConfig.getMaxStorageForPlayer(player);
 
             if (amount == 0) {
               MessageUtils.sendMessageToPlayer(player, ylp.getMessage("EXP-NONE"));
             } else if (myExp - amount > max) {
               amount = -(max - myExp);
+
               if (amount == 0) {
                 MessageUtils.sendMessageToPlayer(player, ylp.getMessage("EXP-LIMIT"));
               }
             }
+
             expMan.changeExp(amount);
           }
 
-          changeExpOnBank(player.getUniqueId(), -amount);
+          changeExpOnBank(player, -amount);
           signListener.scheduleUpdate(player, sign, 1);
         } else {
           MessageUtils.sendMessageToPlayer(player,
@@ -279,25 +299,8 @@ public class ExpBank extends JavaPlugin implements Listener {
     }
   }
 
-  public int getMaxExp(Player player) {
-    Set<String> nodes = getConfig().getConfigurationSection("storage").getKeys(false);
-    int max = 0;
-
-    for (String perm : nodes) {
-      if ("default".equals(perm)
-          || PermissionsHelper.playerHasPermission(player, "expbank.limit." + perm)) {
-        int value = getConfig().getInt("storage." + perm);
-
-        if (value > max) {
-          max = value;
-        }
-      }
-    }
-    return max;
-  }
-
-  public void changeExpOnBank(final UUID uuid, final int delta) {
-    Runnable changeExp = new ChangeExperienceThread(uuid, delta, expConfig, ylp);
+  public void changeExpOnBank(final Player player, final int delta) {
+    Runnable changeExp = new ChangeExperienceThread(player, delta, expConfig, ylp);
     runTask(changeExp);
   }
 

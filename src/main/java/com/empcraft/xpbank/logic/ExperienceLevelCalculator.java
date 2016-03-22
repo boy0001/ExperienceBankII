@@ -63,4 +63,22 @@ public final class ExperienceLevelCalculator {
   public static int getMaxLevel() {
     return expList.length - 1;
   }
+
+  /**
+   * Calculates the amount of Xp the player can deposit for one level.
+   * @param playerExperience the current player's experience.
+   * @return the delta to the lower level.
+   */
+  public static int getExperienceDelteToLowerLevel(int playerExperience) {
+    int currentLevel = getLevel(playerExperience);
+    int experienceForLowerLevel = getMinExperienceForLevel(currentLevel);
+
+    if (experienceForLowerLevel == playerExperience) {
+      // the player is currently at the bottom of the current level.
+      // he needs to give away a whole level.
+      experienceForLowerLevel = getMinExperienceForLevel(currentLevel - 1);
+    }
+
+    return playerExperience - experienceForLowerLevel;
+  }
 }

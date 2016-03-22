@@ -69,4 +69,32 @@ public class ExperienceCalculatorTest {
     Assert.assertEquals(2920, minXp);
   }
 
+  @Test
+  public void testGetExperienceDeltaLowerLevel_0() {
+    int deltaToLowerLevel = ExperienceLevelCalculator.getExperienceDelteToLowerLevel(0);
+
+    Assert.assertEquals(0, deltaToLowerLevel);
+  }
+
+  @Test
+  public void testGetExperienceDeltaLowerLevel_1() {
+    int deltaToLowerLevel = ExperienceLevelCalculator.getExperienceDelteToLowerLevel(1);
+
+    Assert.assertEquals(1, deltaToLowerLevel);
+  }
+
+  @Test
+  public void testGetExperienceDeltaLowerLevel_7() {
+    int deltaToLowerLevel = ExperienceLevelCalculator.getExperienceDelteToLowerLevel(7);
+
+    Assert.assertEquals(7, deltaToLowerLevel);
+  }
+
+  @Test
+  public void testGetExperienceDeltaLowerLevel_8() {
+    int deltaToLowerLevel = ExperienceLevelCalculator.getExperienceDelteToLowerLevel(8);
+
+    Assert.assertEquals(1, deltaToLowerLevel);
+  }
+
 }

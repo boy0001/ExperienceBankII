@@ -3,6 +3,7 @@ package com.empcraft.xpbank.dao;
 import com.empcraft.xpbank.ExpBankConfig;
 
 import java.sql.Connection;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 public abstract class BaseDao {

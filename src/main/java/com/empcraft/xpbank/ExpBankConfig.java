@@ -1,9 +1,11 @@
 package com.empcraft.xpbank;
 
 import com.empcraft.xpbank.err.ConfigurationException;
+import com.empcraft.xpbank.logic.PermissionsHelper;
 import com.empcraft.xpbank.text.MessageUtils;
 
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -12,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.logging.Logger;
 
 public final class ExpBankConfig {
@@ -22,7 +25,7 @@ public final class ExpBankConfig {
   public final String version;
 
   private FileConfiguration config;
-  private JavaPlugin plugin;
+  private final JavaPlugin plugin;
   private File languageFile;
   private String experienceBankActivationString;
   private boolean mySqlEnabled;
@@ -45,6 +48,8 @@ public final class ExpBankConfig {
 
   private final Logger logger;
 
+  private final Map<String, Integer> limits = new HashMap<>();
+
   public ExpBankConfig(final JavaPlugin plugin) throws ConfigurationException {
     this.plugin = plugin;
     this.version = plugin.getDescription().getVersion();
@@ -53,6 +58,10 @@ public final class ExpBankConfig {
 
     initEmptyconfig();
     readConfig();
+  }
+
+  public JavaPlugin getPlugin() {
+    return this.plugin;
   }
 
   public Logger getLogger() {
@@ -107,6 +116,28 @@ public final class ExpBankConfig {
     return this.experienceYmlFile;
   }
 
+  public int getMaxStorageForPlayer(Player player) {
+    int maxStorage = 0;
+
+    for (String permissionnode : limits.keySet()) {
+      if (!"default".equals(permissionnode)
+          && !PermissionsHelper.playerHasPermission(player, "expbank.limit." + permissionnode)) {
+        continue;
+      }
+
+      int currentPermissionMax = limits.get(permissionnode);
+      if (currentPermissionMax <= maxStorage) {
+        // the max permission for this user's role limit
+        // is not higher either.
+        continue;
+      }
+
+      maxStorage = currentPermissionMax;
+    }
+
+    return maxStorage;
+  }
+
   /**
    * Initialises this Config Object by reading elements from it.
    *
@@ -149,6 +180,13 @@ public final class ExpBankConfig {
     this.mySqlUsername = config.getString("mysql.connection.username");
     this.mySqlPassword = config.getString("mysql.connection.password");
     this.mySqlUserTable = config.getString("mysql.connection.table");
+
+    /* Add limits */
+    Set<String> storagelimits = config.getConfigurationSection("storage").getKeys(false);
+
+    for (String limit : storagelimits) {
+      this.limits.put(limit, config.getConfigurationSection("storage").getInt(limit));
+    }
   }
 
   private void initEmptyconfig() {

@@ -27,6 +27,8 @@ public class MySqlPlayerExperienceDao extends PlayerExperienceDao {
 
   private static final String SQL_UPDATE = "UPDATE ? SET EXP = ? WHERE UUID = ?";
 
+  private static final String SQL_DELTA = "UPDATE ? SET EXP = EXP + ? WHERE UUID = ?";
+
   private static final String SQL_SELECT_ALL = "SELECT UUID, EXP FROM ?";
 
   private static final String SQL_SELECT_UUID = "SELECT UUID, EXP FROM ? WHERE UUID = ?";
@@ -122,8 +124,29 @@ public class MySqlPlayerExperienceDao extends PlayerExperienceDao {
     try {
       PreparedStatement st = getConnection().prepareStatement(SQL_UPDATE);
       st.setString(1, getTable());
-      st.setString(2, player.toString());
-      st.setInt(3, newExperience);
+      st.setInt(2, newExperience);
+      st.setString(3, player.toString());
+      int changed = st.executeUpdate();
+
+      if (changed > 0) {
+        success = true;
+      }
+    } catch (SQLException sqlException) {
+      getLogger().log(Level.SEVERE, "Could not count players.", sqlException);
+    }
+
+    return success;
+  }
+
+  @Override
+  public boolean updatePlayerExperienceDelta(UUID player, int delta) {
+    boolean success = false;
+
+    try {
+      PreparedStatement st = getConnection().prepareStatement(SQL_DELTA);
+      st.setString(1, getTable());
+      st.setInt(2, delta);
+      st.setString(3, player.toString());
       int changed = st.executeUpdate();
 
       if (changed > 0) {

@@ -164,4 +164,18 @@ public class DataHelper {
     return getSavedExperience(player.getUniqueId());
   }
 
+  public boolean updatePlayerExperienceDelta(UUID uuid, int delta) throws ConfigurationException {
+    boolean success = false;
+
+    try (Connection connection = getConnection()) {
+      PlayerExperienceDao ped = getDao(connection);
+      success = ped.updatePlayerExperienceDelta(uuid, delta);
+    } catch (SQLException sqlEx) {
+      config.getLogger().log(Level.SEVERE, "Could not update player experience.", sqlEx);
+      throw new ConfigurationException(sqlEx);
+    }
+
+    return success;
+  }
+
 }

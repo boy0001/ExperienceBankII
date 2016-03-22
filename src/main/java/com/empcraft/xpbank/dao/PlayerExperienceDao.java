@@ -45,4 +45,6 @@ public abstract class PlayerExperienceDao extends BaseDao {
   }
 
   public abstract int getSavedExperience(UUID uniqueId) throws ConfigurationException;
+
+  public abstract boolean updatePlayerExperienceDelta(UUID player, int delta);
 }
