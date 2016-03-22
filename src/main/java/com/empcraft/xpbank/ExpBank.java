@@ -23,8 +23,6 @@ import java.util.UUID;
 import java.util.logging.Level;
 
 public class ExpBank extends JavaPlugin {
-  private InSignsNano signListener;
-
   /**
    * Use ylp.getMessage("");
    */
@@ -57,7 +55,7 @@ public class ExpBank extends JavaPlugin {
       return;
     }
 
-    signListener = new InSignsNano(expConfig);
+    new InSignsNano(expConfig);
 
     registerEvents();
   }
