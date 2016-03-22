@@ -111,21 +111,17 @@ public class ExperienceManager {
   }
 
   public int getCurrentExp() {
-    Player player = getPlayer();
+    Player onlineplayer = getPlayer();
 
-    int lvl = player.getLevel();
-    int cur = getXpForLevel(lvl) + Math.round(getXpNeededToLevelUp(lvl) * player.getExp());
-
-    return cur;
+    int lvl = onlineplayer.getLevel();
+    return getXpForLevel(lvl) + Math.round(getXpNeededToLevelUp(lvl) * onlineplayer.getExp());
   }
 
   private double getCurrentFractionalXp() {
-    Player player = getPlayer();
+    Player onlineplayer = getPlayer();
 
-    int lvl = player.getLevel();
-    double cur = getXpForLevel(lvl) + (double) (getXpNeededToLevelUp(lvl) * player.getExp());
-
-    return cur;
+    int lvl = onlineplayer.getLevel();
+    return getXpForLevel(lvl) + (double) (getXpNeededToLevelUp(lvl) * onlineplayer.getExp());
   }
 
   public boolean hasExp(int amt) {

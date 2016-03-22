@@ -57,8 +57,8 @@ public class InSignsNano implements Listener {
 
   private boolean manual;
   private int counter = 0;
-  private volatile List<Sign> updateQueueSign = new ArrayList<Sign>();
-  private volatile List<Player> updateQueuePlayer = new ArrayList<Player>();
+  private volatile List<Sign> updateQueueSign = new ArrayList<>();
+  private volatile List<Player> updateQueuePlayer = new ArrayList<>();
 
   private ExpBankConfig expBankConfig;
 
@@ -80,8 +80,8 @@ public class InSignsNano implements Listener {
                 size -= 1;
               }
 
-              ArrayList<Sign> toRemoveSign = new ArrayList<Sign>();
-              ArrayList<Player> toRemovePlayer = new ArrayList<Player>();
+              ArrayList<Sign> toRemoveSign = new ArrayList<>();
+              ArrayList<Player> toRemovePlayer = new ArrayList<>();
 
               for (int i = 0; i < Math.min(UPDATE_AMOUNT, size); i++) {
                 if (counter >= size) {
@@ -137,10 +137,12 @@ public class InSignsNano implements Listener {
         world.getChunkAt(loc.add(0.0D, 0.0D, -16.0D)),
         world.getChunkAt(loc.add(16.0D, 0.0D, -16.0D)),
         world.getChunkAt(loc.add(-16.0D, 0.0D, 16.0D)) });
-    List<Player> myplayers = new ArrayList<Player>();
+
+    List<Player> myplayers = new ArrayList<>();
+
     for (Chunk chunk : chunks) {
       for (Entity entity : chunk.getEntities()) {
-        if (((entity instanceof Player)) && (!myplayers.contains(entity))) {
+        if ((entity instanceof Player) && (!myplayers.contains(entity))) {
           myplayers.add((Player) entity);
         }
       }
@@ -168,12 +170,12 @@ public class InSignsNano implements Listener {
 
   public void addUpdateQueue(Sign sign, Player player) {
     for (int i = 0; i < updateQueuePlayer.size(); i++) {
-      if (updateQueuePlayer.get(i).getName().equals(player.getName())) {
-        if (updateQueueSign.get(i).getLocation().equals(sign.getLocation())) {
+      if (updateQueuePlayer.get(i).getName().equals(player.getName())
+          && updateQueueSign.get(i).getLocation().equals(sign.getLocation())) {
           return;
-        }
       }
     }
+
     updateQueuePlayer.add(player);
     updateQueueSign.add(sign);
   }

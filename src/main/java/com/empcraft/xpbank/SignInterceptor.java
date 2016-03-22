@@ -67,8 +67,9 @@ public class SignInterceptor extends PacketAdapter {
 
   public void writePacket(PacketContainer packet, String[] lines) {
     WrappedChatComponent[] component = new WrappedChatComponent[4];
+
     for (int j = 3; j >= 0; j--) {
-      if (!lines[j].equals("")) {
+      if (!"".equals(lines[j])) {
         component[j] = WrappedChatComponent.fromJson(lines[j]);
       }
     }

@@ -3,12 +3,22 @@ package com.empcraft.xpbank;
 import org.bukkit.ChatColor;
 
 /**
+ * JSON Utilities.
+ *
  * @author DarkSeraphim
  **/
-public class JSONUtil {
+public final class JSONUtil {
   private static final StringBuilder JSON_BUILDER = new StringBuilder("{\"text\":\"\",\"extra\":[");
 
   private static final int RETAIN = "{\"text\":\"\",\"extra\":[".length();
+
+  private static final StringBuilder STYLE = new StringBuilder();
+
+  /**
+   * private hidden utility constructor.
+   */
+  private JSONUtil() {
+  }
 
   public static String toJSON(String message) {
     if (message == null || message.isEmpty()) {
@@ -76,8 +86,6 @@ public class JSONUtil {
 
     return JSON_BUILDER.append("]}").toString();
   }
-
-  private static final StringBuilder STYLE = new StringBuilder();
 
   private static String getStyle(char colour) {
     if (STYLE.length() > 0) {

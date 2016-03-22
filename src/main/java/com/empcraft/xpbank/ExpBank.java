@@ -73,7 +73,7 @@ public class ExpBank extends JavaPlugin implements Listener {
     boolean manual = true;
     Plugin protocolPlugin = Bukkit.getServer().getPluginManager().getPlugin("ProtocolLib");
 
-    if ((protocolPlugin != null && protocolPlugin.isEnabled())) {
+    if (protocolPlugin != null && protocolPlugin.isEnabled()) {
       MessageUtils.sendMessageToConsole("&aUsing ProtocolLib for packets");
       manual = false;
       ProtocolManager protocolmanager = ProtocolLibrary.getProtocolManager();
@@ -138,7 +138,7 @@ public class ExpBank extends JavaPlugin implements Listener {
   }
 
   private Map<UUID, Integer> loadExperienceFromYaml() {
-    Map<UUID, Integer> experience = new HashMap<UUID, Integer>();
+    Map<UUID, Integer> experience = new HashMap<>();
     File expFile = expConfig.getExperienceYmlFile();
 
     if (null == expFile || !expFile.exists()) {
@@ -243,7 +243,6 @@ public class ExpBank extends JavaPlugin implements Listener {
         MessageUtils.sendMessageToPlayer(player, ylp.getMessage("BOTTLE-ERROR"));
         return;
       } else {
-        amount = bottles * 7;
         player.getInventory().getItemInMainHand().setType(Material.EXP_BOTTLE);
         event.setCancelled(true);
       }

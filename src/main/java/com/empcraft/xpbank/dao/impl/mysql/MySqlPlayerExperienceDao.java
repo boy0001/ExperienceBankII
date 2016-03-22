@@ -131,7 +131,9 @@ public class MySqlPlayerExperienceDao extends PlayerExperienceDao {
         success = true;
       }
     } catch (SQLException sqlException) {
-      getLogger().log(Level.SEVERE, "Could not count players.", sqlException);
+      getLogger().log(Level.SEVERE,
+          "Could set experience of player [" + player.toString() + "] to [" + newExperience + "].",
+          sqlException);
     }
 
     return success;
@@ -152,7 +154,8 @@ public class MySqlPlayerExperienceDao extends PlayerExperienceDao {
         success = true;
       }
     } catch (SQLException sqlException) {
-      getLogger().log(Level.SEVERE, "Could not count players.", sqlException);
+      getLogger().log(Level.SEVERE, "Could not update experience for player [" + player.toString()
+          + "] with [" + delta + "] experience points.", sqlException);
     }
 
     return success;
@@ -173,7 +176,8 @@ public class MySqlPlayerExperienceDao extends PlayerExperienceDao {
         savedExperience.put(uuid, experience);
       }
     } catch (SQLException sqlException) {
-      getLogger().log(Level.SEVERE, "Could not count players.", sqlException);
+      getLogger().log(Level.SEVERE, "Could not fetch saved experience for all players.",
+          sqlException);
       throw new ConfigurationException(sqlException);
     }
 
@@ -185,7 +189,7 @@ public class MySqlPlayerExperienceDao extends PlayerExperienceDao {
     int result = 0;
 
     try {
-      PreparedStatement st = getConnection().prepareStatement(SQL_SELECT_ALL);
+      PreparedStatement st = getConnection().prepareStatement(SQL_SELECT_UUID);
       st.setString(1, getTable());
       ResultSet rs = st.executeQuery();
 
@@ -193,7 +197,9 @@ public class MySqlPlayerExperienceDao extends PlayerExperienceDao {
         result = rs.getInt(2);
       }
     } catch (SQLException sqlException) {
-      getLogger().log(Level.SEVERE, "Could not count players.", sqlException);
+      getLogger().log(Level.SEVERE,
+          "Could not get saved experience for player with UID [" + uniqueId.toString() + "].",
+          sqlException);
       throw new ConfigurationException(sqlException);
     }
 
