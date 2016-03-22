@@ -12,6 +12,7 @@ import com.empcraft.xpbank.listeners.SignSneakLeftClickDepositAllListener;
 import com.empcraft.xpbank.listeners.SignSneakRightClickWithDrawAllListener;
 import com.empcraft.xpbank.logic.DataHelper;
 import com.empcraft.xpbank.text.MessageUtils;
+import com.empcraft.xpbank.text.Text;
 import com.empcraft.xpbank.text.YamlLanguageProvider;
 
 import org.bukkit.Bukkit;
@@ -77,7 +78,7 @@ public class ExpBank extends JavaPlugin {
       moveOldExperienceYmlFile();
     } catch (ConfigurationException configEx) {
       getLogger().log(Level.SEVERE, "Clould not load saved data or save.", configEx);
-      MessageUtils.sendMessageToConsole(ylp.getMessage("MYSQL-CONNECT"));
+      MessageUtils.sendMessageToConsole(ylp.getMessage(Text.MYSQL_CONNECT));
 
       throw configEx;
     }
@@ -141,7 +142,7 @@ public class ExpBank extends JavaPlugin {
       experience.put(uuid, playerExp);
     }
 
-    MessageUtils.sendMessageToConsole(ylp.getMessage("YAML"));
+    MessageUtils.sendMessageToConsole(ylp.getMessage(Text.YAML));
 
     return experience;
   }
@@ -159,7 +160,7 @@ public class ExpBank extends JavaPlugin {
   }
 
   private void convertToDatabase(Map<UUID, Integer> yamlentries) throws ConfigurationException {
-    MessageUtils.sendMessageToConsole(ylp.getMessage("MYSQL"));
+    MessageUtils.sendMessageToConsole(ylp.getMessage(Text.MYSQL));
     DataHelper dh = new DataHelper(ylp, expConfig);
 
     int length = dh.countPlayersInDatabase();
@@ -172,6 +173,7 @@ public class ExpBank extends JavaPlugin {
      * If there are no players in the database yet, see, if we can migrate player's exp from the
      * yaml config.
      */
+    MessageUtils.sendMessageToConsole(ylp.getMessage(Text.CONVERT));
     dh.bulkSaveEntriesToDb(yamlentries);
   }
 

@@ -1,17 +1,15 @@
-#### IMPORTANT #### YAML DOES NOT SUPPORT UTF-8 #### PLEASE MAKE SURE THIS IS IN ASCII FORMAT: http://www.rapidmonkey.com/unicodeconverter/
-#### PLEASE READ BELOW IF YOU WOULD LIKE TO MODIFY ANY MESSAGES:
 ## You should not edit this file but you can edit a copy (e.g. rename it to gibberish.yml)
 ## The "language: english" in the "config.yml" should change to reflect this (e.g. "language: gibberish")
 ## NOTE: messages that are blank will not be sent to players.
 MYSQL: "&fMySQL enabled - establishing a connection."
-MYSQL-CONNECT: "&cCouldn't establish a connection. Make sure it is configured correctly in the config.yml"
-MYSQL-GET: "&a[&7EXPBANK&a]&f Uh oh! Failed to contact MySQL database."
+MYSQL_CONNECT: "&cCouldn't establish a connection. Make sure it is configured correctly in the config.yml"
+MYSQL_GET: "&a[&7EXPBANK&a]&f Uh oh! Failed to contact MySQL database."
 YAML: "&fUsing YAML configuration as storage"
 CONVERT: "&fConverting old YAML configuration to MySQL. Please wait..."
 SUCCESS: "&aSuccess"
 DONE: "&aDone!"
 CREATE: "&7Successfully created an &aEXP BANK &7sign!"
 NOPERM: "&7Missing requirement: &c{STRING}"
-BOTTLE-ERROR: "&7You do not have enough &cEXP&7 to fill those!"
-EXP-NONE: "&7You do not have &cany&7 EXP."
-EXP-LIMIT: "&7You are &cnot allowed&7 to store any more EXP."
+BOTTLE_ERROR: "&7You do not have enough &cEXP&7 to fill those!"
+EXP_NONE: "&7You do not have &cany&7 EXP."
+EXP_LIMIT: "&7You are &cnot allowed&7 to store any more EXP."

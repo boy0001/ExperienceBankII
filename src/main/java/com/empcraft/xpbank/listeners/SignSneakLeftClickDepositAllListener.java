@@ -5,6 +5,7 @@ import com.empcraft.xpbank.logic.ExpBankPermission;
 import com.empcraft.xpbank.logic.PermissionsHelper;
 import com.empcraft.xpbank.logic.SignHelper;
 import com.empcraft.xpbank.text.MessageUtils;
+import com.empcraft.xpbank.text.Text;
 import com.empcraft.xpbank.text.YamlLanguageProvider;
 import com.empcraft.xpbank.threads.ChangeExperienceThread;
 import com.google.common.base.Optional;
@@ -34,7 +35,7 @@ public class SignSneakLeftClickDepositAllListener extends AbstractExperienceSign
 
     if (!PermissionsHelper.playerHasPermission(player, ExpBankPermission.USE)) {
       MessageUtils.sendMessageToPlayer(player,
-          getYlp().getMessage("NOPERM").replace("{STRING}", "expbank.use" + ""));
+          getYlp().getMessage(Text.NOPERM).replace("{STRING}", "expbank.use" + ""));
       return;
     }
 
@@ -44,7 +45,7 @@ public class SignSneakLeftClickDepositAllListener extends AbstractExperienceSign
     int amountToDeposit = player.getTotalExperience();
 
     if (amountToDeposit <= 0) {
-      MessageUtils.sendMessageToPlayer(player, getYlp().getMessage("EXP-NONE"));
+      MessageUtils.sendMessageToPlayer(player, getYlp().getMessage(Text.EXP_NONE));
 
       // nothing to deposit.
       return;

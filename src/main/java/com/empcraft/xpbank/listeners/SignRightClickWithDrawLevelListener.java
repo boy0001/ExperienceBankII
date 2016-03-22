@@ -6,6 +6,7 @@ import com.empcraft.xpbank.logic.ExperienceLevelCalculator;
 import com.empcraft.xpbank.logic.PermissionsHelper;
 import com.empcraft.xpbank.logic.SignHelper;
 import com.empcraft.xpbank.text.MessageUtils;
+import com.empcraft.xpbank.text.Text;
 import com.empcraft.xpbank.text.YamlLanguageProvider;
 import com.empcraft.xpbank.threads.ChangeExperienceThread;
 import com.google.common.base.Optional;
@@ -35,7 +36,8 @@ public class SignRightClickWithDrawLevelListener extends AbstractExperienceSignL
 
     if (!PermissionsHelper.playerHasPermission(player, ExpBankPermission.USE)) {
       MessageUtils.sendMessageToPlayer(player,
-          getYlp().getMessage("NOPERM").replace("{STRING}", "expbank.use" + ""));
+          getYlp().getMessage(Text.NOPERM).replace("{STRING}",
+              ExpBankPermission.USE.getPermissionNode()));
       return;
     }
 

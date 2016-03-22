@@ -8,6 +8,7 @@ import com.empcraft.xpbank.logic.ExpBankPermission;
 import com.empcraft.xpbank.logic.PermissionsHelper;
 import com.empcraft.xpbank.logic.SignHelper;
 import com.empcraft.xpbank.text.MessageUtils;
+import com.empcraft.xpbank.text.Text;
 import com.empcraft.xpbank.text.YamlLanguageProvider;
 
 import org.bukkit.ChatColor;
@@ -44,13 +45,13 @@ public class SignChangeEventListener implements Listener {
       // this player does not have the permission to create such a sign.
       event.setLine(0, "&4[ERROR]");
       MessageUtils.sendMessageToPlayer(player,
-          ylp.getMessage("NOPERM").replace("{STRING}", "expbank.create" + ""));
+          ylp.getMessage(Text.NOPERM).replace("{STRING}", "expbank.create" + ""));
 
       return;
     }
 
     event.setLine(0, MessageUtils.colorise(config.getExperienceBankActivationString()));
-    MessageUtils.sendMessageToPlayer(player, ylp.getMessage("CREATE"));
+    MessageUtils.sendMessageToPlayer(player, ylp.getMessage(Text.CREATE));
 
     SignHelper.updateSign(player, (Sign) event.getBlock().getState(), config);
   }

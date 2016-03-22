@@ -24,14 +24,15 @@ public class YamlLanguageProvider {
     }
   }
 
-  public String getMessage(String key) {
-    try {
-      return MessageUtils.colorise(langYaml.getString(key));
-    } catch (Exception e) {
-      config.getLogger().log(Level.INFO, "Could get Message for key [" + key + "].", e);
+  public String getMessage(Text key) {
+    String message = MessageUtils.colorise(langYaml.getString(key.name()));
 
-      return "";
+    if (null == message || "".equals(message)) {
+      config.getLogger().log(Level.INFO, "Could get Message for key [" + key + "].");
+      message = "";
     }
+
+    return message;
   }
 
 }

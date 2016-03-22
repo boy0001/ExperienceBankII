@@ -7,6 +7,7 @@ import com.empcraft.xpbank.dao.PlayerExperienceDao;
 import com.empcraft.xpbank.dao.impl.mysql.MySqlPlayerExperienceDao;
 import com.empcraft.xpbank.err.ConfigurationException;
 import com.empcraft.xpbank.text.MessageUtils;
+import com.empcraft.xpbank.text.Text;
 import com.empcraft.xpbank.text.YamlLanguageProvider;
 
 import org.bukkit.entity.Player;
@@ -70,7 +71,7 @@ public class DataHelper {
     }
 
     try (Connection connection = getConnection()) {
-      MessageUtils.sendMessageToConsole(ylp.getMessage("CONVERT"));
+      MessageUtils.sendMessageToConsole(ylp.getMessage(Text.CONVERT));
       PlayerExperienceDao ped = getDao(connection);
 
       for (Map.Entry<UUID, Integer> player : yamlentries.entrySet()) {
@@ -79,7 +80,7 @@ public class DataHelper {
         ped.insertPlayerAndExperience(uuid, oldExperience);
       }
 
-      MessageUtils.sendMessageToConsole(ylp.getMessage("DONE"));
+      MessageUtils.sendMessageToConsole(ylp.getMessage(Text.DONE));
     } catch (SQLException sqlEx) {
       config.getLogger().log(Level.SEVERE, "Could not insert players into Database.", sqlEx);
     }

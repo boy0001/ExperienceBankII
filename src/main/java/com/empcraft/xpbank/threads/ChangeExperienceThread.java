@@ -8,6 +8,7 @@ import com.empcraft.xpbank.ExpBankConfig;
 import com.empcraft.xpbank.err.ConfigurationException;
 import com.empcraft.xpbank.logic.DataHelper;
 import com.empcraft.xpbank.text.MessageUtils;
+import com.empcraft.xpbank.text.Text;
 import com.empcraft.xpbank.text.YamlLanguageProvider;
 
 import org.bukkit.Material;
@@ -83,7 +84,7 @@ public class ChangeExperienceThread implements Runnable {
 
     if (numBottles > 0 && actualValue != delta) {
       // not enough experience on bank to fill all those bottles.
-      MessageUtils.sendMessageToPlayer(player, ylp.getMessage("BOTTLE-ERROR"));
+      MessageUtils.sendMessageToPlayer(player, ylp.getMessage(Text.BOTTLE_ERROR));
 
       return;
     }
@@ -94,15 +95,15 @@ public class ChangeExperienceThread implements Runnable {
       config.getLogger().log(Level.WARNING,
           "Could not change experience level for [" + player.getUniqueId().toString() + "].",
           confEx);
-      MessageUtils.sendMessageToConsole(ylp.getMessage("MYSQL-GET"));
-      MessageUtils.sendMessageToPlayer(player, ylp.getMessage("LOST"));
+      MessageUtils.sendMessageToConsole(ylp.getMessage(Text.MYSQL_GET));
+      MessageUtils.sendMessageToPlayer(player, ylp.getMessage(Text.LOST));
     }
 
     if (!success) {
       config.getLogger().log(Level.WARNING,
           "Could not change experience level for [" + player.getUniqueId().toString() + "].");
-      MessageUtils.sendMessageToConsole(ylp.getMessage("MYSQL-GET"));
-      MessageUtils.sendMessageToPlayer(player, ylp.getMessage("LOST"));
+      MessageUtils.sendMessageToConsole(ylp.getMessage(Text.MYSQL_GET));
+      MessageUtils.sendMessageToPlayer(player, ylp.getMessage(Text.LOST));
 
       return;
     }
