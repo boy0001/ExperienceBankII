@@ -261,17 +261,15 @@ public class ExpBank extends JavaPlugin implements Listener {
             }
           } else {
             // Left Click
-            if (player.isSneaking()) {
-              // deposit everythuing
-              amount = -expMan.getCurrentExp();
+            if (!player.isSneaking()) {
+              return;
+            }
+            // deposit one level.
+            if (expMan.getCurrentExp() > 17) {
+              amount = -(expMan.getCurrentExp()
+                  - expMan.getXpForLevel(expMan.getLevelForExp(expMan.getCurrentExp()) - 1));
             } else {
-              // deposit one level.
-              if (expMan.getCurrentExp() > 17) {
-                amount = -(expMan.getCurrentExp()
-                    - expMan.getXpForLevel(expMan.getLevelForExp(expMan.getCurrentExp()) - 1));
-              } else {
-                amount = -expMan.getCurrentExp();
-              }
+              amount = -expMan.getCurrentExp();
             }
 
             int max = expConfig.getMaxStorageForPlayer(player);
