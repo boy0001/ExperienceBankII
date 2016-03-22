@@ -10,7 +10,6 @@ import com.empcraft.xpbank.text.YamlLanguageProvider;
 import com.empcraft.xpbank.threads.ChangeExperienceThread;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -34,15 +33,7 @@ public class SignLeftClickDepositListener implements Listener {
       return;
     }
 
-    if (event.getClickedBlock().getType() != Material.SIGN_POST
-        && event.getClickedBlock().getType() != Material.WALL_SIGN) {
-      // listen only for signs.
-      return;
-    }
-
-    Sign sign = (Sign) event.getClickedBlock().getState();
-
-    if (!SignHelper.isExperienceBankSign(sign, config)) {
+    if (!SignHelper.isExperienceBankSignBlock(event.getClickedBlock(), config)) {
       return;
     }
 
@@ -78,6 +69,7 @@ public class SignLeftClickDepositListener implements Listener {
     Bukkit.getScheduler().runTaskAsynchronously(config.getPlugin(), cet);
 
     // update the sign.
+    Sign sign = (Sign) event.getClickedBlock().getState();
     SignHelper.updateSign(player, sign, config);
   }
 }

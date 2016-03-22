@@ -17,7 +17,6 @@ import com.empcraft.xpbank.threads.ChangeExperienceThread;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -203,15 +202,8 @@ public class ExpBank extends JavaPlugin implements Listener {
     }
 
     Player player = event.getPlayer();
-    Block block = event.getClickedBlock();
 
-    if (block.getType() != Material.SIGN_POST || block.getType() != Material.WALL_SIGN) {
-      return;
-    }
-
-    Sign sign = (Sign) block.getState();
-
-    if (!SignHelper.isExperienceBankSign(sign, expConfig)) {
+    if (!SignHelper.isExperienceBankSignBlock(event.getClickedBlock(), expConfig)) {
       return;
     }
 
@@ -251,6 +243,7 @@ public class ExpBank extends JavaPlugin implements Listener {
       expMan.changeExp(amount);
     }
 
+    Sign sign = (Sign) event.getClickedBlock().getState();
     SignHelper.updateSign(player, sign, expConfig);
   }
 

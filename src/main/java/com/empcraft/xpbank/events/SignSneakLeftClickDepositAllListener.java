@@ -39,9 +39,7 @@ public class SignSneakLeftClickDepositAllListener implements Listener {
       return;
     }
 
-    Sign sign = (Sign) event.getClickedBlock().getState();
-
-    if (!SignHelper.isExperienceBankSign(sign, config)) {
+    if (!SignHelper.isExperienceBankSignBlock(event.getClickedBlock(), config)) {
       return;
     }
 
@@ -51,7 +49,7 @@ public class SignSneakLeftClickDepositAllListener implements Listener {
       // We only treat deposit everything.
       return;
     }
-    
+
     if (!PermissionsHelper.playerHasPermission(player, ExpBankPermission.USE)) {
       MessageUtils.sendMessageToPlayer(player,
           ylp.getMessage("NOPERM").replace("{STRING}", "expbank.use" + ""));
@@ -75,6 +73,7 @@ public class SignSneakLeftClickDepositAllListener implements Listener {
     Bukkit.getScheduler().runTaskAsynchronously(config.getPlugin(), cet);
 
     // update the sign.
+    Sign sign = (Sign) event.getClickedBlock().getState();
     SignHelper.updateSign(player, sign, config);
   }
 
