@@ -7,7 +7,6 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class YamlLanguageProvider {
   private final YamlConfiguration langYaml;

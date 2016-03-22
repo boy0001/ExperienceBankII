@@ -2,7 +2,6 @@ package com.empcraft.xpbank.events;
 
 import com.empcraft.xpbank.ExpBankConfig;
 import com.empcraft.xpbank.logic.ExpBankPermission;
-import com.empcraft.xpbank.logic.ExperienceLevelCalculator;
 import com.empcraft.xpbank.logic.PermissionsHelper;
 import com.empcraft.xpbank.logic.SignHelper;
 import com.empcraft.xpbank.text.MessageUtils;
@@ -18,12 +17,12 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 
-public class SignLeftClickDepositListener implements Listener {
-
+public class SignSneakLeftClickDepositAllListener implements Listener {
   private YamlLanguageProvider ylp;
   private ExpBankConfig config;
 
-  public SignLeftClickDepositListener(final YamlLanguageProvider ylp, final ExpBankConfig config) {
+  public SignSneakLeftClickDepositAllListener(final YamlLanguageProvider ylp,
+      final ExpBankConfig config) {
     this.ylp = ylp;
     this.config = config;
   }
@@ -48,11 +47,11 @@ public class SignLeftClickDepositListener implements Listener {
 
     Player player = event.getPlayer();
 
-    if (player.isSneaking()) {
-      // We only treat deposit one level here.
+    if (!player.isSneaking()) {
+      // We only treat deposit everything.
       return;
     }
-
+    
     if (!PermissionsHelper.playerHasPermission(player, ExpBankPermission.USE)) {
       MessageUtils.sendMessageToPlayer(player,
           ylp.getMessage("NOPERM").replace("{STRING}", "expbank.use" + ""));
@@ -62,9 +61,7 @@ public class SignLeftClickDepositListener implements Listener {
     /*
      * we need to deposit currentxp - xp for currentlevel - 1;
      */
-    int playerExperience = player.getTotalExperience();
-    int amountToDeposit = ExperienceLevelCalculator
-        .getExperienceDelteToLowerLevel(playerExperience);
+    int amountToDeposit = player.getTotalExperience();
 
     if (amountToDeposit <= 0) {
       MessageUtils.sendMessageToPlayer(player, ylp.getMessage("EXP-NONE"));
@@ -80,4 +77,5 @@ public class SignLeftClickDepositListener implements Listener {
     // update the sign.
     SignHelper.updateSign(player, sign, config);
   }
+
 }

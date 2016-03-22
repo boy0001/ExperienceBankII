@@ -194,11 +194,11 @@ public class FakeServer implements Server {
   public BukkitScheduler getScheduler() {
     return new BukkitScheduler() {
       @Override
-      public int scheduleSyncDelayedTask(Plugin plugin, Runnable r, long l) {
+      public int scheduleSyncDelayedTask(Plugin plugin, Runnable thread, long delay) {
         LOG.debug("Got scheduled sync delayed task for plugin [{}], runnable [{}] after [{}] tick.",
-            new Object[] {plugin.toString(), r.toString(), l});
+            new Object[] {plugin.toString(), thread.toString(), delay});
 
-        tasks.add(new RunnableOfPlugin(plugin, r));
+        tasks.add(new RunnableOfPlugin(plugin, thread));
 
         return 0;
       }

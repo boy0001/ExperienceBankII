@@ -6,9 +6,11 @@ import com.empcraft.xpbank.err.ConfigurationException;
 import com.empcraft.xpbank.events.SignBreakListener;
 import com.empcraft.xpbank.events.SignChangeEventListener;
 import com.empcraft.xpbank.events.SignLeftClickDepositListener;
+import com.empcraft.xpbank.events.SignSneakLeftClickDepositAllListener;
 import com.empcraft.xpbank.logic.DataHelper;
 import com.empcraft.xpbank.logic.ExpBankPermission;
 import com.empcraft.xpbank.logic.PermissionsHelper;
+import com.empcraft.xpbank.logic.SignHelper;
 import com.empcraft.xpbank.text.MessageUtils;
 import com.empcraft.xpbank.text.YamlLanguageProvider;
 import com.empcraft.xpbank.threads.ChangeExperienceThread;
@@ -109,8 +111,8 @@ public class ExpBank extends JavaPlugin implements Listener {
     signListener = new InSignsNano(this, false, manual, expConfig);
 
     /* Register sign change event. */
-    Bukkit.getServer().getPluginManager().registerEvents(new SignChangeEventListener(signListener,
-        expConfig.getExperienceBankActivationString(), ylp), this);
+    Bukkit.getServer().getPluginManager().registerEvents(
+        new SignChangeEventListener(expConfig, ylp), this);
 
     /* Register sign break event. */
     Bukkit.getServer().getPluginManager().registerEvents(
@@ -119,6 +121,8 @@ public class ExpBank extends JavaPlugin implements Listener {
     /* Registere player leftclick event */
     Bukkit.getServer().getPluginManager()
         .registerEvents(new SignLeftClickDepositListener(ylp, expConfig), this);
+    Bukkit.getServer().getPluginManager()
+        .registerEvents(new SignSneakLeftClickDepositAllListener(ylp, expConfig), this);
 
     /*
      * All other events. TODO: Remove.
@@ -207,88 +211,61 @@ public class ExpBank extends JavaPlugin implements Listener {
 
   @EventHandler
   public void onPlayerInteract(PlayerInteractEvent event) {
-    if (!(event.getAction() == Action.RIGHT_CLICK_BLOCK
-        || event.getAction() == Action.LEFT_CLICK_BLOCK)) {
+    if (!(event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
       return;
     }
 
     Player player = event.getPlayer();
+    Block block = event.getClickedBlock();
 
-    if (event.getAction() == Action.LEFT_CLICK_BLOCK && !player.isSneaking()) {
-      // handled by SignLeftClipDepositListener.
+    if (block.getType() != Material.SIGN_POST || block.getType() != Material.WALL_SIGN) {
       return;
     }
 
-    Block block = event.getClickedBlock();
-    if (block.getType() == Material.SIGN_POST || block.getType() == Material.WALL_SIGN) {
-      Sign sign = (Sign) block.getState();
-      String[] lines = sign.getLines();
+    Sign sign = (Sign) block.getState();
 
-      if (lines[0].equals(MessageUtils.colorise(getConfig().getString("text.create")))) {
-        if (PermissionsHelper.playerHasPermission(player, ExpBankPermission.USE)) {
-          ExperienceManager expMan = new ExperienceManager(player);
-          int amount;
-          int myExp = 0; // TODO: getExp(player.getUniqueId());
+    if (!SignHelper.isExperienceBankSign(sign, expConfig)) {
+      return;
+    }
 
-          if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+    if (!PermissionsHelper.playerHasPermission(player, ExpBankPermission.USE)) {
+      MessageUtils.sendMessageToPlayer(player,
+          ylp.getMessage("NOPERM").replace("{STRING}", "expbank.use" + ""));
+      return;
+    }
 
-            if (player.isSneaking()) {
-              amount = myExp;
-            } else {
-              amount = expMan.getXpForLevel(expMan.getLevelForExp(expMan.getCurrentExp()) + 1)
-                  - expMan.getCurrentExp();
-              if (amount > myExp) {
-                amount = myExp;
-              }
-            }
+    ExperienceManager expMan = new ExperienceManager(player);
+    int amount;
+    int myExp = 0; // TODO: getExp(player.getUniqueId());
 
-            if (player.getInventory().getItemInMainHand().getType() == Material.GLASS_BOTTLE
-                && PermissionsHelper.playerHasPermission(player, ExpBankPermission.USE_BOTTLE)) {
-              int bottles = player.getInventory().getItemInMainHand().getAmount();
-
-              if (bottles * 7 > myExp) {
-                MessageUtils.sendMessageToPlayer(player, ylp.getMessage("BOTTLE-ERROR"));
-                return;
-              } else {
-                amount = bottles * 7;
-                player.getInventory().getItemInMainHand().setType(Material.EXP_BOTTLE);
-                event.setCancelled(true);
-              }
-
-            } else {
-              expMan.changeExp(amount);
-            }
-          } else {
-            // Left Click
-            if (!player.isSneaking()) {
-              return;
-            }
-            // deposit everythuing
-            amount = -expMan.getCurrentExp();
-
-            int max = expConfig.getMaxStorageForPlayer(player);
-
-            if (amount == 0) {
-              MessageUtils.sendMessageToPlayer(player, ylp.getMessage("EXP-NONE"));
-            } else if (myExp - amount > max) {
-              amount = -(max - myExp);
-
-              if (amount == 0) {
-                MessageUtils.sendMessageToPlayer(player, ylp.getMessage("EXP-LIMIT"));
-              }
-            }
-
-            expMan.changeExp(amount);
-          }
-
-          changeExpOnBank(player, -amount);
-          signListener.scheduleUpdate(player, sign, 1);
-        } else {
-          MessageUtils.sendMessageToPlayer(player,
-              ylp.getMessage("NOPERM").replace("{STRING}", "expbank.use" + ""));
-        }
+    if (player.isSneaking()) {
+      amount = myExp;
+    } else {
+      amount = expMan.getXpForLevel(expMan.getLevelForExp(expMan.getCurrentExp()) + 1)
+          - expMan.getCurrentExp();
+      if (amount > myExp) {
+        amount = myExp;
       }
     }
+
+    if (player.getInventory().getItemInMainHand().getType() == Material.GLASS_BOTTLE
+        && PermissionsHelper.playerHasPermission(player, ExpBankPermission.USE_BOTTLE)) {
+      int bottles = player.getInventory().getItemInMainHand().getAmount();
+
+      if (bottles * 7 > myExp) {
+        MessageUtils.sendMessageToPlayer(player, ylp.getMessage("BOTTLE-ERROR"));
+        return;
+      } else {
+        amount = bottles * 7;
+        player.getInventory().getItemInMainHand().setType(Material.EXP_BOTTLE);
+        event.setCancelled(true);
+      }
+
+    } else {
+      expMan.changeExp(amount);
+    }
+
+    SignHelper.updateSign(player, sign, expConfig);
   }
 
   public void changeExpOnBank(final Player player, final int delta) {

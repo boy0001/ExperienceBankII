@@ -92,12 +92,10 @@ public class InSignsNano implements Listener {
 
             Player player = updateQueuePlayer.get(counter);
             Sign sign = updateQueueSign.get(counter);
-            boolean result = SignHelper.updateSign(player, sign, expBankConfig);
+            SignHelper.updateSign(player, sign, expBankConfig);
 
-            if (!result) {
-              toRemovePlayer.add(player);
-              toRemoveSign.add(sign);
-            }
+            toRemovePlayer.add(player);
+            toRemoveSign.add(sign);
             counter++;
           }
 
@@ -168,24 +166,6 @@ public class InSignsNano implements Listener {
     // manual update.
     Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin,
         new UpdateAllSignsThread(player, location, expBankConfig), 5L);
-  }
-
-  public void scheduleUpdate(final Player player, final Sign sign, long time) {
-    if (brokenSigns.contains(sign.getLocation())) {
-      brokenSigns.clear();
-
-      return;
-    }
-
-    Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
-      public void run() {
-        if (player.isOnline()) {
-          if (sign.getBlock() != null && sign.getBlock().getState() instanceof Sign) {
-            SignHelper.updateSign(player, (Sign) sign.getBlock().getState(), expBankConfig);
-          }
-        }
-      }
-    }, time);
   }
 
   public void addUpdateQueue(Sign sign, Player player) {

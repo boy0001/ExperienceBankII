@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class MySqlPlayerExperienceDao extends PlayerExperienceDao {
 

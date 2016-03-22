@@ -1,7 +1,6 @@
 package com.empcraft.xpbank.test;
 
 import com.empcraft.xpbank.ExpBankConfig;
-import com.empcraft.xpbank.InSignsNano;
 import com.empcraft.xpbank.err.ConfigurationException;
 import com.empcraft.xpbank.events.SignChangeEventListener;
 import com.empcraft.xpbank.test.helpers.RunnableOfPlugin;
@@ -11,7 +10,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.plugin.PluginDescriptionFile;
@@ -28,10 +26,10 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import java.util.Set;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ ExpBankConfig.class, SignChangeEvent.class, JavaPlugin.class, PluginDescriptionFile.class })
+@PrepareForTest({ ExpBankConfig.class, SignChangeEvent.class, JavaPlugin.class,
+    PluginDescriptionFile.class })
 public class SignChangeTest {
   private static final String EXP_BANK = "[EXP]";
-  private InSignsNano signListener;
   private YamlLanguageProvider langYml;
   private SignChangeEventListener signChangeEventListener;
   private Player privileged;
@@ -56,9 +54,10 @@ public class SignChangeTest {
     PowerMockito.when(plugin.getDescription()).thenReturn(pluginDescription);
     PowerMockito.when(pluginDescription.getVersion()).thenReturn("test");
     ExpBankConfig expBankConfig = PowerMockito.mock(ExpBankConfig.class);
-    signListener = new InSignsNano(plugin, false, false, expBankConfig);
+    PowerMockito.when(expBankConfig.getExperienceBankActivationString()).thenReturn(EXP_BANK);
+    PowerMockito.when(expBankConfig.getPlugin()).thenReturn(plugin);
 
-    signChangeEventListener = new SignChangeEventListener(signListener, EXP_BANK, langYml);
+    signChangeEventListener = new SignChangeEventListener(expBankConfig, langYml);
 
     /* Set up sign to use */
     Block sign = PowerMockito.mock(Block.class);
