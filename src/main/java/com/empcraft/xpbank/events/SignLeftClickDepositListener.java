@@ -8,6 +8,7 @@ import com.empcraft.xpbank.logic.SignHelper;
 import com.empcraft.xpbank.text.MessageUtils;
 import com.empcraft.xpbank.text.YamlLanguageProvider;
 import com.empcraft.xpbank.threads.ChangeExperienceThread;
+import com.google.common.base.Optional;
 
 import org.bukkit.Bukkit;
 import org.bukkit.block.Sign;
@@ -24,20 +25,12 @@ public class SignLeftClickDepositListener extends AbstractExperienceSignListener
 
   @EventHandler
   public void onPlayerInteract(PlayerInteractEvent event) {
-    if (!Action.LEFT_CLICK_BLOCK.equals(event.getAction())) {
-      return;
-    }
-
-    if (!SignHelper.isExperienceBankSignBlock(event.getClickedBlock(), getConfig())) {
+    if (!isSignForEvent(getConfig(), event, Action.RIGHT_CLICK_BLOCK,
+        Optional.<Boolean> absent(), Optional.of(new Boolean(false)))) {
       return;
     }
 
     Player player = event.getPlayer();
-
-    if (player.isSneaking()) {
-      // We only treat deposit one level here.
-      return;
-    }
 
     if (!PermissionsHelper.playerHasPermission(player, ExpBankPermission.USE)) {
       MessageUtils.sendMessageToPlayer(player,

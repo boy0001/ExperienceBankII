@@ -8,9 +8,9 @@ import com.empcraft.xpbank.logic.SignHelper;
 import com.empcraft.xpbank.text.MessageUtils;
 import com.empcraft.xpbank.text.YamlLanguageProvider;
 import com.empcraft.xpbank.threads.ChangeExperienceThread;
+import com.google.common.base.Optional;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -26,24 +26,12 @@ public class SignRightClickWithDrawLevelListener extends AbstractExperienceSignL
 
   @EventHandler
   public void onPlayerInteract(PlayerInteractEvent event) {
-    if (!Action.RIGHT_CLICK_BLOCK.equals(event.getAction())) {
-      return;
-    }
-
-    if (!SignHelper.isExperienceBankSignBlock(event.getClickedBlock(), getConfig())) {
+    if (!isSignForEvent(getConfig(), event, Action.RIGHT_CLICK_BLOCK, Optional.<Boolean> absent(),
+        Optional.of(new Boolean(false)))) {
       return;
     }
 
     Player player = event.getPlayer();
-
-    if (player.getInventory().getItemInMainHand().getType() == Material.GLASS_BOTTLE) {
-      return;
-    }
-
-    if (player.isSneaking()) {
-      // We only treat withdraw one level here.
-      return;
-    }
 
     if (!PermissionsHelper.playerHasPermission(player, ExpBankPermission.USE)) {
       MessageUtils.sendMessageToPlayer(player,

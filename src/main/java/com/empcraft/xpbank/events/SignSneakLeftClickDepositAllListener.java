@@ -7,9 +7,9 @@ import com.empcraft.xpbank.logic.SignHelper;
 import com.empcraft.xpbank.text.MessageUtils;
 import com.empcraft.xpbank.text.YamlLanguageProvider;
 import com.empcraft.xpbank.threads.ChangeExperienceThread;
+import com.google.common.base.Optional;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -25,26 +25,12 @@ public class SignSneakLeftClickDepositAllListener extends AbstractExperienceSign
 
   @EventHandler
   public void onPlayerInteract(PlayerInteractEvent event) {
-    if (!Action.LEFT_CLICK_BLOCK.equals(event.getAction())) {
-      return;
-    }
-
-    if (event.getClickedBlock().getType() != Material.SIGN_POST
-        && event.getClickedBlock().getType() != Material.WALL_SIGN) {
-      // listen only for signs.
-      return;
-    }
-
-    if (!SignHelper.isExperienceBankSignBlock(event.getClickedBlock(), getConfig())) {
+    if (!isSignForEvent(getConfig(), event, Action.LEFT_CLICK_BLOCK, Optional.<Boolean> absent(),
+        Optional.of(new Boolean(true)))) {
       return;
     }
 
     Player player = event.getPlayer();
-
-    if (!player.isSneaking()) {
-      // We only treat deposit everything.
-      return;
-    }
 
     if (!PermissionsHelper.playerHasPermission(player, ExpBankPermission.USE)) {
       MessageUtils.sendMessageToPlayer(player,
