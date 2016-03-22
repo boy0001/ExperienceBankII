@@ -59,7 +59,7 @@ public class ExpBank extends JavaPlugin implements Listener {
       this.expConfig = new ExpBankConfig(this);
     } catch (ConfigurationException configEx) {
       getLogger().log(Level.SEVERE, "Could not read main config file.", configEx);
-      MessageUtils.sendMessageToConsole( "Could not read main config file.");
+      MessageUtils.sendMessageToConsole("Could not read main config file.");
     }
 
     try {
@@ -117,12 +117,11 @@ public class ExpBank extends JavaPlugin implements Listener {
         new SignBreakListener(signListener, expConfig.getExperienceBankActivationString()), this);
 
     /* Registere player leftclick event */
-    Bukkit.getServer().getPluginManager().registerEvents(
-        new SignLeftClickDepositListener(ylp, expConfig), this);
+    Bukkit.getServer().getPluginManager()
+        .registerEvents(new SignLeftClickDepositListener(ylp, expConfig), this);
 
     /*
-     * All other events.
-     * TODO: Remove.
+     * All other events. TODO: Remove.
      */
     Bukkit.getServer().getPluginManager().registerEvents(this, this);
 
@@ -264,13 +263,8 @@ public class ExpBank extends JavaPlugin implements Listener {
             if (!player.isSneaking()) {
               return;
             }
-            // deposit one level.
-            if (expMan.getCurrentExp() > 17) {
-              amount = -(expMan.getCurrentExp()
-                  - expMan.getXpForLevel(expMan.getLevelForExp(expMan.getCurrentExp()) - 1));
-            } else {
-              amount = -expMan.getCurrentExp();
-            }
+            // deposit everythuing
+            amount = -expMan.getCurrentExp();
 
             int max = expConfig.getMaxStorageForPlayer(player);
 
