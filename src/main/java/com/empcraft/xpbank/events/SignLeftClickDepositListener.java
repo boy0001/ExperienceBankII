@@ -13,18 +13,13 @@ import org.bukkit.Bukkit;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 
-public class SignLeftClickDepositListener implements Listener {
-
-  private YamlLanguageProvider ylp;
-  private ExpBankConfig config;
+public class SignLeftClickDepositListener extends AbstractExperienceSignListener {
 
   public SignLeftClickDepositListener(final YamlLanguageProvider ylp, final ExpBankConfig config) {
-    this.ylp = ylp;
-    this.config = config;
+    super(ylp, config);
   }
 
   @EventHandler
@@ -33,7 +28,7 @@ public class SignLeftClickDepositListener implements Listener {
       return;
     }
 
-    if (!SignHelper.isExperienceBankSignBlock(event.getClickedBlock(), config)) {
+    if (!SignHelper.isExperienceBankSignBlock(event.getClickedBlock(), getConfig())) {
       return;
     }
 
@@ -46,7 +41,7 @@ public class SignLeftClickDepositListener implements Listener {
 
     if (!PermissionsHelper.playerHasPermission(player, ExpBankPermission.USE)) {
       MessageUtils.sendMessageToPlayer(player,
-          ylp.getMessage("NOPERM").replace("{STRING}", "expbank.use" + ""));
+          getYlp().getMessage("NOPERM").replace("{STRING}", "expbank.use" + ""));
       return;
     }
 
@@ -58,18 +53,19 @@ public class SignLeftClickDepositListener implements Listener {
         .getExperienceDelteToLowerLevel(playerExperience);
 
     if (amountToDeposit <= 0) {
-      MessageUtils.sendMessageToPlayer(player, ylp.getMessage("EXP-NONE"));
+      MessageUtils.sendMessageToPlayer(player, getYlp().getMessage("EXP-NONE"));
 
       // nothing to do;
       return;
     }
 
     // CHeck for limit is done in the thread, so we don't need to wait for Database IO.
-    ChangeExperienceThread cet = new ChangeExperienceThread(player, amountToDeposit, config, ylp);
-    Bukkit.getScheduler().runTaskAsynchronously(config.getPlugin(), cet);
+    ChangeExperienceThread cet = new ChangeExperienceThread(player, amountToDeposit, getConfig(),
+        getYlp());
+    Bukkit.getScheduler().runTaskAsynchronously(getConfig().getPlugin(), cet);
 
     // update the sign.
     Sign sign = (Sign) event.getClickedBlock().getState();
-    SignHelper.updateSign(player, sign, config);
+    SignHelper.updateSign(player, sign, getConfig());
   }
 }

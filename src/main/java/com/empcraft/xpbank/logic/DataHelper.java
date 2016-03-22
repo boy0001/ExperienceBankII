@@ -63,7 +63,7 @@ public class DataHelper {
    * @param yamlentries
    *          the previously stored experience in a yaml file.
    */
-  public void builkSaveEntriesToDb(Map<UUID, Integer> yamlentries) {
+  public void bulkSaveEntriesToDb(Map<UUID, Integer> yamlentries) {
     if (null == yamlentries || yamlentries.isEmpty()) {
       // nothing to do.
       return;

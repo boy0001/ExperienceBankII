@@ -6,25 +6,16 @@ import com.empcraft.xpbank.err.ConfigurationException;
 import com.empcraft.xpbank.events.SignBreakListener;
 import com.empcraft.xpbank.events.SignChangeEventListener;
 import com.empcraft.xpbank.events.SignLeftClickDepositListener;
-import com.empcraft.xpbank.events.SignRightClickWithdrawLevelListener;
+import com.empcraft.xpbank.events.SignRightClickWithDrawBottleListener;
+import com.empcraft.xpbank.events.SignRightClickWithDrawLevelListener;
 import com.empcraft.xpbank.events.SignSneakLeftClickDepositAllListener;
+import com.empcraft.xpbank.events.SignSneakRightClickWithDrawAllListener;
 import com.empcraft.xpbank.logic.DataHelper;
-import com.empcraft.xpbank.logic.ExpBankPermission;
-import com.empcraft.xpbank.logic.PermissionsHelper;
-import com.empcraft.xpbank.logic.SignHelper;
 import com.empcraft.xpbank.text.MessageUtils;
 import com.empcraft.xpbank.text.YamlLanguageProvider;
-import com.empcraft.xpbank.threads.ChangeExperienceThread;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.block.Sign;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -35,7 +26,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 
-public class ExpBank extends JavaPlugin implements Listener {
+public class ExpBank extends JavaPlugin {
   private InSignsNano signListener;
 
   /**
@@ -122,12 +113,11 @@ public class ExpBank extends JavaPlugin implements Listener {
 
     /* Register playre right click events */
     Bukkit.getServer().getPluginManager()
-        .registerEvents(new SignRightClickWithdrawLevelListener(ylp, expConfig), this);
-
-    /*
-     * All other events. TODO: Remove.
-     */
-    Bukkit.getServer().getPluginManager().registerEvents(this, this);
+        .registerEvents(new SignRightClickWithDrawLevelListener(ylp, expConfig), this);
+    Bukkit.getServer().getPluginManager()
+        .registerEvents(new SignSneakRightClickWithDrawAllListener(ylp, expConfig), this);
+    Bukkit.getServer().getPluginManager()
+        .registerEvents(new SignRightClickWithDrawBottleListener(ylp, expConfig), this);
   }
 
   private void moveOldExperienceYmlFile() {
@@ -193,62 +183,7 @@ public class ExpBank extends JavaPlugin implements Listener {
      * If there are no players in the database yet, see, if we can migrate player's exp from the
      * yaml config.
      */
-    dh.builkSaveEntriesToDb(yamlentries);
-  }
-
-  private void runTask(final Runnable r) {
-    Bukkit.getScheduler().runTaskAsynchronously(this, r);
-  }
-
-  @EventHandler
-  public void onPlayerInteract(PlayerInteractEvent event) {
-    if (!(event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-      return;
-    }
-
-    Player player = event.getPlayer();
-
-    if (!SignHelper.isExperienceBankSignBlock(event.getClickedBlock(), expConfig)) {
-      return;
-    }
-
-    if (!PermissionsHelper.playerHasPermission(player, ExpBankPermission.USE)) {
-      MessageUtils.sendMessageToPlayer(player,
-          ylp.getMessage("NOPERM").replace("{STRING}", "expbank.use" + ""));
-      return;
-    }
-
-    ExperienceManager expMan = new ExperienceManager(player);
-    int amount = 0;
-    int myExp = 0; // TODO: getExp(player.getUniqueId());
-
-    if (player.isSneaking()) {
-      amount = myExp;
-    }
-
-    if (player.getInventory().getItemInMainHand().getType() == Material.GLASS_BOTTLE
-        && PermissionsHelper.playerHasPermission(player, ExpBankPermission.USE_BOTTLE)) {
-      int bottles = player.getInventory().getItemInMainHand().getAmount();
-
-      if (bottles * 7 > myExp) {
-        MessageUtils.sendMessageToPlayer(player, ylp.getMessage("BOTTLE-ERROR"));
-        return;
-      } else {
-        player.getInventory().getItemInMainHand().setType(Material.EXP_BOTTLE);
-        event.setCancelled(true);
-      }
-
-    } else {
-      expMan.changeExp(amount);
-    }
-
-    Sign sign = (Sign) event.getClickedBlock().getState();
-    SignHelper.updateSign(player, sign, expConfig);
-  }
-
-  public void changeExpOnBank(final Player player, final int delta) {
-    Runnable changeExp = new ChangeExperienceThread(player, delta, expConfig, ylp);
-    runTask(changeExp);
+    dh.bulkSaveEntriesToDb(yamlentries);
   }
 
 }

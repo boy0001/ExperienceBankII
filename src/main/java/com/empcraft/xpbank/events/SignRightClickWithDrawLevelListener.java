@@ -2,6 +2,7 @@ package com.empcraft.xpbank.events;
 
 import com.empcraft.xpbank.ExpBankConfig;
 import com.empcraft.xpbank.logic.ExpBankPermission;
+import com.empcraft.xpbank.logic.ExperienceLevelCalculator;
 import com.empcraft.xpbank.logic.PermissionsHelper;
 import com.empcraft.xpbank.logic.SignHelper;
 import com.empcraft.xpbank.text.MessageUtils;
@@ -16,22 +17,16 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 
-public class SignSneakLeftClickDepositAllListener extends AbstractExperienceSignListener {
+public class SignRightClickWithDrawLevelListener extends AbstractExperienceSignListener {
 
-  public SignSneakLeftClickDepositAllListener(final YamlLanguageProvider ylp,
+  public SignRightClickWithDrawLevelListener(final YamlLanguageProvider ylp,
       final ExpBankConfig config) {
     super(ylp, config);
   }
 
   @EventHandler
   public void onPlayerInteract(PlayerInteractEvent event) {
-    if (!Action.LEFT_CLICK_BLOCK.equals(event.getAction())) {
-      return;
-    }
-
-    if (event.getClickedBlock().getType() != Material.SIGN_POST
-        && event.getClickedBlock().getType() != Material.WALL_SIGN) {
-      // listen only for signs.
+    if (!Action.RIGHT_CLICK_BLOCK.equals(event.getAction())) {
       return;
     }
 
@@ -41,8 +36,12 @@ public class SignSneakLeftClickDepositAllListener extends AbstractExperienceSign
 
     Player player = event.getPlayer();
 
-    if (!player.isSneaking()) {
-      // We only treat deposit everything.
+    if (player.getInventory().getItemInMainHand().getType() == Material.GLASS_BOTTLE) {
+      return;
+    }
+
+    if (player.isSneaking()) {
+      // We only treat withdraw one level here.
       return;
     }
 
@@ -52,20 +51,11 @@ public class SignSneakLeftClickDepositAllListener extends AbstractExperienceSign
       return;
     }
 
-    /*
-     * we need to deposit currentxp - xp for currentlevel - 1;
-     */
-    int amountToDeposit = player.getTotalExperience();
-
-    if (amountToDeposit <= 0) {
-      MessageUtils.sendMessageToPlayer(player, getYlp().getMessage("EXP-NONE"));
-
-      // nothing to do;
-      return;
-    }
+    int neededForLevel = player.getTotalExperience()
+        - ExperienceLevelCalculator.getMinExperienceForLevel(player.getLevel() + 1);
 
     // CHeck for limit is done in the thread, so we don't need to wait for Database IO.
-    ChangeExperienceThread cet = new ChangeExperienceThread(player, amountToDeposit, getConfig(),
+    ChangeExperienceThread cet = new ChangeExperienceThread(player, neededForLevel, getConfig(),
         getYlp());
     Bukkit.getScheduler().runTaskAsynchronously(getConfig().getPlugin(), cet);
 
@@ -73,5 +63,4 @@ public class SignSneakLeftClickDepositAllListener extends AbstractExperienceSign
     Sign sign = (Sign) event.getClickedBlock().getState();
     SignHelper.updateSign(player, sign, getConfig());
   }
-
 }

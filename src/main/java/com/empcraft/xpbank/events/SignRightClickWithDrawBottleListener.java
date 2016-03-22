@@ -2,7 +2,6 @@ package com.empcraft.xpbank.events;
 
 import com.empcraft.xpbank.ExpBankConfig;
 import com.empcraft.xpbank.logic.ExpBankPermission;
-import com.empcraft.xpbank.logic.ExperienceLevelCalculator;
 import com.empcraft.xpbank.logic.PermissionsHelper;
 import com.empcraft.xpbank.logic.SignHelper;
 import com.empcraft.xpbank.text.MessageUtils;
@@ -14,18 +13,13 @@ import org.bukkit.Material;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 
-public class SignRightClickWithdrawLevelListener implements Listener {
-  private YamlLanguageProvider ylp;
-  private ExpBankConfig config;
+public class SignRightClickWithDrawBottleListener extends AbstractExperienceSignListener {
 
-  public SignRightClickWithdrawLevelListener(final YamlLanguageProvider ylp,
-      final ExpBankConfig config) {
-    this.ylp = ylp;
-    this.config = config;
+  public SignRightClickWithDrawBottleListener(YamlLanguageProvider ylp, ExpBankConfig config) {
+    super(ylp, config);
   }
 
   @EventHandler
@@ -34,36 +28,40 @@ public class SignRightClickWithdrawLevelListener implements Listener {
       return;
     }
 
-    if (!SignHelper.isExperienceBankSignBlock(event.getClickedBlock(), config)) {
+    if (!SignHelper.isExperienceBankSignBlock(event.getClickedBlock(), getConfig())) {
       return;
     }
 
     Player player = event.getPlayer();
 
-    if (player.getInventory().getItemInMainHand().getType() == Material.GLASS_BOTTLE) {
+    if (!(player.getInventory().getItemInMainHand().getType() == Material.GLASS_BOTTLE)) {
       return;
     }
+
+    // Do not throw the bottle...
+    event.setCancelled(true);
 
     if (player.isSneaking()) {
-      // We only treat withdraw one level here.
+      // We only treat withdraw bottles here.
       return;
     }
 
-    if (!PermissionsHelper.playerHasPermission(player, ExpBankPermission.USE)) {
+    if (!PermissionsHelper.playerHasPermission(player, ExpBankPermission.USE_BOTTLE)) {
       MessageUtils.sendMessageToPlayer(player,
-          ylp.getMessage("NOPERM").replace("{STRING}", "expbank.use" + ""));
+          getYlp().getMessage("NOPERM").replace("{STRING}",
+              ExpBankPermission.USE_BOTTLE.getPermissionNode() + ""));
       return;
     }
 
-    int neededForLevel = player.getTotalExperience()
-        - ExperienceLevelCalculator.getMinExperienceForLevel(player.getLevel() + 1);
+    int numberOfBottlesHeld = player.getInventory().getItemInMainHand().getAmount();
 
     // CHeck for limit is done in the thread, so we don't need to wait for Database IO.
-    ChangeExperienceThread cet = new ChangeExperienceThread(player, neededForLevel, config, ylp);
-    Bukkit.getScheduler().runTaskAsynchronously(config.getPlugin(), cet);
+    ChangeExperienceThread cet = new ChangeExperienceThread(player, numberOfBottlesHeld,
+        getConfig(), getYlp(), true);
+    Bukkit.getScheduler().runTaskAsynchronously(getConfig().getPlugin(), cet);
 
     // update the sign.
     Sign sign = (Sign) event.getClickedBlock().getState();
-    SignHelper.updateSign(player, sign, config);
+    SignHelper.updateSign(player, sign, getConfig());
   }
 }
