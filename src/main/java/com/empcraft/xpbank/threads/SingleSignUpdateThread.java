@@ -1,7 +1,7 @@
 package com.empcraft.xpbank.threads;
 
 import com.empcraft.xpbank.ExpBankConfig;
-import com.empcraft.xpbank.text.MessageUtils;
+import com.empcraft.xpbank.logic.SignHelper;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -57,7 +57,7 @@ public class SingleSignUpdateThread implements Runnable {
       return;
     }
 
-    String[] lines = MessageUtils.getSignText(sign.getLines(), player, sign, config);
+    String[] lines = SignHelper.getSignText(sign.getLines(), player, sign, config);
 
     if (lines == null) {
       return;

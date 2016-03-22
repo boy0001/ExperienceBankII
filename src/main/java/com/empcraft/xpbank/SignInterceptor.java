@@ -9,7 +9,7 @@ import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import com.empcraft.xpbank.err.ConfigurationException;
 import com.empcraft.xpbank.logic.DataHelper;
-import com.empcraft.xpbank.text.MessageUtils;
+import com.empcraft.xpbank.logic.SignHelper;
 import com.empcraft.xpbank.text.YamlLanguageProvider;
 
 import org.bukkit.entity.Player;
@@ -55,7 +55,7 @@ public class SignInterceptor extends PacketAdapter {
       List<String> signLines = config.getSignContent();
 
       for (int line = 0; line < 4; line++) {
-        String evaluatedLine = MessageUtils.renderSignLines(signLines.get(line), player, storedPlayerExp);
+        String evaluatedLine = SignHelper.renderSignLines(signLines.get(line), player, storedPlayerExp);
         lines[line] = JSONUtil.toJSON(evaluatedLine);
       }
 
