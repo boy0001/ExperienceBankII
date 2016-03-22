@@ -1,4 +1,4 @@
-package com.empcraft.xpbank.events;
+package com.empcraft.xpbank.listeners;
 
 import com.empcraft.xpbank.ExpBankConfig;
 import com.empcraft.xpbank.logic.ExpBankPermission;
@@ -17,17 +17,16 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 
-public class SignRightClickWithDrawLevelListener extends AbstractExperienceSignListener {
+public class SignLeftClickDepositListener extends AbstractExperienceSignListener {
 
-  public SignRightClickWithDrawLevelListener(final YamlLanguageProvider ylp,
-      final ExpBankConfig config) {
+  public SignLeftClickDepositListener(final YamlLanguageProvider ylp, final ExpBankConfig config) {
     super(ylp, config);
   }
 
   @EventHandler
   public void onPlayerInteract(PlayerInteractEvent event) {
-    if (!isSignForEvent(getConfig(), event, Action.RIGHT_CLICK_BLOCK, Optional.<Boolean> absent(),
-        Optional.of(new Boolean(false)))) {
+    if (!isSignForEvent(getConfig(), event, Action.RIGHT_CLICK_BLOCK,
+        Optional.<Boolean> absent(), Optional.of(new Boolean(false)))) {
       return;
     }
 
@@ -39,11 +38,24 @@ public class SignRightClickWithDrawLevelListener extends AbstractExperienceSignL
       return;
     }
 
-    int neededForLevel = player.getTotalExperience()
-        - ExperienceLevelCalculator.getMinExperienceForLevel(player.getLevel() + 1);
+    /*
+     * We need to deposit the delta to the next lower level. If this is just the start of a level,
+     * deposit a whole level. If this is in the middle of a level, deposit until we reach the
+     * minimum for this level.
+     */
+    int playerExperience = player.getTotalExperience();
+    int amountToDeposit = ExperienceLevelCalculator
+        .getExperienceDelteToLowerLevel(playerExperience);
+
+    if (amountToDeposit <= 0) {
+      MessageUtils.sendMessageToPlayer(player, getYlp().getMessage("EXP-NONE"));
+
+      // nothing to deposit.
+      return;
+    }
 
     // CHeck for limit is done in the thread, so we don't need to wait for Database IO.
-    ChangeExperienceThread cet = new ChangeExperienceThread(player, neededForLevel, getConfig(),
+    ChangeExperienceThread cet = new ChangeExperienceThread(player, amountToDeposit, getConfig(),
         getYlp());
     Bukkit.getScheduler().runTaskAsynchronously(getConfig().getPlugin(), cet);
 

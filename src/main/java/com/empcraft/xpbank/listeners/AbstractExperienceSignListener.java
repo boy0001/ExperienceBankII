@@ -1,4 +1,4 @@
-package com.empcraft.xpbank.events;
+package com.empcraft.xpbank.listeners;
 
 import com.empcraft.xpbank.ExpBankConfig;
 import com.empcraft.xpbank.logic.SignHelper;

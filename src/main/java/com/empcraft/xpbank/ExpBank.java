@@ -1,12 +1,12 @@
 package com.empcraft.xpbank;
 
 import com.empcraft.xpbank.err.ConfigurationException;
-import com.empcraft.xpbank.events.SignChangeEventListener;
-import com.empcraft.xpbank.events.SignLeftClickDepositListener;
-import com.empcraft.xpbank.events.SignRightClickWithDrawBottleListener;
-import com.empcraft.xpbank.events.SignRightClickWithDrawLevelListener;
-import com.empcraft.xpbank.events.SignSneakLeftClickDepositAllListener;
-import com.empcraft.xpbank.events.SignSneakRightClickWithDrawAllListener;
+import com.empcraft.xpbank.listeners.SignChangeEventListener;
+import com.empcraft.xpbank.listeners.SignLeftClickDepositListener;
+import com.empcraft.xpbank.listeners.SignRightClickWithDrawBottleListener;
+import com.empcraft.xpbank.listeners.SignRightClickWithDrawLevelListener;
+import com.empcraft.xpbank.listeners.SignSneakLeftClickDepositAllListener;
+import com.empcraft.xpbank.listeners.SignSneakRightClickWithDrawAllListener;
 import com.empcraft.xpbank.logic.DataHelper;
 import com.empcraft.xpbank.text.MessageUtils;
 import com.empcraft.xpbank.text.YamlLanguageProvider;

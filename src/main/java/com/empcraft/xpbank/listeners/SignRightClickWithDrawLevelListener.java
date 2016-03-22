@@ -1,7 +1,8 @@
-package com.empcraft.xpbank.events;
+package com.empcraft.xpbank.listeners;
 
 import com.empcraft.xpbank.ExpBankConfig;
 import com.empcraft.xpbank.logic.ExpBankPermission;
+import com.empcraft.xpbank.logic.ExperienceLevelCalculator;
 import com.empcraft.xpbank.logic.PermissionsHelper;
 import com.empcraft.xpbank.logic.SignHelper;
 import com.empcraft.xpbank.text.MessageUtils;
@@ -16,9 +17,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 
-public class SignSneakRightClickWithDrawAllListener extends AbstractExperienceSignListener {
+public class SignRightClickWithDrawLevelListener extends AbstractExperienceSignListener {
 
-  public SignSneakRightClickWithDrawAllListener(final YamlLanguageProvider ylp,
+  public SignRightClickWithDrawLevelListener(final YamlLanguageProvider ylp,
       final ExpBankConfig config) {
     super(ylp, config);
   }
@@ -26,7 +27,7 @@ public class SignSneakRightClickWithDrawAllListener extends AbstractExperienceSi
   @EventHandler
   public void onPlayerInteract(PlayerInteractEvent event) {
     if (!isSignForEvent(getConfig(), event, Action.RIGHT_CLICK_BLOCK, Optional.<Boolean> absent(),
-        Optional.of(new Boolean(true)))) {
+        Optional.of(new Boolean(false)))) {
       return;
     }
 
@@ -38,11 +39,11 @@ public class SignSneakRightClickWithDrawAllListener extends AbstractExperienceSi
       return;
     }
 
-    // there is a check later on in the async thread.
-    int withDrawAmount = Integer.MIN_VALUE;
+    int neededForLevel = player.getTotalExperience()
+        - ExperienceLevelCalculator.getMinExperienceForLevel(player.getLevel() + 1);
 
     // CHeck for limit is done in the thread, so we don't need to wait for Database IO.
-    ChangeExperienceThread cet = new ChangeExperienceThread(player, withDrawAmount, getConfig(),
+    ChangeExperienceThread cet = new ChangeExperienceThread(player, neededForLevel, getConfig(),
         getYlp());
     Bukkit.getScheduler().runTaskAsynchronously(getConfig().getPlugin(), cet);
 

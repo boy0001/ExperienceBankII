@@ -2,7 +2,7 @@ package com.empcraft.xpbank.test;
 
 import com.empcraft.xpbank.ExpBankConfig;
 import com.empcraft.xpbank.err.ConfigurationException;
-import com.empcraft.xpbank.events.SignChangeEventListener;
+import com.empcraft.xpbank.listeners.SignChangeEventListener;
 import com.empcraft.xpbank.test.helpers.RunnableOfPlugin;
 import com.empcraft.xpbank.text.YamlLanguageProvider;
 
