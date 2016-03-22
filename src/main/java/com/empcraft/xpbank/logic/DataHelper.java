@@ -23,13 +23,10 @@ public class DataHelper {
 
   private YamlLanguageProvider ylp;
   private ExpBankConfig config;
-  private Logger logger;
 
-  public DataHelper(final YamlLanguageProvider ylp, final ExpBankConfig config,
-      final Logger logger) {
+  public DataHelper(final YamlLanguageProvider ylp, final ExpBankConfig config) {
     this.ylp = ylp;
     this.config = config;
-    this.logger = logger;
   }
 
   private Connection getConnection() {
@@ -41,10 +38,8 @@ public class DataHelper {
   }
 
   private Connection getMySqlConnection() {
-    MySQL mySql = new MySQL(config.getMySqlHost(),
-        config.getMySqlPort(), config.getMySqlDatabase(),
-        config.getMySqlUsername(),
-        config.getMySqlPassword());
+    MySQL mySql = new MySQL(config.getMySqlHost(), config.getMySqlPort(), config.getMySqlDatabase(),
+        config.getMySqlUsername(), config.getMySqlPassword());
 
     return mySql.getConnection();
   }
@@ -56,7 +51,7 @@ public class DataHelper {
 
   private PlayerExperienceDao getDao(Connection connection) {
     if (config.isMySqlEnabled()) {
-      return new MySqlPlayerExperienceDao(connection, config, logger);
+      return new MySqlPlayerExperienceDao(connection, config);
     }
 
     // TODO: Implement SQLite
@@ -87,7 +82,7 @@ public class DataHelper {
 
       MessageUtils.sendMessageToConsole(ylp.getMessage("DONE"));
     } catch (SQLException sqlEx) {
-      logger.log(Level.SEVERE, "Could not insert players into Database.", sqlEx);
+      config.getLogger().log(Level.SEVERE, "Could not insert players into Database.", sqlEx);
     }
 
     return;
@@ -100,7 +95,7 @@ public class DataHelper {
       PlayerExperienceDao ped = getDao(connection);
       playercount = ped.countPlayers();
     } catch (SQLException sqlEx) {
-      logger.log(Level.SEVERE, "Could not count players in Database.", sqlEx);
+      config.getLogger().log(Level.SEVERE, "Could not count players in Database.", sqlEx);
     }
 
     return playercount;
@@ -113,7 +108,7 @@ public class DataHelper {
       PlayerExperienceDao ped = getDao(connection);
       success = ped.updatePlayerExperience(uuid, newExperience);
     } catch (SQLException sqlEx) {
-      logger.log(Level.SEVERE, "Could not update player experience.", sqlEx);
+      config.getLogger().log(Level.SEVERE, "Could not update player experience.", sqlEx);
     }
 
     return success;
@@ -126,7 +121,7 @@ public class DataHelper {
       PlayerExperienceDao ped = getDao(connection);
       success = ped.createTable();
     } catch (SQLException sqlEx) {
-      logger.log(Level.SEVERE, "Could not create Table in Database.", sqlEx);
+      config.getLogger().log(Level.SEVERE, "Could not create Table in Database.", sqlEx);
     }
 
     return success;
@@ -139,7 +134,7 @@ public class DataHelper {
       PlayerExperienceDao ped = getDao(connection);
       results.putAll(ped.getSavedExperience());
     } catch (SQLException sqlEx) {
-      logger.log(Level.SEVERE, "Could not read existing saved exp from Database.", sqlEx);
+      config.getLogger().log(Level.SEVERE, "Could not read existing saved exp from Database.", sqlEx);
       throw new ConfigurationException(sqlEx);
     }
 
@@ -153,7 +148,8 @@ public class DataHelper {
       PlayerExperienceDao ped = getDao(connection);
       result = ped.getSavedExperience(uuid);
     } catch (SQLException sqlEx) {
-      logger.log(Level.SEVERE, "Could not read existing saved exp from Database.", sqlEx);
+      config.getLogger().log(Level.SEVERE, "Could not read existing saved exp from Database.",
+          sqlEx);
       throw new ConfigurationException(sqlEx);
     }
 

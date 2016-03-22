@@ -19,9 +19,8 @@ import java.util.logging.Logger;
  */
 public abstract class PlayerExperienceDao extends BaseDao {
 
-  public PlayerExperienceDao(final Connection conn, final ExpBankConfig config,
-      final Logger logger) {
-    super(conn, config, logger);
+  public PlayerExperienceDao(final Connection conn, final ExpBankConfig config) {
+    super(conn, config);
   }
 
   public abstract boolean createTable();

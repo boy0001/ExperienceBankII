@@ -150,7 +150,7 @@ public final class MessageUtils {
     }
 
     try {
-      DataHelper dh = new DataHelper(null, expBankConfig, null);
+      DataHelper dh = new DataHelper(null, expBankConfig);
       storedPlayerExperience = dh.getSavedExperience(player);
     } catch (ConfigurationException confEx) {
       // player now has 0 exp :(.

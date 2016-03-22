@@ -9,12 +9,10 @@ public abstract class BaseDao {
 
   private Connection connection;
   private ExpBankConfig config;
-  private Logger logger;
 
-  public BaseDao(final Connection conn, final ExpBankConfig config, final Logger logger) {
+  public BaseDao(final Connection conn, final ExpBankConfig config) {
     this.connection = conn;
     this.config = config;
-    this.logger = logger;
   }
 
   protected Connection getConnection() {
@@ -26,6 +24,6 @@ public abstract class BaseDao {
   }
 
   protected Logger getLogger() {
-    return this.logger;
+    return this.config.getLogger();
   }
 }

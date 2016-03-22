@@ -23,27 +23,27 @@ import java.util.logging.Logger;
 public class ChangeExperienceThread implements Runnable {
   private UUID uuid;
   private int value;
-  private final Logger logger;
-  private ExpBankConfig config;
+  private final ExpBankConfig config;
   private YamlLanguageProvider ylp;
 
   /**
    * Handle experience changes for the bank.
-   * @param uuid the uuid of the player whose experience will be set.
-   * @param value the new experience value in the bank.
-   * @param config the config.
-   * @param ylp the translation messages.
-   * @param logger the logger.
+   *
+   * @param uuid
+   *          the uuid of the player whose experience will be set.
+   * @param value
+   *          the new experience value in the bank.
+   * @param config
+   *          the config.
+   * @param ylp
+   *          the translation messages.
+   * @param logger
+   *          the logger.
    */
-  public ChangeExperienceThread(
-      final UUID uuid,
-      final int value,
-      final ExpBankConfig config,
-      YamlLanguageProvider ylp,
-      Logger logger) {
+  public ChangeExperienceThread(final UUID uuid, final int value, final ExpBankConfig config,
+      YamlLanguageProvider ylp) {
     this.uuid = uuid;
     this.value = value;
-    this.logger = logger;
     this.config = config;
     this.ylp = ylp;
   }
@@ -52,16 +52,18 @@ public class ChangeExperienceThread implements Runnable {
   public void run() {
     boolean success = false;
     try {
-      DataHelper dh = new DataHelper(ylp, config, logger);
+      DataHelper dh = new DataHelper(ylp, config);
       int savedXp = dh.getSavedExperience(uuid);
       success = dh.updatePlayerExperience(uuid, savedXp + value);
     } catch (ConfigurationException confEx) {
-      logger.log(Level.WARNING, "Could not change experience level for [" + uuid.toString() + "].");
+      config.getLogger().log(Level.WARNING,
+          "Could not change experience level for [" + uuid.toString() + "].");
       MessageUtils.sendMessageToConsole(ylp.getMessage("MYSQL-GET"));
     }
 
     if (!success) {
-      logger.log(Level.WARNING, "Could not change experience level for [" + uuid.toString() + "].");
+      config.getLogger().log(Level.WARNING,
+          "Could not change experience level for [" + uuid.toString() + "].");
       MessageUtils.sendMessageToConsole(ylp.getMessage("MYSQL-GET"));
     }
 

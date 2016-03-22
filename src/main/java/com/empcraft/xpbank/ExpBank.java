@@ -63,7 +63,7 @@ public class ExpBank extends JavaPlugin implements Listener {
     }
 
     try {
-      ylp = new YamlLanguageProvider(expConfig.getLanguageFile(), getLogger());
+      ylp = new YamlLanguageProvider(expConfig);
     } catch (ConfigurationException configEx) {
       getLogger().log(Level.SEVERE, "Could not load Language file.", configEx);
       MessageUtils.sendMessageToConsole("Could not get Yaml Language File.");
@@ -103,7 +103,7 @@ public class ExpBank extends JavaPlugin implements Listener {
       MessageUtils.sendMessageToConsole("&aUsing ProtocolLib for packets");
       manual = false;
       ProtocolManager protocolmanager = ProtocolLibrary.getProtocolManager();
-      protocolmanager.addPacketListener(new SignInterceptor(this, ylp, expConfig, getLogger()));
+      protocolmanager.addPacketListener(new SignInterceptor(this, ylp, expConfig));
     }
 
     signListener = new InSignsNano(this, false, manual, expConfig);
@@ -165,7 +165,7 @@ public class ExpBank extends JavaPlugin implements Listener {
   }
 
   private void prepareDatabase() throws ConfigurationException {
-    DataHelper dh = new DataHelper(ylp, expConfig, getLogger());
+    DataHelper dh = new DataHelper(ylp, expConfig);
 
     boolean exists = dh.createTableIfNotExists();
 
@@ -178,7 +178,7 @@ public class ExpBank extends JavaPlugin implements Listener {
 
   private void convertToDatabase(Map<UUID, Integer> yamlentries) throws ConfigurationException {
     MessageUtils.sendMessageToConsole(ylp.getMessage("MYSQL"));
-    DataHelper dh = new DataHelper(ylp, expConfig, getLogger());
+    DataHelper dh = new DataHelper(ylp, expConfig);
 
     int length = dh.countPlayersInDatabase();
 
@@ -297,7 +297,7 @@ public class ExpBank extends JavaPlugin implements Listener {
   }
 
   public void changeExpOnBank(final UUID uuid, final int delta) {
-    Runnable changeExp = new ChangeExperienceThread(uuid, delta, expConfig, ylp, getLogger());
+    Runnable changeExp = new ChangeExperienceThread(uuid, delta, expConfig, ylp);
     runTask(changeExp);
   }
 

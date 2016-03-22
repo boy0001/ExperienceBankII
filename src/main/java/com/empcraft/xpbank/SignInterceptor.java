@@ -21,7 +21,6 @@ public class SignInterceptor extends PacketAdapter {
   ProtocolManager protocolmanager = null;
   private YamlLanguageProvider ylp;
   private ExpBankConfig config;
-  private Logger logger;
 
   public void writePacket(PacketContainer packet, String[] lines) {
     WrappedChatComponent[] component = new WrappedChatComponent[4];
@@ -34,12 +33,10 @@ public class SignInterceptor extends PacketAdapter {
     packet.getChatComponentArrays().write(0, component);
   }
 
-  public SignInterceptor(ExpBank plugin, YamlLanguageProvider ylp, ExpBankConfig config,
-      Logger logger) {
+  public SignInterceptor(ExpBank plugin, YamlLanguageProvider ylp, ExpBankConfig config) {
     super(plugin, ListenerPriority.LOW, PacketType.Play.Server.UPDATE_SIGN);
     this.ylp = ylp;
     this.config = config;
-    this.logger = logger;
   }
 
   @Override
@@ -58,7 +55,7 @@ public class SignInterceptor extends PacketAdapter {
       int storedPlayerExp = 0;
 
       try {
-        DataHelper dh = new DataHelper(ylp, config, logger);
+        DataHelper dh = new DataHelper(ylp, config);
         storedPlayerExp = dh.getSavedExperience(player);
       } catch (ConfigurationException confEx) {
         // sadly, players experience is gone.

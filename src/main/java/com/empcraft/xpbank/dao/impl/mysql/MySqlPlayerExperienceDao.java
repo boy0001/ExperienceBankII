@@ -31,9 +31,8 @@ public class MySqlPlayerExperienceDao extends PlayerExperienceDao {
 
   private static final String SQL_SELECT_UUID = "SELECT UUID, EXP FROM ? WHERE UUID = ?";
 
-  public MySqlPlayerExperienceDao(final Connection conn, final ExpBankConfig config,
-      final Logger logger) {
-    super(conn, config, logger);
+  public MySqlPlayerExperienceDao(final Connection conn, final ExpBankConfig config) {
+    super(conn, config);
   }
 
   @Override
