@@ -6,6 +6,7 @@ import com.empcraft.xpbank.err.ConfigurationException;
 import com.empcraft.xpbank.events.SignBreakListener;
 import com.empcraft.xpbank.events.SignChangeEventListener;
 import com.empcraft.xpbank.events.SignLeftClickDepositListener;
+import com.empcraft.xpbank.events.SignRightClickWithdrawLevelListener;
 import com.empcraft.xpbank.events.SignSneakLeftClickDepositAllListener;
 import com.empcraft.xpbank.logic.DataHelper;
 import com.empcraft.xpbank.logic.ExpBankPermission;
@@ -119,6 +120,10 @@ public class ExpBank extends JavaPlugin implements Listener {
     Bukkit.getServer().getPluginManager()
         .registerEvents(new SignSneakLeftClickDepositAllListener(ylp, expConfig), this);
 
+    /* Register playre right click events */
+    Bukkit.getServer().getPluginManager()
+        .registerEvents(new SignRightClickWithdrawLevelListener(ylp, expConfig), this);
+
     /*
      * All other events. TODO: Remove.
      */
@@ -214,17 +219,11 @@ public class ExpBank extends JavaPlugin implements Listener {
     }
 
     ExperienceManager expMan = new ExperienceManager(player);
-    int amount;
+    int amount = 0;
     int myExp = 0; // TODO: getExp(player.getUniqueId());
 
     if (player.isSneaking()) {
       amount = myExp;
-    } else {
-      amount = expMan.getXpForLevel(expMan.getLevelForExp(expMan.getCurrentExp()) + 1)
-          - expMan.getCurrentExp();
-      if (amount > myExp) {
-        amount = myExp;
-      }
     }
 
     if (player.getInventory().getItemInMainHand().getType() == Material.GLASS_BOTTLE

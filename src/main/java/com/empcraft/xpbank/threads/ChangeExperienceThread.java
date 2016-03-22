@@ -49,13 +49,17 @@ public class ChangeExperienceThread implements Runnable {
   @Override
   public void run() {
     boolean success = false;
+    int actualValue = 0;
 
-    int actualValue = checkForMaximumDeposit();
-
-    if (actualValue == -1) {
-      // We cannot reach the database anyway.
-      return;
+    if (delta < 0) {
+      // player withdraws xp.
+      actualValue = checkForMaximumWithdraw();
+    } else {
+      // player wants to store.
+      actualValue = checkForMaximumDeposit();
     }
+
+
 
     try {
       success = dh.updatePlayerExperienceDelta(player.getUniqueId(), actualValue);
@@ -83,16 +87,36 @@ public class ChangeExperienceThread implements Runnable {
     return;
   }
 
-  public int checkForMaximumDeposit() {
+  private int checkForMaximumWithdraw() {
+    int currentlyinstore = 0;
+
+    try {
+      currentlyinstore = dh.getSavedExperience(player);
+    } catch (ConfigurationException confEx) {
+      config.getLogger().log(Level.WARNING, "Could not get the player's currently stored xp.",
+          confEx);
+
+      return 0;
+    }
+
+    if (currentlyinstore < (delta * -1)) {
+      // only get back whats inside.
+      return currentlyinstore * -1;
+    }
+
+    return delta;
+  }
+
+  private int checkForMaximumDeposit() {
     int maxDeposit = config.getMaxStorageForPlayer(player);
-    int currentlyinstore = -1;
+    int currentlyinstore = 0;
 
     try {
       currentlyinstore = dh.getSavedExperience(player);
     } catch (ConfigurationException confEx) {
       config.getLogger().log(Level.WARNING, "Could not get the player's currently stored xp.", confEx);
 
-      return -1;
+      return 0;
     }
 
     if (delta + currentlyinstore <= maxDeposit) {
