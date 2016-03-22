@@ -1,6 +1,7 @@
 package code.husky.mysql;
 
 import code.husky.Database;
+import code.husky.DatabaseConnectorException;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -48,14 +49,20 @@ public class MySQL implements Database {
   }
 
   @Override
-  public Connection openConnection() throws SQLException, ClassNotFoundException {
-    if (checkConnection()) {
-      return connection;
+  public Connection openConnection() throws DatabaseConnectorException {
+    try {
+      if (checkConnection()) {
+        return connection;
+      }
+
+      Class.forName("com.mysql.jdbc.Driver");
+      connection = DriverManager.getConnection(
+          "jdbc:mysql://" + this.hostname + ":" + this.port + "/" + this.database, this.user,
+          this.password);
+    } catch (SQLException | ClassNotFoundException connectEx) {
+      throw new DatabaseConnectorException(connectEx);
     }
-    Class.forName("com.mysql.jdbc.Driver");
-    connection = DriverManager.getConnection(
-        "jdbc:mysql://" + this.hostname + ":" + this.port + "/" + this.database, this.user,
-        this.password);
+
     return connection;
   }
 
@@ -79,31 +86,44 @@ public class MySQL implements Database {
   }
 
   @Override
-  public ResultSet querySQL(String query) throws SQLException, ClassNotFoundException {
-    if (checkConnection()) {
-      openConnection();
+  public ResultSet querySQL(String query) throws DatabaseConnectorException {
+    ResultSet result = null;
+
+    try {
+      if (checkConnection()) {
+        openConnection();
+      }
+
+      Statement statement = connection.createStatement();
+
+      result = statement.executeQuery(query);
+
+      statement.close();
+    } catch (SQLException connectEx) {
+      throw new DatabaseConnectorException(connectEx);
     }
 
-    Statement statement = connection.createStatement();
-
-    ResultSet result = statement.executeQuery(query);
-
-    statement.close();
 
     return result;
   }
 
   @Override
-  public int updateSQL(String query) throws SQLException, ClassNotFoundException {
-    if (checkConnection()) {
-      openConnection();
+  public int updateSQL(String query) throws DatabaseConnectorException {
+    int result = 0;
+
+    try {
+      if (checkConnection()) {
+        openConnection();
+      }
+
+      Statement statement = connection.createStatement();
+
+      statement.executeUpdate(query);
+
+      statement.close();
+    } catch (SQLException connectEx) {
+      throw new DatabaseConnectorException(connectEx);
     }
-
-    Statement statement = connection.createStatement();
-
-    int result = statement.executeUpdate(query);
-
-    statement.close();
 
     return result;
   }

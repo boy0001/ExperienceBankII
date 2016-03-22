@@ -21,7 +21,7 @@ public interface Database {
    * @throws ClassNotFoundException
    *           if the driver cannot be found
    */
-  public Connection openConnection() throws SQLException, ClassNotFoundException;
+  public Connection openConnection() throws DatabaseConnectorException;
 
   /**
    * Checks if a connection is open with the database.
@@ -61,7 +61,7 @@ public interface Database {
    * @throws ClassNotFoundException
    *           If the driver cannot be found; see {@link #openConnection()}
    */
-  public ResultSet querySQL(String query) throws SQLException, ClassNotFoundException;
+  public ResultSet querySQL(String query) throws DatabaseConnectorException;
 
   /**
    * Executes an Update SQL Query<br>
@@ -76,5 +76,5 @@ public interface Database {
    * @throws ClassNotFoundException
    *           If the driver cannot be found; see {@link #openConnection()}
    */
-  public int updateSQL(String query) throws SQLException, ClassNotFoundException;
+  public int updateSQL(String query) throws DatabaseConnectorException;
 }
