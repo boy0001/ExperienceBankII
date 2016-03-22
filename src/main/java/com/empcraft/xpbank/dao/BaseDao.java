@@ -1,6 +1,6 @@
 package com.empcraft.xpbank.dao;
 
-import org.bukkit.configuration.file.FileConfiguration;
+import com.empcraft.xpbank.ExpBankConfig;
 
 import java.sql.Connection;
 import java.util.logging.Logger;
@@ -8,10 +8,10 @@ import java.util.logging.Logger;
 public abstract class BaseDao {
 
   private Connection connection;
-  private FileConfiguration config;
+  private ExpBankConfig config;
   private Logger logger;
 
-  public BaseDao(final Connection conn, final FileConfiguration config, final Logger logger) {
+  public BaseDao(final Connection conn, final ExpBankConfig config, final Logger logger) {
     this.connection = conn;
     this.config = config;
     this.logger = logger;
@@ -21,7 +21,7 @@ public abstract class BaseDao {
     return this.connection;
   }
 
-  protected FileConfiguration getConfig() {
+  protected ExpBankConfig getConfig() {
     return this.config;
   }
 

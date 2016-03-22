@@ -4,9 +4,9 @@
 
 package com.empcraft.xpbank.dao;
 
+import com.empcraft.xpbank.ExpBankConfig;
 import com.empcraft.xpbank.err.ConfigurationException;
 
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 import java.sql.Connection;
@@ -19,7 +19,7 @@ import java.util.logging.Logger;
  */
 public abstract class PlayerExperienceDao extends BaseDao {
 
-  public PlayerExperienceDao(final Connection conn, final FileConfiguration config,
+  public PlayerExperienceDao(final Connection conn, final ExpBankConfig config,
       final Logger logger) {
     super(conn, config, logger);
   }
@@ -40,4 +40,10 @@ public abstract class PlayerExperienceDao extends BaseDao {
    * @throws ConfigurationException if database could not be read.
    */
   public abstract Map<UUID, Integer> getSavedExperience() throws ConfigurationException;
+
+  protected String getTable() {
+    return getConfig().getMySqlUserTable();
+  }
+
+  public abstract int getSavedExperience(UUID uniqueId) throws ConfigurationException;
 }

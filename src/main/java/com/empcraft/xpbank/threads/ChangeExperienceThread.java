@@ -4,6 +4,7 @@
 
 package com.empcraft.xpbank.threads;
 
+import com.empcraft.xpbank.ExpBankConfig;
 import com.empcraft.xpbank.logic.DataHelper;
 import com.empcraft.xpbank.text.MessageUtils;
 import com.empcraft.xpbank.text.YamlLanguageProvider;
@@ -22,7 +23,7 @@ public class ChangeExperienceThread implements Runnable {
   private UUID uuid;
   private int value;
   private final Logger logger;
-  private FileConfiguration config;
+  private ExpBankConfig config;
   private YamlLanguageProvider ylp;
   private Server server;
 
@@ -30,7 +31,7 @@ public class ChangeExperienceThread implements Runnable {
    * Handle experience changes for the bank.
    * @param uuid the uuid of the player whose experience will be set.
    * @param value the new experience value in the bank.
-   * @param fileConfiguration the config.
+   * @param config the config.
    * @param ylp the translation messages.
    * @param server the server.
    * @param logger the logger.
@@ -38,14 +39,14 @@ public class ChangeExperienceThread implements Runnable {
   public ChangeExperienceThread(
       final UUID uuid,
       final int value,
-      final FileConfiguration fileConfiguration,
+      final ExpBankConfig config,
       YamlLanguageProvider ylp,
       final Server server,
       Logger logger) {
     this.uuid = uuid;
     this.value = value;
     this.logger = logger;
-    this.config = fileConfiguration;
+    this.config = config;
     this.ylp = ylp;
     this.server = server;
   }

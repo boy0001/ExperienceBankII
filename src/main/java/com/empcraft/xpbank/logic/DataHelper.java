@@ -2,14 +2,15 @@ package com.empcraft.xpbank.logic;
 
 import code.husky.mysql.MySQL;
 
+import com.empcraft.xpbank.ExpBankConfig;
 import com.empcraft.xpbank.dao.PlayerExperienceDao;
 import com.empcraft.xpbank.dao.impl.mysql.MySqlPlayerExperienceDao;
 import com.empcraft.xpbank.err.ConfigurationException;
 import com.empcraft.xpbank.text.MessageUtils;
 import com.empcraft.xpbank.text.YamlLanguageProvider;
 
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -23,10 +24,10 @@ import java.util.logging.Logger;
 public class DataHelper {
 
   private YamlLanguageProvider ylp;
-  private FileConfiguration config;
+  private ExpBankConfig config;
   private Logger logger;
 
-  public DataHelper(final YamlLanguageProvider ylp, final FileConfiguration config,
+  public DataHelper(final YamlLanguageProvider ylp, final ExpBankConfig config,
       final Logger logger) {
     this.ylp = ylp;
     this.config = config;
@@ -34,7 +35,7 @@ public class DataHelper {
   }
 
   private Connection getConnection() {
-    if (config.getBoolean("mysql.enabled")) {
+    if (config.isMySqlEnabled()) {
       return getMySqlConnection();
     }
 
@@ -42,10 +43,10 @@ public class DataHelper {
   }
 
   private Connection getMySqlConnection() {
-    MySQL mySql = new MySQL(config.getString("mysql.connection.host"),
-        config.getString("mysql.connection.port"), config.getString("mysql.connection.database"),
-        config.getString("mysql.connection.username"),
-        config.getString("mysql.connection.password"));
+    MySQL mySql = new MySQL(config.getMySqlHost(),
+        config.getMySqlPort(), config.getMySqlDatabase(),
+        config.getMySqlUsername(),
+        config.getMySqlPassword());
 
     return mySql.getConnection();
   }
@@ -56,7 +57,7 @@ public class DataHelper {
   }
 
   private PlayerExperienceDao getDao(Connection connection) {
-    if (config.getBoolean("mysql.enabled")) {
+    if (config.isMySqlEnabled()) {
       return new MySqlPlayerExperienceDao(connection, config, logger);
     }
 
@@ -147,6 +148,20 @@ public class DataHelper {
     }
 
     return results;
+  }
+
+  public int getSavedExperience(Player player) throws ConfigurationException {
+    int result = 0;
+
+    try (Connection connection = getConnection()) {
+      PlayerExperienceDao ped = getDao(connection);
+      result = ped.getSavedExperience(player.getUniqueId());
+    } catch (SQLException sqlEx) {
+      logger.log(Level.SEVERE, "Could not read existing saved exp from Database.", sqlEx);
+      throw new ConfigurationException(sqlEx);
+    }
+
+    return result;
   }
 
 }

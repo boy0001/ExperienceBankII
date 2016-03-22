@@ -1,14 +1,12 @@
 package com.empcraft.xpbank;
 
-import com.empcraft.xpbank.text.MessageUtils;
+import com.empcraft.xpbank.logic.SignHelper;
+import com.empcraft.xpbank.threads.UpdateAllSignsThread;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -94,7 +92,7 @@ public class InSignsNano implements Listener {
 
             Player player = updateQueuePlayer.get(counter);
             Sign sign = updateQueueSign.get(counter);
-            boolean result = updateSign(player, sign);
+            boolean result = SignHelper.updateSign(player, sign, expBankConfig);
 
             if (!result) {
               toRemovePlayer.add(player);
@@ -168,13 +166,8 @@ public class InSignsNano implements Listener {
     }
 
     // manual update.
-    Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
-      public void run() {
-        if (player.isOnline()) {
-          updateAllSigns(player, location);
-        }
-      }
-    }, 5L);
+    Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin,
+        new UpdateAllSignsThread(player, location, expBankConfig), 5L);
   }
 
   public void scheduleUpdate(final Player player, final Sign sign, long time) {
@@ -188,7 +181,7 @@ public class InSignsNano implements Listener {
       public void run() {
         if (player.isOnline()) {
           if (sign.getBlock() != null && sign.getBlock().getState() instanceof Sign) {
-            updateSign(player, (Sign) sign.getBlock().getState());
+            SignHelper.updateSign(player, (Sign) sign.getBlock().getState(), expBankConfig);
           }
         }
       }
@@ -207,102 +200,4 @@ public class InSignsNano implements Listener {
     updateQueueSign.add(sign);
   }
 
-  public void updateAllSigns(Player player, Location location) {
-    List<BlockState> states = new ArrayList<BlockState>();
-    World world = player.getWorld();
-    List<Chunk> chunks = Arrays.asList(
-        new Chunk[] { location.getChunk(), world.getChunkAt(location.add(16.0D, 0.0D, 0.0D)),
-            world.getChunkAt(location.add(16.0D, 0.0D, 16.0D)),
-            world.getChunkAt(location.add(0.0D, 0.0D, 16.0D)),
-            world.getChunkAt(location.add(-16.0D, 0.0D, 0.0D)),
-            world.getChunkAt(location.add(-16.0D, 0.0D, -16.0D)),
-            world.getChunkAt(location.add(0.0D, 0.0D, -16.0D)),
-            world.getChunkAt(location.add(16.0D, 0.0D, -16.0D)),
-            world.getChunkAt(location.add(-16.0D, 0.0D, 16.0D)) });
-
-    for (Chunk chunk : chunks) {
-      for (BlockState state : chunk.getTileEntities()) {
-        states.add(state);
-      }
-    }
-
-    for (BlockState current : states) {
-      if ((current instanceof Sign)) {
-        updateSign(player, (Sign) current);
-      }
-    }
-
-    states = null;
-  }
-
-  public boolean updateSign(Player player, Sign sign) {
-    Location location = sign.getLocation();
-    Block block = location.getBlock();
-
-    if (block == null) {
-      return false;
-    }
-
-    if (block.getState() == null) {
-      return false;
-    }
-
-    if (!(block.getState() instanceof Sign)) {
-      return false;
-    }
-
-    if (player == null || !player.isOnline()) {
-      return false;
-    }
-
-    if (!location.getWorld().equals(player.getWorld())) {
-      return false;
-    }
-
-    if (!location.getChunk().isLoaded()) {
-      return false;
-    }
-
-    double distance = location.distanceSquared(player.getLocation());
-
-    if (distance > 1024) {
-      return false;
-    }
-
-    String[] lines = MessageUtils.getSignText(sign.getLines(), player, sign,
-        expBankConfig,
-        (ExpBank) this.plugin);
-
-    if (lines == null) {
-      return false;
-    }
-
-    for (int i = 0; i < 4; i++) {
-      if (lines[i].contains("\n")) {
-        if ((i < 3)) {
-          if (lines[i + 1].isEmpty()) {
-            lines[i + 1] = ChatColor.getLastColors(lines[i].substring(0, 15))
-                + lines[i].substring(lines[i].indexOf("\n") + 1);
-          }
-        }
-
-        lines[i] = lines[i].substring(0, lines[i].indexOf("\n"));
-      }
-
-      if (lines[i].length() > 15) {
-        if ((i < 3)) {
-          if (lines[i + 1].isEmpty()) {
-            lines[i + 1] = ChatColor.getLastColors(lines[i].substring(0, 15))
-                + lines[i].substring(15);
-          }
-        }
-
-        lines[i] = lines[i].substring(0, 15);
-      }
-    }
-
-    player.sendSignChange(sign.getLocation(), lines);
-
-    return true;
-  }
 }

@@ -143,7 +143,7 @@ public class ExpBank extends JavaPlugin implements Listener {
 
   private Map<UUID, Integer> loadExperienceFromSql() throws ConfigurationException {
     MessageUtils.sendMessageToAll(getServer(), ylp.getMessage("MYSQL"));
-    DataHelper dh = new DataHelper(ylp, getConfig(), getLogger());
+    DataHelper dh = new DataHelper(ylp, expConfig, getLogger());
 
     boolean exists = dh.createTableIfNotExists();
 
@@ -279,7 +279,7 @@ public class ExpBank extends JavaPlugin implements Listener {
 
   public void changeExp(final UUID uuid, final int value) {
     if (exp == null) {
-      Runnable changeExp = new ChangeExperienceThread(uuid, value, getConfig(), ylp, getServer(),
+      Runnable changeExp = new ChangeExperienceThread(uuid, value, expConfig, ylp, getServer(),
           getLogger());
       runTask(changeExp);
     } else {

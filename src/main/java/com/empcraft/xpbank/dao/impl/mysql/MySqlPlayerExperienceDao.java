@@ -1,9 +1,9 @@
 package com.empcraft.xpbank.dao.impl.mysql;
 
+import com.empcraft.xpbank.ExpBankConfig;
 import com.empcraft.xpbank.dao.PlayerExperienceDao;
 import com.empcraft.xpbank.err.ConfigurationException;
 
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 import java.sql.Connection;
@@ -25,11 +25,13 @@ public class MySqlPlayerExperienceDao extends PlayerExperienceDao {
 
   private static final String SQL_COUNT = "SELECT COUNT(UUID) from ?";
 
-  private static final String SQL_UPDATE = "UPDATE ? SET EXP = ? " + "WHERE UUID = ?";
+  private static final String SQL_UPDATE = "UPDATE ? SET EXP = ? WHERE UUID = ?";
 
   private static final String SQL_SELECT_ALL = "SELECT UUID, EXP FROM ?";
 
-  public MySqlPlayerExperienceDao(final Connection conn, final FileConfiguration config,
+  private static final String SQL_SELECT_UUID = "SELECT UUID, EXP FROM ? WHERE UUID = ?";
+
+  public MySqlPlayerExperienceDao(final Connection conn, final ExpBankConfig config,
       final Logger logger) {
     super(conn, config, logger);
   }
@@ -157,8 +159,24 @@ public class MySqlPlayerExperienceDao extends PlayerExperienceDao {
     return savedExperience;
   }
 
-  private String getTable() {
-    return getConfig().getString("mysql.connection.table");
+  @Override
+  public int getSavedExperience(UUID uniqueId) throws ConfigurationException {
+    int result = 0;
+
+    try {
+      PreparedStatement st = getConnection().prepareStatement(SQL_SELECT_ALL);
+      st.setString(1, getTable());
+      ResultSet rs = st.executeQuery();
+
+      if (rs.next()) {
+        result = rs.getInt(2);
+      }
+    } catch (SQLException sqlException) {
+      getLogger().log(Level.SEVERE, "Could not count players.", sqlException);
+      throw new ConfigurationException(sqlException);
+    }
+
+    return result;
   }
 
 }

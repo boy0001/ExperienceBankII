@@ -20,6 +20,19 @@ public final class ExpBankConfig {
   private JavaPlugin plugin;
   private File languageFile;
   private String experienceBankActivationString;
+  private boolean mySqlEnabled;
+
+  private String mySqlHost;
+
+  private int mySqlPort;
+
+  private String mySqlDatabase;
+
+  private String mySqlUsername;
+
+  private String mySqlPassword;
+
+  private String mySqlUserTable;
 
   public ExpBankConfig(final JavaPlugin plugin) throws ConfigurationException {
     this.plugin = plugin;
@@ -40,6 +53,34 @@ public final class ExpBankConfig {
 
   public void saveConfig() {
     this.plugin.saveConfig();
+  }
+
+  public String getMySqlHost() {
+    return mySqlHost;
+  }
+
+  public int getMySqlPort() {
+    return mySqlPort;
+  }
+
+  public String getMySqlDatabase() {
+    return mySqlDatabase;
+  }
+
+  public String getMySqlUsername() {
+    return mySqlUsername;
+  }
+
+  public String getMySqlPassword() {
+    return mySqlPassword;
+  }
+
+  public boolean isMySqlEnabled() {
+    return mySqlEnabled;
+  }
+
+  public String getMySqlUserTable() {
+    return this.mySqlUserTable;
   }
 
   /**
@@ -66,6 +107,15 @@ public final class ExpBankConfig {
     }
 
     this.experienceBankActivationString = config.getString(TEXT_CREATE);
+
+    /* MySQL related */
+    this.mySqlEnabled = config.getBoolean("mysql.enabled");
+    this.mySqlHost = config.getString("mysql.connection.host");
+    this.mySqlPort = config.getInt("mysql.connection.port");
+    this.mySqlDatabase = config.getString("mysql.connection.database");
+    this.mySqlUsername = config.getString("mysql.connection.username");
+    this.mySqlPassword = config.getString("mysql.connection.password");
+    this.mySqlUserTable = config.getString("mysql.connection.table");
   }
 
   private void initEmptyconfig() {
