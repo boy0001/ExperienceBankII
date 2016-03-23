@@ -1,8 +1,9 @@
 package com.empcraft.xpbank.logic;
 
+import code.husky.DatabaseConnectorException;
+
 import com.empcraft.xpbank.ExpBankConfig;
 import com.empcraft.xpbank.JSONUtil;
-import com.empcraft.xpbank.err.ConfigurationException;
 import com.empcraft.xpbank.text.MessageUtils;
 import com.empcraft.xpbank.threads.SingleSignUpdateThread;
 import com.empcraft.xpbank.threads.UpdateAllSignsThread;
@@ -95,7 +96,7 @@ public final class SignHelper {
     try {
       DataHelper dh = new DataHelper(null, expBankConfig);
       storedPlayerExperience = dh.getSavedExperience(player);
-    } catch (ConfigurationException confEx) {
+    } catch (DatabaseConnectorException confEx) {
       expBankConfig.getLogger().log(Level.WARNING,
           "Could not load experience for player [" + player.getName() + "].", confEx);
     }

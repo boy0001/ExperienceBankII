@@ -1,17 +1,19 @@
 package com.empcraft.xpbank.logic;
 
+import code.husky.DatabaseConnectorException;
 import code.husky.mysql.MySQL;
+import code.husky.sqlite.SqLite;
 
 import com.empcraft.xpbank.ExpBankConfig;
 import com.empcraft.xpbank.dao.PlayerExperienceDao;
 import com.empcraft.xpbank.dao.impl.mysql.MySqlPlayerExperienceDao;
-import com.empcraft.xpbank.err.ConfigurationException;
 import com.empcraft.xpbank.text.MessageUtils;
 import com.empcraft.xpbank.text.Text;
 import com.empcraft.xpbank.text.YamlLanguageProvider;
 
 import org.bukkit.entity.Player;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -29,7 +31,7 @@ public class DataHelper {
     this.config = config;
   }
 
-  private Connection getConnection() {
+  private Connection getConnection() throws DatabaseConnectorException {
     if (config.isMySqlEnabled()) {
       return getMySqlConnection();
     }
@@ -37,16 +39,18 @@ public class DataHelper {
     return getSqLiteConnection();
   }
 
-  private Connection getMySqlConnection() {
+  private Connection getMySqlConnection() throws DatabaseConnectorException {
     MySQL mySql = new MySQL(config.getMySqlHost(), config.getMySqlPort(), config.getMySqlDatabase(),
         config.getMySqlUsername(), config.getMySqlPassword());
 
-    return mySql.getConnection();
+    return mySql.openConnection();
   }
 
-  private Connection getSqLiteConnection() {
-    // TODO: Implement SQLite
-    return null;
+  private Connection getSqLiteConnection() throws DatabaseConnectorException {
+    File sqliteFile = new File(config.getPlugin().getDataFolder(), "xp.db");
+    SqLite sqlite = new SqLite(sqliteFile);
+
+    return sqlite.openConnection();
   }
 
   private PlayerExperienceDao getDao(Connection connection) {
@@ -63,8 +67,9 @@ public class DataHelper {
    *
    * @param yamlentries
    *          the previously stored experience in a yaml file.
+   * @throws DatabaseConnectorException
    */
-  public void bulkSaveEntriesToDb(Map<UUID, Integer> yamlentries) {
+  public void bulkSaveEntriesToDb(Map<UUID, Integer> yamlentries) throws DatabaseConnectorException {
     if (null == yamlentries || yamlentries.isEmpty()) {
       // nothing to do.
       return;
@@ -88,7 +93,7 @@ public class DataHelper {
     return;
   }
 
-  public int countPlayersInDatabase() {
+  public int countPlayersInDatabase() throws DatabaseConnectorException {
     int playercount = 0;
 
     try (Connection connection = getConnection()) {
@@ -101,7 +106,8 @@ public class DataHelper {
     return playercount;
   }
 
-  public boolean updatePlayerExperience(UUID uuid, int newExperience) {
+  public boolean updatePlayerExperience(UUID uuid, int newExperience)
+      throws DatabaseConnectorException {
     boolean success = false;
 
     try (Connection connection = getConnection()) {
@@ -114,7 +120,7 @@ public class DataHelper {
     return success;
   }
 
-  public boolean createTableIfNotExists() {
+  public boolean createTableIfNotExists() throws DatabaseConnectorException {
     boolean success = false;
 
     try (Connection connection = getConnection()) {
@@ -127,7 +133,8 @@ public class DataHelper {
     return success;
   }
 
-  public Map<UUID, Integer> getSavedExperience() throws ConfigurationException {
+  public Map<UUID, Integer> getSavedExperience()
+      throws DatabaseConnectorException {
     Map<UUID, Integer> results = new HashMap<>();
 
     try (Connection connection = getConnection()) {
@@ -135,13 +142,14 @@ public class DataHelper {
       results.putAll(ped.getSavedExperience());
     } catch (SQLException sqlEx) {
       config.getLogger().log(Level.SEVERE, "Could not read existing saved exp from Database.", sqlEx);
-      throw new ConfigurationException(sqlEx);
+      throw new DatabaseConnectorException(sqlEx);
     }
 
     return results;
   }
 
-  public int getSavedExperience(UUID uuid) throws ConfigurationException {
+  public int getSavedExperience(UUID uuid)
+      throws DatabaseConnectorException {
     int result = 0;
 
     try (Connection connection = getConnection()) {
@@ -150,13 +158,14 @@ public class DataHelper {
     } catch (SQLException sqlEx) {
       config.getLogger().log(Level.SEVERE, "Could not read existing saved exp from Database.",
           sqlEx);
-      throw new ConfigurationException(sqlEx);
+      throw new DatabaseConnectorException(sqlEx);
     }
 
     return result;
   }
 
-  public int getSavedExperience(Player player) throws ConfigurationException {
+  public int getSavedExperience(Player player)
+      throws DatabaseConnectorException {
     if (player == null) {
       return 0;
     }
@@ -164,7 +173,8 @@ public class DataHelper {
     return getSavedExperience(player.getUniqueId());
   }
 
-  public boolean updatePlayerExperienceDelta(UUID uuid, int delta) throws ConfigurationException {
+  public boolean updatePlayerExperienceDelta(UUID uuid, int delta)
+      throws DatabaseConnectorException {
     boolean success = false;
 
     try (Connection connection = getConnection()) {
@@ -172,7 +182,7 @@ public class DataHelper {
       success = ped.updatePlayerExperienceDelta(uuid, delta);
     } catch (SQLException sqlEx) {
       config.getLogger().log(Level.SEVERE, "Could not update player experience.", sqlEx);
-      throw new ConfigurationException(sqlEx);
+      throw new DatabaseConnectorException(sqlEx);
     }
 
     return success;

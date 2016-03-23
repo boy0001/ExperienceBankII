@@ -4,6 +4,8 @@
 
 package com.empcraft.xpbank.dao;
 
+import code.husky.DatabaseConnectorException;
+
 import com.empcraft.xpbank.ExpBankConfig;
 import com.empcraft.xpbank.err.ConfigurationException;
 
@@ -34,16 +36,20 @@ public abstract class PlayerExperienceDao extends BaseDao {
 
   /**
    * Returns the saved Exp for all known players.
+   * 
    * @return the saved exp.
-   * @throws ConfigurationException if database could not be read.
+   * @throws ConfigurationException
+   *           if database could not be read.
+   * @throws DatabaseConnectorException
    */
-  public abstract Map<UUID, Integer> getSavedExperience() throws ConfigurationException;
+  public abstract Map<UUID, Integer> getSavedExperience() throws DatabaseConnectorException;
 
   protected String getTable() {
     return getConfig().getMySqlUserTable();
   }
 
-  public abstract int getSavedExperience(UUID uniqueId) throws ConfigurationException;
+  public abstract int getSavedExperience(UUID uniqueId)
+      throws DatabaseConnectorException;
 
   public abstract boolean updatePlayerExperienceDelta(UUID player, int delta);
 }

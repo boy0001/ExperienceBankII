@@ -4,8 +4,9 @@
 
 package com.empcraft.xpbank.threads;
 
+import code.husky.DatabaseConnectorException;
+
 import com.empcraft.xpbank.ExpBankConfig;
-import com.empcraft.xpbank.err.ConfigurationException;
 import com.empcraft.xpbank.logic.DataHelper;
 import com.empcraft.xpbank.text.MessageUtils;
 import com.empcraft.xpbank.text.Text;
@@ -91,7 +92,7 @@ public class ChangeExperienceThread implements Runnable {
 
     try {
       success = dh.updatePlayerExperienceDelta(player.getUniqueId(), actualValue);
-    } catch (ConfigurationException confEx) {
+    } catch (DatabaseConnectorException confEx) {
       config.getLogger().log(Level.WARNING,
           "Could not change experience level for [" + player.getUniqueId().toString() + "].",
           confEx);
@@ -126,7 +127,7 @@ public class ChangeExperienceThread implements Runnable {
 
     try {
       currentlyinstore = dh.getSavedExperience(player);
-    } catch (ConfigurationException confEx) {
+    } catch (DatabaseConnectorException confEx) {
       config.getLogger().log(Level.WARNING, "Could not get the player's currently stored xp.",
           confEx);
 
@@ -147,8 +148,9 @@ public class ChangeExperienceThread implements Runnable {
 
     try {
       currentlyinstore = dh.getSavedExperience(player);
-    } catch (ConfigurationException confEx) {
-      config.getLogger().log(Level.WARNING, "Could not get the player's currently stored xp.", confEx);
+    } catch (DatabaseConnectorException confEx) {
+      config.getLogger().log(Level.WARNING, "Could not get the player's currently stored xp.",
+          confEx);
 
       return 0;
     }

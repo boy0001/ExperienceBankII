@@ -1,5 +1,7 @@
 package com.empcraft.xpbank;
 
+import code.husky.DatabaseConnectorException;
+
 import com.empcraft.xpbank.err.ConfigurationException;
 import com.empcraft.xpbank.listeners.PlayerJoinListener;
 import com.empcraft.xpbank.listeners.PlayerMoveListener;
@@ -51,7 +53,7 @@ public class ExpBank extends JavaPlugin {
 
       /* Migrate from yaml */
       migrateFromYaml();
-    } catch (ConfigurationException configEx) {
+    } catch (ConfigurationException | DatabaseConnectorException configEx) {
       getLogger().log(Level.SEVERE, "Clould not initialize plugin.", configEx);
       MessageUtils.sendMessageToConsole("Could not initialize plugin.");
 
@@ -70,13 +72,13 @@ public class ExpBank extends JavaPlugin {
     saveResource("catalan.yml", true);
   }
 
-  private void migrateFromYaml() throws ConfigurationException {
+  private void migrateFromYaml() throws DatabaseConnectorException {
     try {
       // See if we need to migrate.
       Map<UUID, Integer> fromYaml = loadExperienceFromYaml();
       convertToDatabase(fromYaml);
       moveOldExperienceYmlFile();
-    } catch (ConfigurationException configEx) {
+    } catch (DatabaseConnectorException configEx) {
       getLogger().log(Level.SEVERE, "Clould not load saved data or save.", configEx);
       MessageUtils.sendMessageToConsole(ylp.getMessage(Text.MYSQL_CONNECT));
 
@@ -147,19 +149,19 @@ public class ExpBank extends JavaPlugin {
     return experience;
   }
 
-  private void prepareDatabase() throws ConfigurationException {
+  private void prepareDatabase() throws DatabaseConnectorException {
     DataHelper dh = new DataHelper(ylp, expConfig);
 
     boolean exists = dh.createTableIfNotExists();
 
     if (!exists) {
-      throw new ConfigurationException();
+      throw new DatabaseConnectorException();
     }
 
     return;
   }
 
-  private void convertToDatabase(Map<UUID, Integer> yamlentries) throws ConfigurationException {
+  private void convertToDatabase(Map<UUID, Integer> yamlentries) throws DatabaseConnectorException {
     MessageUtils.sendMessageToConsole(ylp.getMessage(Text.MYSQL));
     DataHelper dh = new DataHelper(ylp, expConfig);
 

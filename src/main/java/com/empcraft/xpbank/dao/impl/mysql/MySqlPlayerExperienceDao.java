@@ -1,8 +1,9 @@
 package com.empcraft.xpbank.dao.impl.mysql;
 
+import code.husky.DatabaseConnectorException;
+
 import com.empcraft.xpbank.ExpBankConfig;
 import com.empcraft.xpbank.dao.PlayerExperienceDao;
-import com.empcraft.xpbank.err.ConfigurationException;
 
 import org.bukkit.entity.Player;
 
@@ -162,7 +163,7 @@ public class MySqlPlayerExperienceDao extends PlayerExperienceDao {
   }
 
   @Override
-  public Map<UUID, Integer> getSavedExperience() throws ConfigurationException {
+  public Map<UUID, Integer> getSavedExperience() throws DatabaseConnectorException {
     Map<UUID, Integer> savedExperience = new HashMap<>();
 
     try {
@@ -178,14 +179,14 @@ public class MySqlPlayerExperienceDao extends PlayerExperienceDao {
     } catch (SQLException sqlException) {
       getLogger().log(Level.SEVERE, "Could not fetch saved experience for all players.",
           sqlException);
-      throw new ConfigurationException(sqlException);
+      throw new DatabaseConnectorException(sqlException);
     }
 
     return savedExperience;
   }
 
   @Override
-  public int getSavedExperience(UUID uniqueId) throws ConfigurationException {
+  public int getSavedExperience(UUID uniqueId) throws DatabaseConnectorException {
     int result = 0;
 
     try {
@@ -200,7 +201,7 @@ public class MySqlPlayerExperienceDao extends PlayerExperienceDao {
       getLogger().log(Level.SEVERE,
           "Could not get saved experience for player with UID [" + uniqueId.toString() + "].",
           sqlException);
-      throw new ConfigurationException(sqlException);
+      throw new DatabaseConnectorException(sqlException);
     }
 
     return result;
