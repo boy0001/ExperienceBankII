@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public final class ExpBankConfig {
@@ -147,10 +148,14 @@ public final class ExpBankConfig {
    *           Problems reading the config.
    */
   private void readConfig() throws ConfigurationException {
-    this.languageFile = new File(plugin.getDataFolder(),
-        config.getString("language").toLowerCase() + ".yml");
+    String languagefilepath = plugin.getDataFolder() + File.separator
+        + config.getString("language").toLowerCase() + ".yml";
+    this.languageFile = new File(languagefilepath);
 
     if (!languageFile.exists()) {
+      plugin.getLogger()
+          .log(Level.SEVERE,
+              "Could not find language file: [" + languagefilepath + "].");
       throw new ConfigurationException();
     }
 
