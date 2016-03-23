@@ -5,9 +5,7 @@ import code.husky.DatabaseConnectorException;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 /**
  * Connects to and uses a MySQL database.
@@ -77,55 +75,23 @@ public class MySQL implements Database {
   }
 
   @Override
-  public boolean closeConnection() throws SQLException {
+  public boolean closeConnection() throws DatabaseConnectorException {
     if (connection == null) {
       return false;
     }
-    connection.close();
+
+    try {
+      if (connection.isClosed()) {
+        connection = null;
+
+        return true;
+      }
+
+      connection.close();
+    } catch (SQLException sqlEx) {
+      throw new DatabaseConnectorException(sqlEx);
+    }
+
     return true;
   }
-
-  @Override
-  public ResultSet querySQL(String query) throws DatabaseConnectorException {
-    ResultSet result = null;
-
-    try {
-      if (checkConnection()) {
-        openConnection();
-      }
-
-      Statement statement = connection.createStatement();
-
-      result = statement.executeQuery(query);
-
-      statement.close();
-    } catch (SQLException connectEx) {
-      throw new DatabaseConnectorException(connectEx);
-    }
-
-
-    return result;
-  }
-
-  @Override
-  public int updateSQL(String query) throws DatabaseConnectorException {
-    int result = 0;
-
-    try {
-      if (checkConnection()) {
-        openConnection();
-      }
-
-      Statement statement = connection.createStatement();
-
-      statement.executeUpdate(query);
-
-      statement.close();
-    } catch (SQLException connectEx) {
-      throw new DatabaseConnectorException(connectEx);
-    }
-
-    return result;
-  }
-
 }

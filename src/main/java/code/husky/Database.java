@@ -1,7 +1,6 @@
 package code.husky;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
@@ -43,38 +42,8 @@ public interface Database {
    * Closes the connection with the database.
    *
    * @return true if successful
-   * @throws SQLException
+   * @throws SQLEDataDatabaseConnectorExceptionbaseConnectorExceptionxception
    *           if the connection cannot be closed
    */
-  public boolean closeConnection() throws SQLException;
-
-  /**
-   * Executes a SQL Query<br>
-   *
-   * <p>If the connection is closed, it will be opened.</p>
-   *
-   * @param query
-   *          Query to be run
-   * @return the results of the query
-   * @throws SQLException
-   *           If the query cannot be executed
-   * @throws ClassNotFoundException
-   *           If the driver cannot be found; see {@link #openConnection()}
-   */
-  public ResultSet querySQL(String query) throws DatabaseConnectorException;
-
-  /**
-   * Executes an Update SQL Query<br>
-   * See {@link java.sql.Statement#executeUpdate(String)}<br>
-   * If the connection is closed, it will be opened
-   *
-   * @param query
-   *          Query to be run
-   * @return Result Code, see {@link java.sql.Statement#executeUpdate(String)}
-   * @throws SQLException
-   *           If the query cannot be executed
-   * @throws ClassNotFoundException
-   *           If the driver cannot be found; see {@link #openConnection()}
-   */
-  public int updateSQL(String query) throws DatabaseConnectorException;
+  public boolean closeConnection() throws DatabaseConnectorException;
 }
