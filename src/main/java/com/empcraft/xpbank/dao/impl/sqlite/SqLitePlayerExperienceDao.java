@@ -7,8 +7,16 @@ import java.sql.Connection;
 
 public class SqLitePlayerExperienceDao extends PlayerExperienceDao {
 
+  private final String sqlInsert = "INSERT INTO expbank SELECT ?, ? "
+      + " WHERE NOT EXISTS (SELECT 1 FROM expbank WHERE UUID = ?);";
+
   public SqLitePlayerExperienceDao(final Connection conn, final ExpBankConfig config) {
     super(conn, config);
+  }
+
+  @Override
+  public String getSqlInsert() {
+    return sqlInsert;
   }
 
 }

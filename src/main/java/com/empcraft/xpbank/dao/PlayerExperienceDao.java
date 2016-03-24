@@ -27,17 +27,18 @@ public abstract class PlayerExperienceDao extends BaseDao {
   private final String SQL_CREATE = "CREATE TABLE IF NOT EXISTS " + getTable()
       + " ( UUID VARCHAR(36), EXP INT )";
 
-  private final String SQL_INSERT = "INSERT INTO " + getTable() + " VALUES(?, ?)";
+  private final String sqlInsert = "INSERT INTO " + getTable()
+      + " VALUES(?, ?) WHERE NOT EXISTS (SELECT 1 FROM " + getTable() + " WHERE UUID = ?)";
 
   private final String SQL_COUNT = "SELECT COUNT(*) from " + getTable();
 
   private final String SQL_UPDATE = "UPDATE " + getTable() + " SET EXP = ? WHERE UUID = ?";
 
-  private final String SQL_DELTA = "UPDATE ? SET EXP = EXP + ? WHERE UUID = ?";
+  private final String SQL_DELTA = "UPDATE " + getTable() + " SET EXP = EXP + ? WHERE UUID = ?";
 
   private final String SQL_SELECT_ALL = "SELECT UUID, EXP FROM " + getTable();
 
-  private final String SQL_SELECT_UUID = "SELECT UUID, EXP FROM ? WHERE UUID = ?";
+  private final String SQL_SELECT_UUID = "SELECT UUID, EXP FROM " + getTable() + " WHERE UUID = ?";
 
   public PlayerExperienceDao(final Connection conn, final ExpBankConfig config) {
     super(conn, config);
@@ -54,6 +55,7 @@ public abstract class PlayerExperienceDao extends BaseDao {
       PreparedStatement st = getConnection().prepareStatement(SQL_CREATE);
       st.executeUpdate();
       success = true;
+      st.close();
     } catch (SQLException sqlEx) {
       getLogger().log(Level.SEVERE, "Could not create player table [" + getTable() + "].", sqlEx);
     }
@@ -62,37 +64,24 @@ public abstract class PlayerExperienceDao extends BaseDao {
   }
 
   public boolean insertPlayerAndExperience(Player player, int experience) {
-    boolean changed = false;
-
-    try {
-      PreparedStatement st = getConnection().prepareStatement(SQL_INSERT);
-      st.setString(1, player.getUniqueId().toString());
-      st.setInt(2, experience);
-      int executeUpdate = st.executeUpdate();
-
-      if (executeUpdate == 1) {
-        changed = true;
-      }
-    } catch (SQLException sqlException) {
-      getLogger().log(Level.SEVERE, "Could not insert player [" + player.getName() + "].",
-          sqlException);
-    }
-
-    return changed;
+    return insertPlayerAndExperience(player.getUniqueId(), experience);
   }
 
   public boolean insertPlayerAndExperience(UUID playerUuid, int experience) {
     boolean changed = false;
 
     try {
-      PreparedStatement st = getConnection().prepareStatement(SQL_INSERT);
+      PreparedStatement st = getConnection().prepareStatement(getSqlInsert());
       st.setString(1, playerUuid.toString());
       st.setInt(2, experience);
+      st.setString(3, playerUuid.toString());
       int executeUpdate = st.executeUpdate();
 
       if (executeUpdate == 1) {
         changed = true;
       }
+
+      st.close();
     } catch (SQLException sqlException) {
       getLogger().log(Level.SEVERE, "Could not insert player [" + playerUuid + "].", sqlException);
     }
@@ -112,6 +101,7 @@ public abstract class PlayerExperienceDao extends BaseDao {
       }
 
       rs.close();
+      st.close();
     } catch (SQLException sqlException) {
       getLogger().log(Level.SEVERE, "Could not count players.", sqlException);
     }
@@ -131,6 +121,8 @@ public abstract class PlayerExperienceDao extends BaseDao {
       if (changed > 0) {
         success = true;
       }
+
+      st.close();
     } catch (SQLException sqlException) {
       getLogger().log(Level.SEVERE,
           "Could set experience of player [" + player.toString() + "] to [" + newExperience + "].",
@@ -152,6 +144,8 @@ public abstract class PlayerExperienceDao extends BaseDao {
       if (changed > 0) {
         success = true;
       }
+
+      st.close();
     } catch (SQLException sqlException) {
       getLogger().log(Level.SEVERE, "Could not update experience for player [" + player.toString()
           + "] with [" + delta + "] experience points.", sqlException);
@@ -172,6 +166,9 @@ public abstract class PlayerExperienceDao extends BaseDao {
         Integer experience = Integer.valueOf(rs.getString(2));
         savedExperience.put(uuid, experience);
       }
+
+      rs.close();
+      st.close();
     } catch (SQLException sqlException) {
       getLogger().log(Level.SEVERE, "Could not fetch saved experience for all players.",
           sqlException);
@@ -191,6 +188,9 @@ public abstract class PlayerExperienceDao extends BaseDao {
       if (rs.next()) {
         result = rs.getInt(2);
       }
+
+      rs.close();
+      st.close();
     } catch (SQLException sqlException) {
       getLogger().log(Level.SEVERE,
           "Could not get saved experience for player with UID [" + uniqueId.toString() + "].",
@@ -203,5 +203,9 @@ public abstract class PlayerExperienceDao extends BaseDao {
 
   public boolean insertNewPlayer(UUID uuid) {
     return insertPlayerAndExperience(uuid, 0);
+  }
+
+  public String getSqlInsert() {
+    return sqlInsert;
   }
 }
