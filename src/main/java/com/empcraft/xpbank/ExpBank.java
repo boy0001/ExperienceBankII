@@ -70,6 +70,9 @@ public class ExpBank extends JavaPlugin {
     saveResource("english.yml", true);
     saveResource("spanish.yml", true);
     saveResource("catalan.yml", true);
+    if (!new File(getDataFolder(), "config.yml").exists()) {
+      saveResource("config.yml", true);
+    }
   }
 
   private void migrateFromYaml() throws DatabaseConnectorException {
