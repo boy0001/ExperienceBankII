@@ -3,6 +3,7 @@ package com.empcraft.xpbank;
 import code.husky.DatabaseConnectorException;
 
 import com.empcraft.xpbank.err.ConfigurationException;
+import com.empcraft.xpbank.listeners.PlayerExperienceChangedListener;
 import com.empcraft.xpbank.listeners.PlayerJoinListener;
 import com.empcraft.xpbank.listeners.PlayerMoveListener;
 import com.empcraft.xpbank.listeners.PlayerTeleportListener;
@@ -16,6 +17,7 @@ import com.empcraft.xpbank.logic.DataHelper;
 import com.empcraft.xpbank.text.MessageUtils;
 import com.empcraft.xpbank.text.Text;
 import com.empcraft.xpbank.text.YamlLanguageProvider;
+import com.empcraft.xpbank.threads.LoadExperienceOnStartupThread;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -49,6 +51,10 @@ public class ExpBank extends JavaPlugin {
       this.expConfig = new ExpBankConfig(this);
       this.ylp = new YamlLanguageProvider(expConfig);
 
+      if (expConfig.getBackend() == null) {
+        throw new IllegalArgumentException("Backend not specified!");
+      }
+
       prepareDatabase();
 
       /* Migrate from yaml */
@@ -60,6 +66,9 @@ public class ExpBank extends JavaPlugin {
       // do not proceed: Don't register defunct listeners!
       return;
     }
+
+    LoadExperienceOnStartupThread lest = new LoadExperienceOnStartupThread(expConfig, ylp);
+    Bukkit.getScheduler().runTaskAsynchronously(this, lest);
 
     new InSignsNano(expConfig);
 
@@ -98,7 +107,8 @@ public class ExpBank extends JavaPlugin {
     Bukkit.getServer().getPluginManager().registerEvents(new PlayerTeleportListener(expConfig),
         this);
     Bukkit.getServer().getPluginManager().registerEvents(new PlayerMoveListener(expConfig), this);
-    Bukkit.getServer().getPluginManager().registerEvents(new PlayerJoinListener(expConfig), this);
+    Bukkit.getServer().getPluginManager().registerEvents(new PlayerJoinListener(expConfig, ylp),
+        this);
 
     /* Registere player leftclick event */
     Bukkit.getServer().getPluginManager()
@@ -106,13 +116,17 @@ public class ExpBank extends JavaPlugin {
     Bukkit.getServer().getPluginManager()
         .registerEvents(new SignSneakLeftClickDepositAllListener(ylp, expConfig), this);
 
-    /* Register playre right click events */
+    /* Register player right click events */
     Bukkit.getServer().getPluginManager()
         .registerEvents(new SignRightClickWithDrawLevelListener(ylp, expConfig), this);
     Bukkit.getServer().getPluginManager()
         .registerEvents(new SignSneakRightClickWithDrawAllListener(ylp, expConfig), this);
     Bukkit.getServer().getPluginManager()
         .registerEvents(new SignRightClickWithDrawBottleListener(ylp, expConfig), this);
+
+    /* Register player exp change event */
+    Bukkit.getServer().getPluginManager().registerEvents(new PlayerExperienceChangedListener(),
+        this);
   }
 
   private void moveOldExperienceYmlFile() {

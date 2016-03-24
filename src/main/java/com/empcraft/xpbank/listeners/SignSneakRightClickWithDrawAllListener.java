@@ -1,6 +1,7 @@
 package com.empcraft.xpbank.listeners;
 
 import com.empcraft.xpbank.ExpBankConfig;
+import com.empcraft.xpbank.logic.DataHelper;
 import com.empcraft.xpbank.logic.ExpBankPermission;
 import com.empcraft.xpbank.logic.PermissionsHelper;
 import com.empcraft.xpbank.logic.SignHelper;
@@ -16,6 +17,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
+
+import java.util.logging.Level;
 
 public class SignSneakRightClickWithDrawAllListener extends AbstractExperienceSignListener {
 
@@ -43,8 +46,19 @@ public class SignSneakRightClickWithDrawAllListener extends AbstractExperienceSi
     // there is a check later on in the async thread.
     int withDrawAmount = Integer.MIN_VALUE;
 
-    // CHeck for limit is done in the thread, so we don't need to wait for Database IO.
-    ChangeExperienceThread cet = new ChangeExperienceThread(player, withDrawAmount, getConfig(),
+    withDrawAmount = DataHelper.checkForMaximumWithdraw(player, withDrawAmount, getConfig());
+
+    MessageUtils.sendMessageToPlayer(player,
+        "Withdrawing all you can get [" + withDrawAmount + "].");
+    getConfig().getLogger().log(Level.INFO,
+        "Player [" + player.getName() + "] is withdrawing everything he has [" + withDrawAmount
+            + "].");
+
+    getConfig().getExperienceCache().substractExperience(player.getUniqueId(), withDrawAmount,
+        getConfig(), getYlp());
+
+    ChangeExperienceThread cet = new ChangeExperienceThread(player.getUniqueId(), withDrawAmount,
+        getConfig(),
         getYlp());
     Bukkit.getScheduler().runTaskAsynchronously(getConfig().getPlugin(), cet);
 

@@ -35,6 +35,8 @@ public final class ExpBankConfig {
   private File languageFile;
   private String experienceBankActivationString;
 
+  private final ExperienceCache experienceCache = new ExperienceCache();
+
   private String mySqlHost;
 
   private int mySqlPort;
@@ -63,7 +65,7 @@ public final class ExpBankConfig {
     this.config = plugin.getConfig();
     this.logger = plugin.getLogger();
 
-    initEmptyconfig();
+    refreshConfig();
     readConfig();
   }
 
@@ -151,6 +153,10 @@ public final class ExpBankConfig {
     return maxStorage;
   }
 
+  public ExperienceCache getExperienceCache() {
+    return experienceCache;
+  }
+
   /**
    * Initialises this Config Object by reading elements from it.
    *
@@ -193,12 +199,12 @@ public final class ExpBankConfig {
     this.experienceYmlFile = new File(plugin.getDataFolder() + File.separator + "xplist.yml");
 
     /* MySQL related */
-    this.mySqlHost = config.getString("mysql.connection.host");
-    this.mySqlPort = config.getInt("mysql.connection.port");
-    this.mySqlDatabase = config.getString("mysql.connection.database");
-    this.mySqlUsername = config.getString("mysql.connection.username");
-    this.mySqlPassword = config.getString("mysql.connection.password");
-    this.mySqlUserTable = config.getString("mysql.connection.table");
+    this.mySqlHost = config.getString("mysql.host");
+    this.mySqlPort = config.getInt("mysql.port");
+    this.mySqlDatabase = config.getString("mysql.database");
+    this.mySqlUsername = config.getString("mysql.username");
+    this.mySqlPassword = config.getString("mysql.password");
+    this.mySqlUserTable = config.getString("mysql.table");
 
     /* Add limits */
     Set<String> storagelimits = config.getConfigurationSection("storage").getKeys(false);
@@ -208,7 +214,7 @@ public final class ExpBankConfig {
     }
   }
 
-  private void initEmptyconfig() {
+  private void refreshConfig() {
     Map<String, Object> options = new HashMap<>();
     config.set("version", version);
     options.put("language", "english");
@@ -219,12 +225,13 @@ public final class ExpBankConfig {
     options.put("text.3", MessageUtils.MAGIC_KEYWORD_STORED_XP);
     options.put("text.4", "&8---&a===&8---");
     options.put("mysql.enabled", false);
-    options.put("mysql.connection.port", 3306);
-    options.put("mysql.connection.host", "localhost");
-    options.put("mysql.connection.username", "root");
-    options.put("mysql.connection.password", "");
-    options.put("mysql.connection.database", "mysql");
-    options.put("mysql.connection.table", "expbank");
+    options.put("mysql.port", 3306);
+    options.put("mysql.host", "localhost");
+    options.put("mysql.username", "root");
+    options.put("mysql.password", "");
+    options.put("mysql.database", "mysql");
+    options.put("mysql.table", "expbank");
+    options.put("backend", "sqlite");
 
     for (final Entry<String, Object> node : options.entrySet()) {
       if (!config.contains(node.getKey())) {

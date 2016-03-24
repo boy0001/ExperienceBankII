@@ -1,6 +1,7 @@
 package com.empcraft.xpbank.listeners;
 
 import com.empcraft.xpbank.ExpBankConfig;
+import com.empcraft.xpbank.logic.DataHelper;
 import com.empcraft.xpbank.logic.ExpBankPermission;
 import com.empcraft.xpbank.logic.ExperienceLevelCalculator;
 import com.empcraft.xpbank.logic.PermissionsHelper;
@@ -18,6 +19,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 
+import java.util.logging.Level;
+
 public class SignLeftClickDepositListener extends AbstractExperienceSignListener {
 
   public SignLeftClickDepositListener(final YamlLanguageProvider ylp, final ExpBankConfig config) {
@@ -26,17 +29,16 @@ public class SignLeftClickDepositListener extends AbstractExperienceSignListener
 
   @EventHandler
   public void onPlayerInteract(PlayerInteractEvent event) {
-    if (!isSignForEvent(getConfig(), event, Action.RIGHT_CLICK_BLOCK,
-        Optional.<Boolean> absent(), Optional.of(new Boolean(false)))) {
+    if (!isSignForEvent(getConfig(), event, Action.LEFT_CLICK_BLOCK, Optional.<Boolean> absent(),
+        Optional.of(new Boolean(false)))) {
       return;
     }
 
     Player player = event.getPlayer();
 
     if (!PermissionsHelper.playerHasPermission(player, ExpBankPermission.USE)) {
-      MessageUtils.sendMessageToPlayer(player,
-          getYlp().getMessage(Text.NOPERM).replace("{STRING}",
-              ExpBankPermission.USE.getPermissionNode()));
+      MessageUtils.sendMessageToPlayer(player, getYlp().getMessage(Text.NOPERM).replace("{STRING}",
+          ExpBankPermission.USE.getPermissionNode()));
       return;
     }
 
@@ -56,9 +58,18 @@ public class SignLeftClickDepositListener extends AbstractExperienceSignListener
       return;
     }
 
+    amountToDeposit = DataHelper.checkForMaximumDeposit(player, amountToDeposit, getConfig());
+
+    MessageUtils.sendMessageToPlayer(player, "Depositing one level: [" + amountToDeposit + "].");
+    getConfig().getLogger().log(Level.INFO,
+        "Player [" + player.getName() + "] is depositing one level: [" + amountToDeposit + "].");
+
+    getConfig().getExperienceCache().substractExperience(player.getUniqueId(), amountToDeposit,
+        getConfig(), getYlp());
+
     // CHeck for limit is done in the thread, so we don't need to wait for Database IO.
-    ChangeExperienceThread cet = new ChangeExperienceThread(player, amountToDeposit, getConfig(),
-        getYlp());
+    ChangeExperienceThread cet = new ChangeExperienceThread(player.getUniqueId(), amountToDeposit,
+        getConfig(), getYlp());
     Bukkit.getScheduler().runTaskAsynchronously(getConfig().getPlugin(), cet);
 
     // update the sign.

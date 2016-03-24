@@ -12,32 +12,23 @@ import com.empcraft.xpbank.text.MessageUtils;
 import com.empcraft.xpbank.text.Text;
 import com.empcraft.xpbank.text.YamlLanguageProvider;
 
-import org.bukkit.Material;
-import org.bukkit.entity.Player;
-
+import java.util.UUID;
 import java.util.logging.Level;
 
 /**
  * Thread to handle experience changes.
  */
 public class ChangeExperienceThread implements Runnable {
-  /**
-   * Experience gain per bottle ranges from 3 to 11….
-   */
-  private static final int EXPERIENCE_PER_BOTTLE = 7;
-
-  private Player player;
+  private final UUID player;
   private final int delta;
   private final ExpBankConfig config;
   private YamlLanguageProvider ylp;
   private DataHelper dh;
-  private boolean deltaBottles;
-  private final int numBottles;
 
   /**
    * Handle experience changes for the bank.
    *
-   * @param player
+   * @param playerUuid
    *          the uuid of the player whose experience will be set.
    * @param delta
    *          the delta, added to the bank and substracted from the player.
@@ -46,26 +37,12 @@ public class ChangeExperienceThread implements Runnable {
    * @param ylp
    *          the translation messages.
    */
-  public ChangeExperienceThread(final Player player, final int delta, final ExpBankConfig config,
+  public ChangeExperienceThread(final UUID playerUuid, final int delta, final ExpBankConfig config,
       YamlLanguageProvider ylp) {
-    this(player, delta, config, ylp, false);
-  }
-
-  public ChangeExperienceThread(final Player player, final int delta, final ExpBankConfig config,
-      YamlLanguageProvider ylp, boolean deltaBottles) {
-    this.player = player;
+    this.player = playerUuid;
     this.config = config;
     this.ylp = ylp;
-    this.deltaBottles = deltaBottles;
-
-    if (deltaBottles) {
-      // delta = num of bottles, * experience per bottle * -1 (withdraw).
-      this.delta = delta * EXPERIENCE_PER_BOTTLE * -1;
-      this.numBottles = delta;
-    } else {
-      this.delta = delta;
-      this.numBottles = 0;
-    }
+    this.delta = delta;
 
     this.dh = new DataHelper(ylp, config);
   }
@@ -73,28 +50,12 @@ public class ChangeExperienceThread implements Runnable {
   @Override
   public void run() {
     boolean success = false;
-    int actualValue;
-
-    if (delta < 0) {
-      // player withdraws xp.
-      actualValue = checkForMaximumWithdraw();
-    } else {
-      // player wants to store.
-      actualValue = checkForMaximumDeposit();
-    }
-
-    if (numBottles > 0 && actualValue != delta) {
-      // not enough experience on bank to fill all those bottles.
-      MessageUtils.sendMessageToPlayer(player, ylp.getMessage(Text.BOTTLE_ERROR));
-
-      return;
-    }
 
     try {
-      success = dh.updatePlayerExperienceDelta(player.getUniqueId(), actualValue);
+      success = dh.updatePlayerExperienceDelta(player, delta);
     } catch (DatabaseConnectorException confEx) {
       config.getLogger().log(Level.WARNING,
-          "Could not change experience level for [" + player.getUniqueId().toString() + "].",
+          "Could not change experience level for [" + player.toString() + "].",
           confEx);
       MessageUtils.sendMessageToConsole(ylp.getMessage(Text.MYSQL_GET));
       MessageUtils.sendMessageToPlayer(player, ylp.getMessage(Text.LOST));
@@ -102,65 +63,14 @@ public class ChangeExperienceThread implements Runnable {
 
     if (!success) {
       config.getLogger().log(Level.WARNING,
-          "Could not change experience level for [" + player.getUniqueId().toString() + "].");
+          "Could not change experience level for [" + player.toString() + "].");
       MessageUtils.sendMessageToConsole(ylp.getMessage(Text.MYSQL_GET));
       MessageUtils.sendMessageToPlayer(player, ylp.getMessage(Text.LOST));
 
       return;
     }
 
-    if (deltaBottles) {
-      player.getInventory().getItemInMainHand().setType(Material.EXP_BOTTLE);
-
-      return;
-    }
-
-    // if everything worked, we can lower the player's xp.
-    int currentExperience = player.getTotalExperience();
-    player.setTotalExperience(currentExperience - actualValue);
-
     return;
   }
 
-  private int checkForMaximumWithdraw() {
-    int currentlyinstore = 0;
-
-    try {
-      currentlyinstore = dh.getSavedExperience(player);
-    } catch (DatabaseConnectorException confEx) {
-      config.getLogger().log(Level.WARNING, "Could not get the player's currently stored xp.",
-          confEx);
-
-      return 0;
-    }
-
-    if (currentlyinstore < (delta * -1)) {
-      // only get back whats inside.
-      return currentlyinstore * -1;
-    }
-
-    return delta;
-  }
-
-  private int checkForMaximumDeposit() {
-    int maxDeposit = config.getMaxStorageForPlayer(player);
-    int currentlyinstore = 0;
-
-    try {
-      currentlyinstore = dh.getSavedExperience(player);
-    } catch (DatabaseConnectorException confEx) {
-      config.getLogger().log(Level.WARNING, "Could not get the player's currently stored xp.",
-          confEx);
-
-      return 0;
-    }
-
-    if (delta + currentlyinstore <= maxDeposit) {
-      // the player can deposit everything.
-      return delta;
-    }
-
-    // there is not enough limit left.
-    return maxDeposit - currentlyinstore;
-  }
 }

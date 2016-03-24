@@ -1,0 +1,26 @@
+version: '2'
+text:
+  create: '[EXP]'
+  '2': '{player}'
+  '1': '&8---&aEXP&8---'
+  '4': '&8---&a===&8---'
+  '3': '{expbank}'
+language: english
+
+# Choose your database. either sqlite or mysql.
+# Deprecated, but possible: yaml.
+backend: sqlite
+
+mysql:
+  table: expbank
+  host: localhost
+  password: ''
+  database: mysql
+  port: 3306
+  username: root
+
+# Default max storage
+storage:
+  default: 825
+
+

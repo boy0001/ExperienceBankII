@@ -109,6 +109,8 @@ public class DataHelper {
         UUID uuid = player.getKey();
         int oldExperience = player.getValue();
         ped.insertPlayerAndExperience(uuid, oldExperience);
+        config.getLogger().log(Level.INFO,
+            "Inserted player [" + player.getKey().toString() + "] into the DB.");
       }
 
       MessageUtils.sendMessageToConsole(ylp.getMessage(Text.DONE));
@@ -144,6 +146,9 @@ public class DataHelper {
       config.getLogger().log(Level.SEVERE, "Could not update player experience.", sqlEx);
     }
 
+    config.getLogger().log(Level.INFO,
+        "Updated Experience of player [" + uuid.toString() + "] to [" + newExperience + "].");
+
     return success;
   }
 
@@ -156,6 +161,8 @@ public class DataHelper {
     } catch (SQLException sqlEx) {
       config.getLogger().log(Level.SEVERE, "Could not create Table in Database.", sqlEx);
     }
+
+    config.getLogger().log(Level.INFO, "Created Database");
 
     return success;
   }
@@ -171,6 +178,8 @@ public class DataHelper {
       config.getLogger().log(Level.SEVERE, "Could not read existing saved exp from Database.", sqlEx);
       throw new DatabaseConnectorException(sqlEx);
     }
+
+    config.getLogger().log(Level.INFO, "Read saved experience.");
 
     return results;
   }
@@ -188,6 +197,9 @@ public class DataHelper {
       throw new DatabaseConnectorException(sqlEx);
     }
 
+    config.getLogger().log(Level.INFO,
+        "Experience for player [" + uuid.toString() + "] is [" + result + "]xp in bank.");
+
     return result;
   }
 
@@ -197,7 +209,12 @@ public class DataHelper {
       return 0;
     }
 
-    return getSavedExperience(player.getUniqueId());
+    int result = getSavedExperience(player.getUniqueId());
+
+    config.getLogger().log(Level.INFO,
+        "Experience for player [" + player.getName() + "] is [" + result + "]xp in bank.");
+
+    return result;
   }
 
   public boolean updatePlayerExperienceDelta(UUID uuid, int delta)
@@ -211,6 +228,9 @@ public class DataHelper {
       config.getLogger().log(Level.SEVERE, "Could not update player experience.", sqlEx);
       throw new DatabaseConnectorException(sqlEx);
     }
+
+    config.getLogger().log(Level.INFO,
+        "Updated experience of player [" + uuid.toString() + "] by [" + delta + "].");
 
     return success;
   }
@@ -226,7 +246,38 @@ public class DataHelper {
       throw new DatabaseConnectorException(sqlEx);
     }
 
+    config.getLogger().log(Level.INFO,
+        "Inserted new player [" + uuid.toString() + "] with 0 experience.");
+
     return success;
+  }
+
+  public static int checkForMaximumWithdraw(Player player, int delta, final ExpBankConfig config) {
+    int currentlyinstore = 0;
+
+    currentlyinstore = config.getExperienceCache().get(player.getUniqueId()).get();
+
+    if (currentlyinstore < (delta * -1)) {
+      // only get back whats inside.
+      return currentlyinstore * -1;
+    }
+
+    return delta;
+  }
+
+  public static int checkForMaximumDeposit(Player player, int delta, final ExpBankConfig config) {
+    int maxDeposit = config.getMaxStorageForPlayer(player);
+    int currentlyinstore = 0;
+
+      currentlyinstore = config.getExperienceCache().get(player.getUniqueId()).get();
+
+    if (delta + currentlyinstore <= maxDeposit) {
+      // the player can deposit everything.
+      return delta;
+    }
+
+    // there is not enough limit left.
+    return maxDeposit - currentlyinstore;
   }
 
 }

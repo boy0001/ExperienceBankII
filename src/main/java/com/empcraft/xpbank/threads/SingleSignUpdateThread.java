@@ -83,7 +83,9 @@ public class SingleSignUpdateThread implements Runnable {
       }
     }
 
+    sign.update();
     player.sendSignChange(sign.getLocation(), lines);
+    sign.update();
   }
 
 }

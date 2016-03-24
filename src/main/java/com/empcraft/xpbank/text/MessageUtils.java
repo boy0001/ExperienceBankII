@@ -4,6 +4,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
+import java.util.UUID;
+
 /**
  * Text formatter.
  */
@@ -77,6 +79,15 @@ public final class MessageUtils {
     }
 
     player.sendMessage(MessageUtils.colorise(text));
+  }
+
+  public static void sendMessageToPlayer(final UUID uuid, final String text) {
+    if (uuid == null) {
+      return;
+    }
+
+    Player player = Bukkit.getServer().getPlayer(uuid);
+    sendMessageToPlayer(player, text);
   }
 
   /**

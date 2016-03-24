@@ -3,12 +3,10 @@ package com.empcraft.xpbank.logic;
 import code.husky.DatabaseConnectorException;
 
 import com.empcraft.xpbank.ExpBankConfig;
-import com.empcraft.xpbank.JSONUtil;
 import com.empcraft.xpbank.text.MessageUtils;
 import com.empcraft.xpbank.threads.SingleSignUpdateThread;
 import com.empcraft.xpbank.threads.UpdateAllSignsThread;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -39,8 +37,12 @@ public final class SignHelper {
   public static void updateSign(Player player, Sign sign, final ExpBankConfig expBankConfig) {
     SingleSignUpdateThread singleSignUpdateThread = new SingleSignUpdateThread(player, sign,
         expBankConfig);
-    Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(expBankConfig.getPlugin(),
-        singleSignUpdateThread, 10L);
+
+    // needs to run in sync.
+    singleSignUpdateThread.run();
+    sign.update();
+    // Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(expBankConfig.getPlugin(),
+    // singleSignUpdateThread, 10L);
   }
 
   public static boolean isExperienceBankSignBlock(final Block block, final ExpBankConfig config) {
@@ -54,7 +56,7 @@ public final class SignHelper {
     Sign sign = (Sign) block.getState();
 
     String firstLine = sign.getLines()[0];
-    String coloredExpSign = MessageUtils.colorise(config.getExperienceBankActivationString());
+    String coloredExpSign = MessageUtils.colorise(config.getSignContent().get(0));
 
     if (coloredExpSign.equals(firstLine)) {
       expBankSign = true;
@@ -103,7 +105,7 @@ public final class SignHelper {
 
     for (int line = 0; line < 4; line++) {
       String evaluatedLine = renderSignLines(signLines.get(line), player, storedPlayerExperience);
-      lines[line] = JSONUtil.toJSON(evaluatedLine);
+      lines[line] = evaluatedLine;
     }
 
     return lines;
@@ -120,7 +122,8 @@ public final class SignHelper {
   public static void scheduleUpdate(final Player player, final Location location,
       final ExpBankConfig expBankConfig) {
     // manual update.
-    Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(expBankConfig.getPlugin(),
-        new UpdateAllSignsThread(player, location, expBankConfig), 5L);
+    // Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(expBankConfig.getPlugin(),
+    // new UpdateAllSignsThread(player, location, expBankConfig), 5L);
+    new UpdateAllSignsThread(player, location, expBankConfig).run();
   }
 }

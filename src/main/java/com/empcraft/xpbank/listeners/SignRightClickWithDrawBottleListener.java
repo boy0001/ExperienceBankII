@@ -1,6 +1,7 @@
 package com.empcraft.xpbank.listeners;
 
 import com.empcraft.xpbank.ExpBankConfig;
+import com.empcraft.xpbank.logic.DataHelper;
 import com.empcraft.xpbank.logic.ExpBankPermission;
 import com.empcraft.xpbank.logic.PermissionsHelper;
 import com.empcraft.xpbank.logic.SignHelper;
@@ -17,7 +18,13 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 
+import java.util.logging.Level;
+
 public class SignRightClickWithDrawBottleListener extends AbstractExperienceSignListener {
+  /**
+   * Experience gain per bottle ranges from 3 to 11….
+   */
+  private static final int EXPERIENCE_PER_BOTTLE = 7;
 
   public SignRightClickWithDrawBottleListener(YamlLanguageProvider ylp, ExpBankConfig config) {
     super(ylp, config);
@@ -44,9 +51,18 @@ public class SignRightClickWithDrawBottleListener extends AbstractExperienceSign
 
     int numberOfBottlesHeld = player.getInventory().getItemInMainHand().getAmount();
 
-    // CHeck for limit is done in the thread, so we don't need to wait for Database IO.
-    ChangeExperienceThread cet = new ChangeExperienceThread(player, numberOfBottlesHeld,
-        getConfig(), getYlp(), true);
+    int withdrawAmount = DataHelper.checkForMaximumWithdraw(player,
+        numberOfBottlesHeld * EXPERIENCE_PER_BOTTLE, getConfig());
+
+    MessageUtils.sendMessageToPlayer(player, "Withdrawing one bottle.");
+    getConfig().getLogger().log(Level.INFO,
+        "Player [" + player.getName() + "] is withdrawing one bottle!");
+
+    getConfig().getExperienceCache().substractExperience(player.getUniqueId(), withdrawAmount,
+        getConfig(), getYlp());
+
+    ChangeExperienceThread cet = new ChangeExperienceThread(player.getUniqueId(),
+        withdrawAmount, getConfig(), getYlp());
     Bukkit.getScheduler().runTaskAsynchronously(getConfig().getPlugin(), cet);
 
     // update the sign.

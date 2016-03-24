@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.bmarwell.spigot</groupId>
 	<artifactId>ExperienceBankII</artifactId>
-	<version>0.3</version>
+	<version>0.4</version>
 	<name>ExperienceBankII - Plugin to save exp</name>
 
 	<repositories>
