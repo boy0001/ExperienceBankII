@@ -15,4 +15,8 @@ public class DatabaseConnectorException extends Exception {
     super(thrown);
   }
 
+  public DatabaseConnectorException(String reason) {
+    super(reason);
+  }
+
 }

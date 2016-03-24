@@ -7,13 +7,13 @@ import code.husky.sqlite.SqLite;
 import com.empcraft.xpbank.ExpBankConfig;
 import com.empcraft.xpbank.dao.PlayerExperienceDao;
 import com.empcraft.xpbank.dao.impl.mysql.MySqlPlayerExperienceDao;
+import com.empcraft.xpbank.dao.impl.sqlite.SqLitePlayerExperienceDao;
 import com.empcraft.xpbank.text.MessageUtils;
 import com.empcraft.xpbank.text.Text;
 import com.empcraft.xpbank.text.YamlLanguageProvider;
 
 import org.bukkit.entity.Player;
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -32,11 +32,27 @@ public class DataHelper {
   }
 
   private Connection getConnection() throws DatabaseConnectorException {
-    if (config.isMySqlEnabled()) {
-      return getMySqlConnection();
+    Connection c = null;
+
+    switch (config.getBackend()) {
+      case MYSQL: {
+        c = getMySqlConnection();
+        break;
+      }
+      case YAML: {
+        c = null;
+        break;
+      }
+      case SQLITE: {
+        c = getSqLiteConnection();
+        break;
+      }
+      default: {
+        throw new DatabaseConnectorException("No such backend: + [" + config.getBackend() + "].");
+      }
     }
 
-    return getSqLiteConnection();
+    return c;
   }
 
   private Connection getMySqlConnection() throws DatabaseConnectorException {
@@ -47,19 +63,29 @@ public class DataHelper {
   }
 
   private Connection getSqLiteConnection() throws DatabaseConnectorException {
-    File sqliteFile = new File(config.getPlugin().getDataFolder(), "xp.db");
-    SqLite sqlite = new SqLite(sqliteFile);
+    SqLite sqlite = new SqLite(config.getDbFileName());
 
     return sqlite.openConnection();
   }
 
   private PlayerExperienceDao getDao(Connection connection) {
-    if (config.isMySqlEnabled()) {
-      return new MySqlPlayerExperienceDao(connection, config);
+    PlayerExperienceDao pd = null;
+
+    switch (config.getBackend()) {
+      case MYSQL: {
+        pd = new MySqlPlayerExperienceDao(connection, config);
+        break;
+      }
+      case SQLITE: {
+        pd = new SqLitePlayerExperienceDao(connection, config);
+        break;
+      }
+      default: {
+        // empty
+      }
     }
 
-    // TODO: Implement SQLite
-    return null;
+    return pd;
   }
 
   /**
@@ -99,6 +125,7 @@ public class DataHelper {
     try (Connection connection = getConnection()) {
       PlayerExperienceDao ped = getDao(connection);
       playercount = ped.countPlayers();
+      config.getLogger().info("Found [" + playercount + "] players.");
     } catch (SQLException sqlEx) {
       config.getLogger().log(Level.SEVERE, "Could not count players in Database.", sqlEx);
     }
@@ -180,6 +207,20 @@ public class DataHelper {
     try (Connection connection = getConnection()) {
       PlayerExperienceDao ped = getDao(connection);
       success = ped.updatePlayerExperienceDelta(uuid, delta);
+    } catch (SQLException sqlEx) {
+      config.getLogger().log(Level.SEVERE, "Could not update player experience.", sqlEx);
+      throw new DatabaseConnectorException(sqlEx);
+    }
+
+    return success;
+  }
+
+  public boolean insertNewPlayer(UUID uuid) throws DatabaseConnectorException {
+    boolean success = false;
+
+    try (Connection connection = getConnection()) {
+      PlayerExperienceDao ped = getDao(connection);
+      success = ped.insertNewPlayer(uuid);
     } catch (SQLException sqlEx) {
       config.getLogger().log(Level.SEVERE, "Could not update player experience.", sqlEx);
       throw new DatabaseConnectorException(sqlEx);

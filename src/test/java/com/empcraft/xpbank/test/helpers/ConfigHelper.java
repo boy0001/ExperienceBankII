@@ -1,5 +1,7 @@
 package com.empcraft.xpbank.test.helpers;
 
+import code.husky.Backend;
+
 import com.empcraft.xpbank.ExpBankConfig;
 import com.empcraft.xpbank.err.ConfigurationException;
 
@@ -24,7 +26,8 @@ public class ConfigHelper {
   public static ConfigHelper getFakeConfig() throws ConfigurationException, FileNotFoundException,
       IOException, InvalidConfigurationException {
     ConfigHelper confighelper = new ConfigHelper();
-    confighelper.config = new ExpBankConfig(mockJavaPlugin());
+    ExpBankConfig cfg = new ExpBankConfig(mockJavaPlugin());
+    confighelper.config = PowerMockito.spy(cfg);
 
     return confighelper;
   }
@@ -65,6 +68,15 @@ public class ConfigHelper {
   public ConfigHelper withLanguage(String language) {
     File langFile = new File(this.config.getPlugin().getDataFolder(), language + ".yml");
     PowerMockito.when(this.config.getLanguageFile()).thenReturn(langFile);
+
+    return this;
+  }
+
+  public ConfigHelper withBackend(String backend) {
+    Backend be = Backend.getBackend(backend);
+    LOG.info("Using Backend [" + be.toString() + "].");
+
+    PowerMockito.doReturn(be).when(config).getBackend();
 
     return this;
   }

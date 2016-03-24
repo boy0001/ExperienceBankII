@@ -10,6 +10,7 @@ import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 /**
  *
@@ -33,9 +34,14 @@ public class SqLite implements Database {
       if (checkConnection()) {
         return connection;
       }
+
       Class.forName("org.sqlite.JDBC");
       connection = DriverManager
-          .getConnection("jdbc:sqlite:" + dbFile.getAbsolutePath() + "; PRAGMA SYNCHRONOUS=NORMAL");
+          .getConnection("jdbc:sqlite:" + dbFile.getAbsolutePath());
+
+      Statement createStatement = connection.createStatement();
+      createStatement.executeUpdate("PRAGMA SYNCHRONOUS=NORMAL");
+      createStatement.close();
     } catch (SQLException | ClassNotFoundException sqlEx) {
       throw new DatabaseConnectorException(sqlEx);
     }

@@ -1,5 +1,7 @@
 package com.empcraft.xpbank;
 
+import code.husky.Backend;
+
 import com.empcraft.xpbank.err.ConfigurationException;
 import com.empcraft.xpbank.logic.PermissionsHelper;
 import com.empcraft.xpbank.text.MessageUtils;
@@ -19,6 +21,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public final class ExpBankConfig {
+
+  private static final String DB_FILENAME = "xp.db";
+
   private static final String TEXT_CREATE = "text.create";
 
   private static final String[] SIGN_LINES = { "text.1", "text.2", "text.3", "text.4" };
@@ -29,7 +34,6 @@ public final class ExpBankConfig {
   private final JavaPlugin plugin;
   private File languageFile;
   private String experienceBankActivationString;
-  private boolean mySqlEnabled;
 
   private String mySqlHost;
 
@@ -50,6 +54,8 @@ public final class ExpBankConfig {
   private final Logger logger;
 
   private final Map<String, Integer> limits = new HashMap<>();
+
+  private Backend backend;
 
   public ExpBankConfig(final JavaPlugin plugin) throws ConfigurationException {
     this.plugin = plugin;
@@ -105,8 +111,9 @@ public final class ExpBankConfig {
     return mySqlPassword;
   }
 
+  @Deprecated
   public boolean isMySqlEnabled() {
-    return mySqlEnabled;
+    return Backend.MYSQL.equals(getBackend());
   }
 
   public String getMySqlUserTable() {
@@ -115,6 +122,14 @@ public final class ExpBankConfig {
 
   public File getExperienceYmlFile() {
     return this.experienceYmlFile;
+  }
+
+  public File getDbFileName() {
+    return new File(plugin.getDataFolder(), DB_FILENAME);
+  }
+
+  public Backend getBackend() {
+    return this.backend;
   }
 
   public int getMaxStorageForPlayer(Player player) {
@@ -171,11 +186,13 @@ public final class ExpBankConfig {
       this.signContent.add(config.getString(signline));
     }
 
+    /* Backend */
+    this.backend = Backend.getBackend(config.getString("backend"));
+
     /* Old yml file backend */
     this.experienceYmlFile = new File(plugin.getDataFolder() + File.separator + "xplist.yml");
 
     /* MySQL related */
-    this.mySqlEnabled = config.getBoolean("mysql.enabled");
     this.mySqlHost = config.getString("mysql.connection.host");
     this.mySqlPort = config.getInt("mysql.connection.port");
     this.mySqlDatabase = config.getString("mysql.connection.database");
