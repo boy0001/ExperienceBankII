@@ -110,14 +110,4 @@ public class SignChangeTest {
     Assert.assertTrue(expBankSign);
   }
 
-  @Test
-  public void testOnSignChange_operator_line_runnable() {
-    Mockito.when(validSignChangeEvent.getPlayer()).thenReturn(operator);
-    signChangeEventListener.onSignChange(validSignChangeEvent);
-
-    Set<RunnableOfPlugin> tasks = ((FakeServer) Bukkit.getServer()).getTasks();
-    Assert.assertEquals(1, tasks.size());
-    tasks.clear();
-  }
-
 }
