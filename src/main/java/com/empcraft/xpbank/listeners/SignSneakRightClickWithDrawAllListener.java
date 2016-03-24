@@ -42,7 +42,7 @@ public class SignSneakRightClickWithDrawAllListener extends AbstractExperienceSi
     }
 
     // there is a check later on in the async thread.
-    int withDrawAmount = Integer.MIN_VALUE;
+    int withDrawAmount = Integer.MAX_VALUE;
 
     withDrawAmount = DataHelper.checkForMaximumWithdraw(player, withDrawAmount, getConfig());
 

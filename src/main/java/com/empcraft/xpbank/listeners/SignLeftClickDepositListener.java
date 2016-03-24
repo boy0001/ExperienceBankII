@@ -62,7 +62,7 @@ public class SignLeftClickDepositListener extends AbstractExperienceSignListener
     getConfig().getLogger().log(Level.INFO,
         "Player [" + player.getName() + "] is depositing one level: [" + amountToDeposit + "].");
 
-    getConfig().getExperienceCache().substractExperience(player, amountToDeposit,
+    getConfig().getExperienceCache().addExperience(player, amountToDeposit,
         getConfig(), getYlp());
 
     // update the sign.

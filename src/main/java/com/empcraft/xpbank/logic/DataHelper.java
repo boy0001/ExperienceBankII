@@ -252,28 +252,28 @@ public class DataHelper {
     return success;
   }
 
-  public static int checkForMaximumWithdraw(Player player, int delta, final ExpBankConfig config) {
+  public static int checkForMaximumWithdraw(Player player, int toWithdraw, final ExpBankConfig config) {
     int currentlyinstore = 0;
 
     currentlyinstore = config.getExperienceCache().get(player.getUniqueId()).get();
 
-    if (currentlyinstore < (delta * -1)) {
+    if (currentlyinstore < toWithdraw) {
       // only get back whats inside.
-      return currentlyinstore * -1;
+      return currentlyinstore;
     }
 
-    return delta;
+    return toWithdraw;
   }
 
-  public static int checkForMaximumDeposit(Player player, int delta, final ExpBankConfig config) {
+  public static int checkForMaximumDeposit(Player player, int toDeposit, final ExpBankConfig config) {
     int maxDeposit = config.getMaxStorageForPlayer(player);
     int currentlyinstore = 0;
 
-      currentlyinstore = config.getExperienceCache().get(player.getUniqueId()).get();
+    currentlyinstore = config.getExperienceCache().get(player.getUniqueId()).get();
 
-    if (delta + currentlyinstore <= maxDeposit) {
+    if (toDeposit + currentlyinstore <= maxDeposit) {
       // the player can deposit everything.
-      return delta;
+      return toDeposit;
     }
 
     // there is not enough limit left.

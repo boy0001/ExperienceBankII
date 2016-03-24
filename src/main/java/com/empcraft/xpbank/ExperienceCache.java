@@ -42,9 +42,15 @@ public class ExperienceCache extends HashMap<UUID, AtomicInteger> {
         language);
     Bukkit.getServer().getPluginManager().callEvent(pece);
 
-    int newExperience = this.get(player.getUniqueId()).addAndGet(delta);
-    player.setTotalExperience(newExperience);
-    player.setLevel(ExperienceLevelCalculator.getLevel(newExperience));
+    int newExperienceInBank = this.get(player.getUniqueId()).addAndGet(delta);
+    config.getLogger().info("Player new experience in bank: " + newExperienceInBank);
+
+    player.setTotalExperience(player.getTotalExperience() - delta);
+    config.getLogger().info("Player new experience on Hand: " + player.getTotalExperience());
+
+    int level = ExperienceLevelCalculator.getLevel(player.getTotalExperience());
+    config.getLogger().info("Player new level: " + level);
+    player.setLevel(level);
   }
 
   public void substractExperience(Player player, int withdrawAmount, final ExpBankConfig config,

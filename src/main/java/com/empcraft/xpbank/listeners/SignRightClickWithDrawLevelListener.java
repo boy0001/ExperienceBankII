@@ -42,12 +42,10 @@ public class SignRightClickWithDrawLevelListener extends AbstractExperienceSignL
       return;
     }
 
-    int neededForLevel = player.getTotalExperience()
-        - ExperienceLevelCalculator.getMinExperienceForLevel(player.getLevel() + 1);
+    int neededForLevel = ExperienceLevelCalculator.getMinExperienceForLevel(player.getLevel() + 1)
+        - player.getTotalExperience();
 
     neededForLevel = DataHelper.checkForMaximumWithdraw(player, neededForLevel, getConfig());
-    getConfig().getExperienceCache().substractExperience(player, neededForLevel,
-        getConfig(), getYlp());
 
     MessageUtils.sendMessageToPlayer(player, "Withdrawing one level: [" + neededForLevel + "].");
     getConfig().getLogger().log(Level.INFO,
