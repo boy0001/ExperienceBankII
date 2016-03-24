@@ -8,10 +8,8 @@ import com.empcraft.xpbank.logic.SignHelper;
 import com.empcraft.xpbank.text.MessageUtils;
 import com.empcraft.xpbank.text.Text;
 import com.empcraft.xpbank.text.YamlLanguageProvider;
-import com.empcraft.xpbank.threads.ChangeExperienceThread;
 import com.google.common.base.Optional;
 
-import org.bukkit.Bukkit;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -55,7 +53,7 @@ public class SignSneakLeftClickDepositAllListener extends AbstractExperienceSign
     }
 
     amountToDeposit = DataHelper.checkForMaximumDeposit(player, amountToDeposit, getConfig());
-    getConfig().getExperienceCache().addExperience(player.getUniqueId(), amountToDeposit,
+    getConfig().getExperienceCache().addExperience(player, amountToDeposit,
         getConfig(), getYlp());
 
     MessageUtils.sendMessageToPlayer(player,
@@ -63,12 +61,6 @@ public class SignSneakLeftClickDepositAllListener extends AbstractExperienceSign
     getConfig().getLogger().log(Level.INFO,
         "Player [" + player.getName() + "] is depositing everything he has: [" + amountToDeposit
             + "].");
-
-    // CHeck for limit is done in the thread, so we don't need to wait for Database IO.
-    ChangeExperienceThread cet = new ChangeExperienceThread(player.getUniqueId(), amountToDeposit,
-        getConfig(),
-        getYlp());
-    Bukkit.getScheduler().runTaskAsynchronously(getConfig().getPlugin(), cet);
 
     // update the sign.
     Sign sign = (Sign) event.getClickedBlock().getState();

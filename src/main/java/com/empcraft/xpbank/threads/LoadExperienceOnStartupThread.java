@@ -6,8 +6,6 @@ import com.empcraft.xpbank.ExpBankConfig;
 import com.empcraft.xpbank.logic.DataHelper;
 import com.empcraft.xpbank.text.YamlLanguageProvider;
 
-import org.bukkit.Bukkit;
-
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
@@ -34,7 +32,7 @@ public class LoadExperienceOnStartupThread implements Runnable {
 
       for (Entry<UUID, Integer> entry : savedExperience.entrySet()) {
         config.getLogger().log(Level.INFO, "loaded [" + entry.getValue() + "]xp for player ["
-            + Bukkit.getServer().getPlayer(entry.getKey()) + "].");
+            + entry.getKey() + "].");
         config.getExperienceCache().put(entry.getKey(), new AtomicInteger(entry.getValue()));
       }
     } catch (DatabaseConnectorException dbEx) {

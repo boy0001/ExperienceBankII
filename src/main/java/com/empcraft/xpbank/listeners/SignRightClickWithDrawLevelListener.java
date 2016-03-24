@@ -9,10 +9,8 @@ import com.empcraft.xpbank.logic.SignHelper;
 import com.empcraft.xpbank.text.MessageUtils;
 import com.empcraft.xpbank.text.Text;
 import com.empcraft.xpbank.text.YamlLanguageProvider;
-import com.empcraft.xpbank.threads.ChangeExperienceThread;
 import com.google.common.base.Optional;
 
-import org.bukkit.Bukkit;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -48,21 +46,15 @@ public class SignRightClickWithDrawLevelListener extends AbstractExperienceSignL
         - ExperienceLevelCalculator.getMinExperienceForLevel(player.getLevel() + 1);
 
     neededForLevel = DataHelper.checkForMaximumWithdraw(player, neededForLevel, getConfig());
-    getConfig().getExperienceCache().substractExperience(player.getUniqueId(), neededForLevel,
+    getConfig().getExperienceCache().substractExperience(player, neededForLevel,
         getConfig(), getYlp());
 
     MessageUtils.sendMessageToPlayer(player, "Withdrawing one level: [" + neededForLevel + "].");
     getConfig().getLogger().log(Level.INFO,
         "Player [" + player.getName() + "] is withdrawing one level: [" + neededForLevel + "].");
 
-    getConfig().getExperienceCache().substractExperience(player.getUniqueId(), neededForLevel,
+    getConfig().getExperienceCache().substractExperience(player, neededForLevel,
         getConfig(), getYlp());
-
-    // CHeck for limit is done in the thread, so we don't need to wait for Database IO.
-    ChangeExperienceThread cet = new ChangeExperienceThread(player.getUniqueId(), neededForLevel,
-        getConfig(),
-        getYlp());
-    Bukkit.getScheduler().runTaskAsynchronously(getConfig().getPlugin(), cet);
 
     // update the sign.
     Sign sign = (Sign) event.getClickedBlock().getState();
