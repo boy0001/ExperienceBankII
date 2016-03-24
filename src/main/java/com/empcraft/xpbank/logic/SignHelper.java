@@ -1,10 +1,7 @@
 package com.empcraft.xpbank.logic;
 
-import code.husky.DatabaseConnectorException;
-
 import com.empcraft.xpbank.ExpBankConfig;
 import com.empcraft.xpbank.text.MessageUtils;
-import com.empcraft.xpbank.threads.SingleSignUpdateThread;
 import com.empcraft.xpbank.threads.UpdateAllSignsThread;
 
 import org.bukkit.Location;
@@ -14,7 +11,6 @@ import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 
 import java.util.List;
-import java.util.logging.Level;
 
 public final class SignHelper {
 
@@ -34,15 +30,61 @@ public final class SignHelper {
    * @param expBankConfig
    *          The plugin config.
    */
-  public static void updateSign(Player player, Sign sign, final ExpBankConfig expBankConfig) {
-    SingleSignUpdateThread singleSignUpdateThread = new SingleSignUpdateThread(player, sign,
-        expBankConfig);
+  public static void updateSign(Player player, Sign sign, final ExpBankConfig config) {
+    Location location = sign.getLocation();
+    Block block = location.getBlock();
 
-    // needs to run in sync.
-    singleSignUpdateThread.run();
+    if (block == null) {
+      config.getLogger().warning("not a block.");
+      return;
+    }
+
+    if (block.getState() == null) {
+      config.getLogger().warning("not a stateful block.");
+      return;
+    }
+
+    if (!(block.getState() instanceof Sign)) {
+      config.getLogger().warning("not a sign.");
+      return;
+    }
+
+    if (player == null || !player.isOnline()) {
+      config.getLogger().warning("player is not online.");
+      return;
+    }
+
+    if (!location.getWorld().equals(player.getWorld())) {
+      config.getLogger().warning("player is in another world.");
+      return;
+    }
+
+    if (!location.getChunk().isLoaded()) {
+      config.getLogger().warning("chunk is not loaded.");
+      return;
+    }
+
+    double distance = location.distanceSquared(player.getLocation());
+
+    if (distance > 1024) {
+      config.getLogger().warning("sign is too far away.");
+      return;
+    }
+
+    String[] lines = SignHelper.getSignText(sign.getLines(), player, config);
+
+    if (lines == null) {
+      config.getLogger().warning("sign has no text.");
+      return;
+    }
+
+    String[] signText = SignHelper.getSignText(lines, player, config);
+    for (int ii = 0; ii < signText.length; ii++) {
+      sign.setLine(ii, signText[ii]);
+    }
+
+    player.sendSignChange(sign.getLocation(), signText);
     sign.update();
-    // Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(expBankConfig.getPlugin(),
-    // singleSignUpdateThread, 10L);
   }
 
   public static boolean isExperienceBankSignBlock(final Block block, final ExpBankConfig config) {
@@ -89,19 +131,13 @@ public final class SignHelper {
     int storedPlayerExperience = 0;
     List<String> signLines = expBankConfig.getSignContent();
 
-    if (!MessageUtils.colorise(expBankConfig.getExperienceBankActivationString())
+    if (!MessageUtils.colorise(expBankConfig.getSignContent().get(0))
         .equals(lines[0])) {
       // this is not an ExpBank-Sign.
       return lines;
     }
 
-    try {
-      DataHelper dh = new DataHelper(null, expBankConfig);
-      storedPlayerExperience = dh.getSavedExperience(player);
-    } catch (DatabaseConnectorException confEx) {
-      expBankConfig.getLogger().log(Level.WARNING,
-          "Could not load experience for player [" + player.getName() + "].", confEx);
-    }
+    storedPlayerExperience = expBankConfig.getExperienceCache().get(player.getUniqueId()).get();
 
     for (int line = 0; line < 4; line++) {
       String evaluatedLine = renderSignLines(signLines.get(line), player, storedPlayerExperience);
