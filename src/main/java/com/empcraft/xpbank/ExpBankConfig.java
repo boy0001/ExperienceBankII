@@ -113,11 +113,6 @@ public final class ExpBankConfig {
     return mySqlPassword;
   }
 
-  @Deprecated
-  public boolean isMySqlEnabled() {
-    return Backend.MYSQL.equals(getBackend());
-  }
-
   public String getMySqlUserTable() {
     return this.mySqlUserTable;
   }
