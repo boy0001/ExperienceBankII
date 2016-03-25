@@ -67,4 +67,9 @@ public class ExpBankConfigTest {
     Assert.assertNotNull(mySqlUsername);
     Assert.assertNotNull(mySqlUserTable);
   }
+
+  @Test
+  public void testConfigSave() {
+    config.saveConfig();
+  }
 }
