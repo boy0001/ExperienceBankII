@@ -24,21 +24,21 @@ import java.util.logging.Level;
  */
 public abstract class PlayerExperienceDao extends BaseDao {
 
-  private final String SQL_CREATE = "CREATE TABLE IF NOT EXISTS " + getTable()
+  private final String sqlCreate = "CREATE TABLE IF NOT EXISTS " + getTable()
       + " ( UUID VARCHAR(36), EXP INT )";
 
   private final String sqlInsert = "INSERT INTO " + getTable()
       + " VALUES(?, ?) WHERE NOT EXISTS (SELECT 1 FROM " + getTable() + " WHERE UUID = ?)";
 
-  private final String SQL_COUNT = "SELECT COUNT(*) from " + getTable();
+  private final String sqlCount = "SELECT COUNT(*) from " + getTable();
 
-  private final String SQL_UPDATE = "UPDATE " + getTable() + " SET EXP = ? WHERE UUID = ?";
+  private final String sqlUpdate = "UPDATE " + getTable() + " SET EXP = ? WHERE UUID = ?";
 
-  private final String SQL_DELTA = "UPDATE " + getTable() + " SET EXP = EXP + ? WHERE UUID = ?";
+  private final String sqlDelta = "UPDATE " + getTable() + " SET EXP = EXP + ? WHERE UUID = ?";
 
-  private final String SQL_SELECT_ALL = "SELECT UUID, EXP FROM " + getTable();
+  private final String sqlSelectAll = "SELECT UUID, EXP FROM " + getTable();
 
-  private final String SQL_SELECT_UUID = "SELECT UUID, EXP FROM " + getTable() + " WHERE UUID = ?";
+  private final String sqlSelectUuid = "SELECT UUID, EXP FROM " + getTable() + " WHERE UUID = ?";
 
   public PlayerExperienceDao(final Connection conn, final ExpBankConfig config) {
     super(conn, config);
@@ -52,7 +52,7 @@ public abstract class PlayerExperienceDao extends BaseDao {
     boolean success = false;
 
     try {
-      PreparedStatement st = getConnection().prepareStatement(SQL_CREATE);
+      PreparedStatement st = getConnection().prepareStatement(sqlCreate);
       st.executeUpdate();
       success = true;
       st.close();
@@ -93,7 +93,7 @@ public abstract class PlayerExperienceDao extends BaseDao {
     int playercount = 0;
 
     try {
-      PreparedStatement st = getConnection().prepareStatement(SQL_COUNT);
+      PreparedStatement st = getConnection().prepareStatement(sqlCount);
       ResultSet rs = st.executeQuery();
 
       if (rs.next()) {
@@ -113,7 +113,7 @@ public abstract class PlayerExperienceDao extends BaseDao {
     boolean success = false;
 
     try {
-      PreparedStatement st = getConnection().prepareStatement(SQL_UPDATE);
+      PreparedStatement st = getConnection().prepareStatement(sqlUpdate);
       st.setInt(1, newExperience);
       st.setString(2, player.toString());
       int changed = st.executeUpdate();
@@ -136,7 +136,7 @@ public abstract class PlayerExperienceDao extends BaseDao {
     boolean success = false;
 
     try {
-      PreparedStatement st = getConnection().prepareStatement(SQL_DELTA);
+      PreparedStatement st = getConnection().prepareStatement(sqlDelta);
       st.setInt(1, delta);
       st.setString(2, player.toString());
       int changed = st.executeUpdate();
@@ -158,7 +158,7 @@ public abstract class PlayerExperienceDao extends BaseDao {
     Map<UUID, Integer> savedExperience = new HashMap<>();
 
     try {
-      PreparedStatement st = getConnection().prepareStatement(SQL_SELECT_ALL);
+      PreparedStatement st = getConnection().prepareStatement(sqlSelectAll);
       ResultSet rs = st.executeQuery();
 
       while (rs.next()) {
@@ -182,7 +182,7 @@ public abstract class PlayerExperienceDao extends BaseDao {
     int result = 0;
 
     try {
-      PreparedStatement st = getConnection().prepareStatement(SQL_SELECT_UUID);
+      PreparedStatement st = getConnection().prepareStatement(sqlSelectUuid);
       ResultSet rs = st.executeQuery();
 
       if (rs.next()) {

@@ -13,7 +13,7 @@ public class MySqlPlayerExperienceDao extends PlayerExperienceDao {
   /**
    * For mysql an unique index may improve performance.
    */
-  private final String SQL_CREATE = "CREATE TABLE IF NOT EXISTS " + getTable()
+  private final String sqlCreate = "CREATE TABLE IF NOT EXISTS " + getTable()
       + " ( UUID VARCHAR(36) NOT NULL UNIQUE, EXP INT )";
 
   public MySqlPlayerExperienceDao(final Connection conn, final ExpBankConfig config) {
@@ -25,7 +25,7 @@ public class MySqlPlayerExperienceDao extends PlayerExperienceDao {
     boolean success = false;
 
     try {
-      PreparedStatement st = getConnection().prepareStatement(SQL_CREATE);
+      PreparedStatement st = getConnection().prepareStatement(sqlCreate);
       st.executeUpdate();
       success = true;
     } catch (SQLException sqlEx) {
