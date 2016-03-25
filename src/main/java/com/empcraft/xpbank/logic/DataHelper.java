@@ -68,17 +68,14 @@ public class DataHelper {
     PlayerExperienceDao pd = null;
 
     switch (config.getBackend()) {
-      case MYSQL: {
+      case MYSQL:
         pd = new MySqlPlayerExperienceDao(connection, config);
         break;
-      }
-      case SQLITE: {
+      case SQLITE:
         pd = new SqLitePlayerExperienceDao(connection, config);
         break;
-      }
-      default: {
-        // empty
-      }
+      default:
+        break;
     }
 
     return pd;
@@ -139,7 +136,7 @@ public class DataHelper {
       PlayerExperienceDao ped = getDao(connection);
       success = ped.updatePlayerExperience(uuid, newExperience);
     } catch (SQLException sqlEx) {
-      config.getLogger().log(Level.SEVERE, "Could not update player experience.", sqlEx);
+      config.getLogger().log(Level.SEVERE, ylp.getMessage(Text.MYSQL_GET), sqlEx);
     }
 
     config.getLogger().log(Level.INFO,
@@ -155,7 +152,7 @@ public class DataHelper {
       PlayerExperienceDao ped = getDao(connection);
       success = ped.createTable();
     } catch (SQLException sqlEx) {
-      config.getLogger().log(Level.SEVERE, "Could not create Table in Database.", sqlEx);
+      config.getLogger().log(Level.SEVERE, ylp.getMessage(Text.MYSQL_GET), sqlEx);
     }
 
     config.getLogger().log(Level.INFO, "Created Database");
@@ -188,7 +185,7 @@ public class DataHelper {
       PlayerExperienceDao ped = getDao(connection);
       result = ped.getSavedExperience(uuid);
     } catch (SQLException sqlEx) {
-      config.getLogger().log(Level.SEVERE, "Could not read existing saved exp from Database.",
+      config.getLogger().log(Level.SEVERE, ylp.getMessage(Text.MYSQL_GET),
           sqlEx);
       throw new DatabaseConnectorException(sqlEx);
     }
@@ -221,7 +218,7 @@ public class DataHelper {
       PlayerExperienceDao ped = getDao(connection);
       success = ped.updatePlayerExperienceDelta(uuid, delta);
     } catch (SQLException sqlEx) {
-      config.getLogger().log(Level.SEVERE, "Could not update player experience.", sqlEx);
+      config.getLogger().log(Level.SEVERE, ylp.getMessage(Text.MYSQL_GET), sqlEx);
       throw new DatabaseConnectorException(sqlEx);
     }
 
@@ -238,7 +235,7 @@ public class DataHelper {
       PlayerExperienceDao ped = getDao(connection);
       success = ped.insertNewPlayer(uuid);
     } catch (SQLException sqlEx) {
-      config.getLogger().log(Level.SEVERE, "Could not update player experience.", sqlEx);
+      config.getLogger().log(Level.SEVERE, ylp.getMessage(Text.MYSQL_GET), sqlEx);
       throw new DatabaseConnectorException(sqlEx);
     }
 
