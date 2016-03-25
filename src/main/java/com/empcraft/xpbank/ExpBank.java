@@ -70,8 +70,6 @@ public class ExpBank extends JavaPlugin {
     LoadExperienceOnStartupThread lest = new LoadExperienceOnStartupThread(expConfig, ylp);
     Bukkit.getScheduler().runTaskAsynchronously(this, lest);
 
-    new InSignsNano(expConfig);
-
     registerEvents();
   }
 
