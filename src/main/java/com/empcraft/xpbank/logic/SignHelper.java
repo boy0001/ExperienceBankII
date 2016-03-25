@@ -4,6 +4,7 @@ import com.empcraft.xpbank.ExpBankConfig;
 import com.empcraft.xpbank.text.MessageUtils;
 import com.empcraft.xpbank.threads.UpdateAllSignsThread;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -128,7 +129,7 @@ public final class SignHelper {
 
   public static String[] getSignText(String[] lines, Player player,
       final ExpBankConfig expBankConfig) {
-    int storedPlayerExperience = 0;
+    int storedPlayerExperience;
     List<String> signLines = expBankConfig.getSignContent();
 
     if (!MessageUtils.colorise(expBankConfig.getSignContent().get(0))
@@ -157,9 +158,7 @@ public final class SignHelper {
    */
   public static void scheduleUpdate(final Player player, final Location location,
       final ExpBankConfig expBankConfig) {
-    // manual update.
-    // Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(expBankConfig.getPlugin(),
-    // new UpdateAllSignsThread(player, location, expBankConfig), 5L);
-    new UpdateAllSignsThread(player, location, expBankConfig).run();
+    Bukkit.getScheduler().runTask(expBankConfig.getPlugin(),
+        new UpdateAllSignsThread(player, location, expBankConfig));
   }
 }

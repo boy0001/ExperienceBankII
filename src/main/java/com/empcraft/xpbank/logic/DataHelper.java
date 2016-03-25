@@ -246,7 +246,7 @@ public class DataHelper {
   }
 
   public static int checkForMaximumWithdraw(Player player, int toWithdraw, final ExpBankConfig config) {
-    int currentlyinstore = 0;
+    int currentlyinstore;
 
     currentlyinstore = config.getExperienceCache().get(player.getUniqueId()).get();
 
@@ -260,7 +260,7 @@ public class DataHelper {
 
   public static int checkForMaximumDeposit(Player player, int toDeposit, final ExpBankConfig config) {
     int maxDeposit = config.getMaxStorageForPlayer(player);
-    int currentlyinstore = 0;
+    int currentlyinstore;
 
     currentlyinstore = config.getExperienceCache().get(player.getUniqueId()).get();
 
