@@ -32,19 +32,19 @@ public class DataHelper {
   }
 
   private Connection getConnection() throws DatabaseConnectorException {
-    Connection c = null;
+    Connection connection;
 
     switch (config.getBackend()) {
       case MYSQL: {
-        c = getMySqlConnection();
+        connection = getMySqlConnection();
         break;
       }
       case YAML: {
-        c = null;
+        connection = null;
         break;
       }
       case SQLITE: {
-        c = getSqLiteConnection();
+        connection = getSqLiteConnection();
         break;
       }
       default: {
@@ -52,7 +52,7 @@ public class DataHelper {
       }
     }
 
-    return c;
+    return connection;
   }
 
   private Connection getMySqlConnection() throws DatabaseConnectorException {
