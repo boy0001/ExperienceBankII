@@ -5,6 +5,7 @@ package code.husky.sqlite;
 
 import code.husky.Database;
 import code.husky.DatabaseConnectorException;
+import code.husky.StubDatabase;
 
 import java.io.File;
 import java.sql.Connection;
@@ -15,11 +16,10 @@ import java.sql.Statement;
 /**
  *
  */
-public class SqLite implements Database {
+public class SqLite extends StubDatabase implements Database {
 
   private File dbFile;
 
-  private Connection connection = null;
 
   public SqLite(File dbFile) {
     this.dbFile = dbFile;
@@ -32,61 +32,22 @@ public class SqLite implements Database {
   public Connection openConnection() throws DatabaseConnectorException {
     try {
       if (checkConnection()) {
-        return connection;
+        return getConnection();
       }
 
       Class.forName("org.sqlite.JDBC");
-      connection = DriverManager
-          .getConnection("jdbc:sqlite:" + dbFile.getAbsolutePath());
+      setConnection(DriverManager
+          .getConnection("jdbc:sqlite:" + dbFile.getAbsolutePath()));
 
-      Statement createStatement = connection.createStatement();
+      Statement createStatement = getConnection().createStatement();
       createStatement.executeUpdate("PRAGMA SYNCHRONOUS=NORMAL");
       createStatement.close();
     } catch (SQLException | ClassNotFoundException sqlEx) {
       throw new DatabaseConnectorException(sqlEx);
     }
 
-    return connection;
+    return getConnection();
   }
 
-  /* (non-Javadoc)
-   * @see code.husky.Database#checkConnection()
-   */
-  @Override
-  public boolean checkConnection() throws SQLException {
-    return connection != null && !connection.isClosed();
-  }
-
-  /* (non-Javadoc)
-   * @see code.husky.Database#getConnection()
-   */
-  @Override
-  public Connection getConnection() {
-    return connection;
-  }
-
-  /* (non-Javadoc)
-   * @see code.husky.Database#closeConnection()
-   */
-  @Override
-  public boolean closeConnection() throws DatabaseConnectorException {
-    if (connection == null) {
-      return true;
-    }
-
-    try {
-      if (connection.isClosed()) {
-        connection = null;
-
-        return true;
-      }
-
-      connection.close();
-    } catch (SQLException sqlEx) {
-      throw new DatabaseConnectorException(sqlEx);
-    }
-
-    return true;
-  }
 
 }

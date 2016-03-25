@@ -2,6 +2,7 @@ package code.husky.mysql;
 
 import code.husky.Database;
 import code.husky.DatabaseConnectorException;
+import code.husky.StubDatabase;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -13,14 +14,12 @@ import java.sql.SQLException;
  * @author -_Husky_-
  * @author tips48
  */
-public class MySQL implements Database {
+public class MySQL extends StubDatabase implements Database {
   private final String user;
   private final String database;
   private final String password;
   private final int port;
   private final String hostname;
-
-  private Connection connection;
 
   /**
    * Creates a new MySQL instance.
@@ -43,55 +42,25 @@ public class MySQL implements Database {
     this.database = database;
     this.user = username;
     this.password = password;
-    this.connection = null;
   }
 
   @Override
   public Connection openConnection() throws DatabaseConnectorException {
     try {
       if (checkConnection()) {
-        return connection;
+        return getConnection();
       }
 
       Class.forName("com.mysql.jdbc.Driver");
-      connection = DriverManager.getConnection(
+      setConnection(DriverManager.getConnection(
           "jdbc:mysql://" + this.hostname + ":" + this.port + "/" + this.database, this.user,
-          this.password);
+          this.password));
     } catch (SQLException | ClassNotFoundException connectEx) {
       throw new DatabaseConnectorException(connectEx);
     }
 
-    return connection;
+    return getConnection();
   }
 
-  @Override
-  public boolean checkConnection() throws SQLException {
-    return connection != null && !connection.isClosed();
-  }
 
-  @Override
-  public Connection getConnection() {
-    return connection;
-  }
-
-  @Override
-  public boolean closeConnection() throws DatabaseConnectorException {
-    if (connection == null) {
-      return false;
-    }
-
-    try {
-      if (connection.isClosed()) {
-        connection = null;
-
-        return true;
-      }
-
-      connection.close();
-    } catch (SQLException sqlEx) {
-      throw new DatabaseConnectorException(sqlEx);
-    }
-
-    return true;
-  }
 }
