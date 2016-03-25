@@ -30,7 +30,7 @@ public enum Backend {
     }
 
     for (Backend be : values()) {
-      if (be.name().toLowerCase().equals(backendString.toLowerCase())) {
+      if (be.name().equalsIgnoreCase(backendString)) {
         return be;
       }
     }
