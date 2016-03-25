@@ -35,21 +35,17 @@ public class DataHelper {
     Connection connection;
 
     switch (config.getBackend()) {
-      case MYSQL: {
+      case MYSQL:
         connection = getMySqlConnection();
         break;
-      }
-      case YAML: {
+      case YAML:
         connection = null;
         break;
-      }
-      case SQLITE: {
+      case SQLITE:
         connection = getSqLiteConnection();
         break;
-      }
-      default: {
+      default:
         throw new DatabaseConnectorException("No such backend: + [" + config.getBackend() + "].");
-      }
     }
 
     return connection;
