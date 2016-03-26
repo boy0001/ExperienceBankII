@@ -43,24 +43,26 @@ public class SqLiteDbTest {
   public void setUp() throws FileNotFoundException, ConfigurationException, IOException,
       InvalidConfigurationException, DatabaseConnectorException {
     this.config = ConfigHelper.getFakeConfig().withBackend(Backend.SQLITE.toString()).build();
+
+    if (config.getSqLiteDbFileName().exists()) {
+      config.getSqLiteDbFileName().delete();
+    }
+
+    config.closeSqliteConnection();
+    config.setupSqlite();
   }
 
   @Test
   public void testSqLite() throws ConfigurationException, FileNotFoundException, IOException,
       InvalidConfigurationException, URISyntaxException, DatabaseConnectorException {
     YamlLanguageProvider ylp = new YamlLanguageProvider(config);
-
-    config.getLogger().log(Level.INFO, "Using Backend: [" + config.getBackend().name() + "].");
-
-    DataHelper dh = new DataHelper(ylp, config);
-    config.getLogger().log(Level.INFO, "Database file: " + config.getSqLiteDbFileName());
     Assert.assertNotNull(config.getSqLiteDbFileName());
-    if (config.getSqLiteDbFileName().exists()) {
-      config.getSqLiteDbFileName().delete();
-    }
-
     Assert.assertNotNull(config.getSqLiteConnection());
 
+    config.getLogger().log(Level.INFO, "Using Backend: [" + config.getBackend().name() + "].");
+    config.getLogger().log(Level.INFO, "Database file: " + config.getSqLiteDbFileName());
+
+    DataHelper dh = new DataHelper(ylp, config);
     boolean exists = dh.createTableIfNotExists();
     Assert.assertTrue(exists);
 
