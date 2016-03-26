@@ -16,6 +16,7 @@ import com.empcraft.xpbank.text.YamlLanguageProvider;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -36,22 +37,29 @@ public class SqLiteDbTest {
 
   @Rule
   public PowerMockRule rule = new PowerMockRule();
+  private ExpBankConfig config;
+
+  @Before
+  public void setUp() throws FileNotFoundException, ConfigurationException, IOException,
+      InvalidConfigurationException, DatabaseConnectorException {
+    this.config = ConfigHelper.getFakeConfig().withBackend(Backend.SQLITE.toString()).build();
+  }
 
   @Test
   public void testSqLite() throws ConfigurationException, FileNotFoundException, IOException,
       InvalidConfigurationException, URISyntaxException, DatabaseConnectorException {
-    ExpBankConfig config = ConfigHelper.getFakeConfig().withBackend("sqlite").build();
     YamlLanguageProvider ylp = new YamlLanguageProvider(config);
 
     config.getLogger().log(Level.INFO, "Using Backend: [" + config.getBackend().name() + "].");
 
     DataHelper dh = new DataHelper(ylp, config);
-    config.getLogger().log(Level.INFO, "Database file: " + config.getDbFileName());
-    Assert.assertNotNull(config.getDbFileName());
-    if (config.getDbFileName().exists()) {
-      config.getDbFileName().delete();
+    config.getLogger().log(Level.INFO, "Database file: " + config.getSqLiteDbFileName());
+    Assert.assertNotNull(config.getSqLiteDbFileName());
+    if (config.getSqLiteDbFileName().exists()) {
+      config.getSqLiteDbFileName().delete();
     }
 
+    Assert.assertNotNull(config.getSqLiteConnection());
 
     boolean exists = dh.createTableIfNotExists();
     Assert.assertTrue(exists);
@@ -67,9 +75,12 @@ public class SqLiteDbTest {
 
     countPlayersInDatabase = dh.countPlayersInDatabase();
     Assert.assertEquals(1, countPlayersInDatabase);
-    Assert.assertTrue(config.getDbFileName().exists());
 
-    config.getDbFileName().delete();
+    config.closeSqliteConnection();
+
+    Assert.assertTrue(config.getSqLiteDbFileName().exists());
+
+    config.getSqLiteDbFileName().delete();
   }
 
 }

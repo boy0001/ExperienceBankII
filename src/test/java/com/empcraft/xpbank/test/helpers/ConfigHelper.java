@@ -1,6 +1,7 @@
 package com.empcraft.xpbank.test.helpers;
 
 import code.husky.Backend;
+import code.husky.DatabaseConnectorException;
 
 import com.empcraft.xpbank.ExpBankConfig;
 import com.empcraft.xpbank.err.ConfigurationException;
@@ -51,7 +52,7 @@ public class ConfigHelper {
 
     LOG.info("Description: [{}].".replaceFirst("\\{\\}", plugin.getDescription().getDescription()));
 
-    PowerMockito.doReturn(datafolder).when(plugin).getDataFolder();
+    PowerMockito.doReturn(datafolder.getCanonicalFile()).when(plugin).getDataFolder();
 
     YamlConfiguration yamlConfig = getYamlConfig();
     PowerMockito.doReturn(yamlConfig).when(plugin).getConfig();
@@ -101,11 +102,12 @@ public class ConfigHelper {
     return this;
   }
 
-  public ConfigHelper withBackend(String backend) {
+  public ConfigHelper withBackend(String backend) throws DatabaseConnectorException {
     Backend be = Backend.getBackend(backend);
     LOG.info("Using Backend [" + be.toString() + "].");
 
     PowerMockito.doReturn(be).when(config).getBackend();
+    config.setupSqlite();
 
     return this;
   }

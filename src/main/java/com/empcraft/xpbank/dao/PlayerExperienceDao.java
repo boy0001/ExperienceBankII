@@ -14,7 +14,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -49,7 +48,7 @@ public abstract class PlayerExperienceDao extends BaseDao {
     return getConfig().getMySqlUserTable();
   }
 
-  public boolean createTable() {
+  public boolean createTable() throws DatabaseConnectorException {
     boolean success = false;
 
     try {
@@ -57,12 +56,9 @@ public abstract class PlayerExperienceDao extends BaseDao {
       st.executeUpdate();
       success = true;
       st.close();
-
-      Statement createStatement = getConnection().createStatement();
-      createStatement.executeUpdate("PRAGMA SYNCHRONOUS=NORMAL");
-      createStatement.close();
     } catch (SQLException sqlEx) {
       getLogger().log(Level.SEVERE, "Could not create player table [" + getTable() + "].", sqlEx);
+      throw new DatabaseConnectorException(sqlEx);
     }
 
     return success;

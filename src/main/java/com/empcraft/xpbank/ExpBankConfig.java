@@ -1,6 +1,8 @@
 package com.empcraft.xpbank;
 
 import code.husky.Backend;
+import code.husky.DatabaseConnectorException;
+import code.husky.sqlite.SqLite;
 
 import com.empcraft.xpbank.err.ConfigurationException;
 import com.empcraft.xpbank.logic.PermissionsHelper;
@@ -11,6 +13,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -59,6 +63,8 @@ public class ExpBankConfig {
 
   private Backend backend;
 
+  private Connection sqLiteConnection;
+
   public ExpBankConfig(final JavaPlugin plugin) throws ConfigurationException {
     this.plugin = plugin;
     this.version = plugin.getDescription().getVersion();
@@ -67,6 +73,29 @@ public class ExpBankConfig {
 
     refreshConfig();
     readConfig();
+
+    try {
+      setupSqlite();
+    } catch (DatabaseConnectorException sqlEx) {
+      throw new ConfigurationException(sqlEx);
+    }
+  }
+
+  public void setupSqlite() throws DatabaseConnectorException {
+    if (this.getSqLiteConnection() != null) {
+      try {
+        if (!this.getSqLiteConnection().isClosed()) {
+          this.getSqLiteConnection().close();
+        }
+      } catch (SQLException sqlEx) {
+        getLogger().log(Level.SEVERE, "Could not close old conn", sqlEx);
+      }
+    }
+
+    if (Backend.SQLITE.equals(this.backend)) {
+      SqLite sql = new SqLite(getSqLiteDbFileName());
+      this.sqLiteConnection = sql.openConnection();
+    }
   }
 
   public JavaPlugin getPlugin() {
@@ -121,7 +150,12 @@ public class ExpBankConfig {
     return this.experienceYmlFile;
   }
 
-  public File getDbFileName() {
+  /**
+   * SQLite DB File name.
+   *
+   * @return
+   */
+  public File getSqLiteDbFileName() {
     return new File(plugin.getDataFolder(), DB_FILENAME);
   }
 
@@ -150,6 +184,10 @@ public class ExpBankConfig {
 
   public ExperienceCache getExperienceCache() {
     return experienceCache;
+  }
+
+  public Connection getSqLiteConnection() {
+    return sqLiteConnection;
   }
 
   /**
@@ -232,6 +270,24 @@ public class ExpBankConfig {
       if (!config.contains(node.getKey())) {
         config.set(node.getKey(), node.getValue());
       }
+    }
+  }
+
+  public void closeSqliteConnection() {
+    if (!Backend.SQLITE.equals(backend)) {
+      return;
+    }
+
+    if (sqLiteConnection == null) {
+      return;
+    }
+
+    try {
+      if (!sqLiteConnection.isClosed()) {
+        sqLiteConnection.close();
+      }
+    } catch (SQLException sqlEx) {
+      getLogger().log(Level.SEVERE, "Could not clean close the sqlite connection!", sqlEx);
     }
   }
 

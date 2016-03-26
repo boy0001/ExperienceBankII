@@ -1,8 +1,8 @@
 package com.empcraft.xpbank.logic;
 
+import code.husky.Backend;
 import code.husky.DatabaseConnectorException;
 import code.husky.mysql.MySQL;
-import code.husky.sqlite.SqLite;
 
 import com.empcraft.xpbank.ExpBankConfig;
 import com.empcraft.xpbank.dao.PlayerExperienceDao;
@@ -42,7 +42,7 @@ public class DataHelper {
         connection = null;
         break;
       case SQLITE:
-        connection = getSqLiteConnection();
+        connection = config.getSqLiteConnection();
         break;
       default:
         throw new DatabaseConnectorException("No such backend: + [" + config.getBackend() + "].");
@@ -56,12 +56,6 @@ public class DataHelper {
         config.getMySqlUsername(), config.getMySqlPassword());
 
     return mySql.openConnection();
-  }
-
-  private Connection getSqLiteConnection() throws DatabaseConnectorException {
-    SqLite sqlite = new SqLite(config.getDbFileName());
-
-    return sqlite.openConnection();
   }
 
   private PlayerExperienceDao getDao(Connection connection) {
@@ -94,7 +88,10 @@ public class DataHelper {
       return;
     }
 
-    try (Connection connection = getConnection()) {
+    Connection connection = null;
+
+    try {
+      connection = getConnection();
       MessageUtils.sendMessageToConsole(ylp.getMessage(Text.CONVERT));
       PlayerExperienceDao ped = getDao(connection);
 
@@ -107,8 +104,41 @@ public class DataHelper {
       }
 
       MessageUtils.sendMessageToConsole(ylp.getMessage(Text.DONE));
+    } finally {
+      specialCloseConnection(connection);
+    }
+
+    return;
+  }
+
+  /**
+   * Null- and exception safe method to close connections.
+   *
+   * <p>
+   * <b>SQLite</b>-Conneciton may not be closed.
+   * </p>
+   *
+   * @param connection
+   *          the conneciton to be closed.
+   */
+  private void specialCloseConnection(Connection connection) {
+    if (Backend.SQLITE.equals(config.getBackend())) {
+      // Don't close SQLite connections.
+      return;
+    }
+
+    if (connection == null) {
+      return;
+    }
+
+    try {
+      if (connection.isClosed()) {
+        return;
+      }
+
+      connection.close();
     } catch (SQLException sqlEx) {
-      config.getLogger().log(Level.SEVERE, "Could not insert players into Database.", sqlEx);
+      config.getLogger().log(Level.WARNING, "Could not close connection.", sqlEx);
     }
 
     return;
@@ -117,12 +147,14 @@ public class DataHelper {
   public int countPlayersInDatabase() throws DatabaseConnectorException {
     int playercount = 0;
 
-    try (Connection connection = getConnection()) {
+    Connection connection = null;
+    try {
+      connection = getConnection();
       PlayerExperienceDao ped = getDao(connection);
       playercount = ped.countPlayers();
       config.getLogger().info("Found [" + playercount + "] players.");
-    } catch (SQLException sqlEx) {
-      config.getLogger().log(Level.SEVERE, "Could not count players in Database.", sqlEx);
+    } finally {
+      specialCloseConnection(connection);
     }
 
     return playercount;
@@ -132,11 +164,14 @@ public class DataHelper {
       throws DatabaseConnectorException {
     boolean success = false;
 
-    try (Connection connection = getConnection()) {
+    Connection connection = null;
+
+    try {
+      connection = getConnection();
       PlayerExperienceDao ped = getDao(connection);
       success = ped.updatePlayerExperience(uuid, newExperience);
-    } catch (SQLException sqlEx) {
-      config.getLogger().log(Level.SEVERE, ylp.getMessage(Text.MYSQL_GET), sqlEx);
+    } finally {
+      specialCloseConnection(connection);
     }
 
     config.getLogger().log(Level.INFO,
@@ -148,11 +183,14 @@ public class DataHelper {
   public boolean createTableIfNotExists() throws DatabaseConnectorException {
     boolean success = false;
 
-    try (Connection connection = getConnection()) {
+    Connection connection = null;
+
+    try {
+      connection = getConnection();
       PlayerExperienceDao ped = getDao(connection);
       success = ped.createTable();
-    } catch (SQLException sqlEx) {
-      config.getLogger().log(Level.SEVERE, ylp.getMessage(Text.MYSQL_GET), sqlEx);
+    } finally {
+      specialCloseConnection(connection);
     }
 
     config.getLogger().log(Level.INFO, "Created Database");
@@ -163,13 +201,14 @@ public class DataHelper {
   public Map<UUID, Integer> getSavedExperience()
       throws DatabaseConnectorException {
     Map<UUID, Integer> results = new HashMap<>();
+    Connection connection = null;
 
-    try (Connection connection = getConnection()) {
+    try {
+      connection = getConnection();
       PlayerExperienceDao ped = getDao(connection);
       results.putAll(ped.getSavedExperience());
-    } catch (SQLException sqlEx) {
-      config.getLogger().log(Level.SEVERE, "Could not read existing saved exp from Database.", sqlEx);
-      throw new DatabaseConnectorException(sqlEx);
+    } finally {
+      specialCloseConnection(connection);
     }
 
     config.getLogger().log(Level.INFO, "Read saved experience.");
@@ -180,14 +219,14 @@ public class DataHelper {
   public int getSavedExperience(UUID uuid)
       throws DatabaseConnectorException {
     int result = 0;
+    Connection connection = null;
 
-    try (Connection connection = getConnection()) {
+    try {
+      connection = getConnection();
       PlayerExperienceDao ped = getDao(connection);
       result = ped.getSavedExperience(uuid);
-    } catch (SQLException sqlEx) {
-      config.getLogger().log(Level.SEVERE, ylp.getMessage(Text.MYSQL_GET),
-          sqlEx);
-      throw new DatabaseConnectorException(sqlEx);
+    } finally {
+      specialCloseConnection(connection);
     }
 
     config.getLogger().log(Level.INFO,
@@ -213,13 +252,14 @@ public class DataHelper {
   public boolean updatePlayerExperienceDelta(UUID uuid, int delta)
       throws DatabaseConnectorException {
     boolean success = false;
+    Connection connection = null;
 
-    try (Connection connection = getConnection()) {
+    try {
+      connection = getConnection();
       PlayerExperienceDao ped = getDao(connection);
       success = ped.updatePlayerExperienceDelta(uuid, delta);
-    } catch (SQLException sqlEx) {
-      config.getLogger().log(Level.SEVERE, ylp.getMessage(Text.MYSQL_GET), sqlEx);
-      throw new DatabaseConnectorException(sqlEx);
+    } finally {
+      specialCloseConnection(connection);
     }
 
     config.getLogger().log(Level.INFO,
@@ -230,13 +270,14 @@ public class DataHelper {
 
   public boolean insertNewPlayer(UUID uuid) throws DatabaseConnectorException {
     boolean success = false;
+    Connection connection = null;
 
-    try (Connection connection = getConnection()) {
+    try {
+      connection = getConnection();
       PlayerExperienceDao ped = getDao(connection);
       success = ped.insertNewPlayer(uuid);
-    } catch (SQLException sqlEx) {
-      config.getLogger().log(Level.SEVERE, ylp.getMessage(Text.MYSQL_GET), sqlEx);
-      throw new DatabaseConnectorException(sqlEx);
+    } finally {
+      specialCloseConnection(connection);
     }
 
     config.getLogger().log(Level.INFO,

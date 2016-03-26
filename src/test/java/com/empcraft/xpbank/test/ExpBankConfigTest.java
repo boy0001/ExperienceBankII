@@ -1,6 +1,7 @@
 package com.empcraft.xpbank.test;
 
 import code.husky.Backend;
+import code.husky.DatabaseConnectorException;
 
 import com.empcraft.xpbank.ExpBankConfig;
 import com.empcraft.xpbank.err.ConfigurationException;
@@ -32,7 +33,7 @@ public class ExpBankConfigTest {
 
   @Before
   public void setUp() throws ConfigurationException, FileNotFoundException, IOException,
-      InvalidConfigurationException {
+      InvalidConfigurationException, DatabaseConnectorException {
     this.config = ConfigHelper.getFakeConfig().withLanguage("english")
         .withBackend(Backend.YAML.toString()).build();
     this.ylp = new YamlLanguageProvider(config);

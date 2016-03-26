@@ -40,6 +40,8 @@ public class ExpBank extends JavaPlugin {
   @Override
   public void onDisable() {
     saveConfig();
+
+    expConfig.closeSqliteConnection();
   }
 
   @Override

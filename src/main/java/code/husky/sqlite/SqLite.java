@@ -11,6 +11,7 @@ import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 /**
  *
@@ -37,6 +38,14 @@ public class SqLite extends StubDatabase implements Database {
       Class.forName("org.sqlite.JDBC");
       setConnection(DriverManager
           .getConnection("jdbc:sqlite:" + dbFile.getAbsolutePath()));
+
+      Statement journalSt = getConnection().createStatement();
+      journalSt.executeUpdate("PRAGMA journal_mode = TRUNCATE");
+      journalSt.close();
+
+      Statement createStatement = getConnection().createStatement();
+      createStatement.executeUpdate("PRAGMA SYNCHRONOUS = NORMAL");
+      createStatement.close();
     } catch (SQLException | ClassNotFoundException sqlEx) {
       throw new DatabaseConnectorException(sqlEx);
     }
