@@ -96,7 +96,7 @@ public class SqLiteDbTest {
     List<Runnable> threads = new ArrayList<>();
     final UUID testplayer = UUID.randomUUID();
     final DataHelper dh = new DataHelper(ylp, config);
-    ExecutorService pool = Executors.newWorkStealingPool(10);
+    ExecutorService pool = Executors.newCachedThreadPool();
 
     boolean exists = dh.createTableIfNotExists();
     Assert.assertTrue(exists);
