@@ -19,7 +19,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.SignChangeEvent;
 
 /**
- * @author bmarwell
  *
  */
 public class SignChangeEventListener implements Listener {
