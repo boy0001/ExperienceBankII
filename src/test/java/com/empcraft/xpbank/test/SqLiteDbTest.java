@@ -15,6 +15,7 @@ import com.empcraft.xpbank.text.YamlLanguageProvider;
 
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -25,7 +26,12 @@ import org.powermock.modules.junit4.rule.PowerMockRule;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 
@@ -38,6 +44,7 @@ public class SqLiteDbTest {
   @Rule
   public PowerMockRule rule = new PowerMockRule();
   private ExpBankConfig config;
+  private YamlLanguageProvider ylp;
 
   @Before
   public void setUp() throws FileNotFoundException, ConfigurationException, IOException,
@@ -50,12 +57,13 @@ public class SqLiteDbTest {
 
     config.closeSqliteConnection();
     config.setupSqlite();
+
+    ylp = new YamlLanguageProvider(config);
   }
 
   @Test
   public void testSqLite() throws ConfigurationException, FileNotFoundException, IOException,
       InvalidConfigurationException, URISyntaxException, DatabaseConnectorException {
-    YamlLanguageProvider ylp = new YamlLanguageProvider(config);
     Assert.assertNotNull(config.getSqLiteDbFileName());
     Assert.assertNotNull(config.getSqLiteConnection());
 
@@ -81,7 +89,55 @@ public class SqLiteDbTest {
     config.closeSqliteConnection();
 
     Assert.assertTrue(config.getSqLiteDbFileName().exists());
+  }
 
+  @Test
+  public void concurrencyTest() throws InterruptedException, DatabaseConnectorException {
+    List<Runnable> threads = new ArrayList<>();
+    final UUID testplayer = UUID.randomUUID();
+    final DataHelper dh = new DataHelper(ylp, config);
+    ExecutorService pool = Executors.newWorkStealingPool(10);
+
+    boolean exists = dh.createTableIfNotExists();
+    Assert.assertTrue(exists);
+
+    dh.insertNewPlayer(testplayer);
+
+    long starttime = System.currentTimeMillis();
+
+    for (int ii = 0; ii < 500; ii++) {
+      threads.add(new Runnable() {
+
+        @Override
+        public void run() {
+          try {
+            dh.updatePlayerExperienceDelta(testplayer, 1);
+          } catch (DatabaseConnectorException dcEx) {
+            config.getLogger().log(Level.SEVERE, "Could not update player", dcEx);
+          }
+        }
+      });
+    }
+
+    for (Runnable runnable : threads) {
+      pool.submit(runnable);
+    }
+
+    pool.shutdown();
+    pool.awaitTermination(10, TimeUnit.SECONDS);
+
+    long endtime = System.currentTimeMillis();
+
+    long duration = endtime - starttime;
+    config.getLogger().info("Insert took [" + duration + "]ms.");
+    Assert.assertTrue(10000 > duration);
+
+    int points = dh.getSavedExperience(testplayer);
+    Assert.assertEquals(500, points);
+  }
+
+  @After
+  public void tearDown() {
     config.getSqLiteDbFileName().delete();
   }
 

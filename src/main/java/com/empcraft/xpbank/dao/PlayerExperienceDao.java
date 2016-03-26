@@ -184,6 +184,7 @@ public abstract class PlayerExperienceDao extends BaseDao {
 
     try {
       PreparedStatement st = getConnection().prepareStatement(sqlSelectUuid);
+      st.setString(1, uniqueId.toString());
       ResultSet rs = st.executeQuery();
 
       if (rs.next()) {
