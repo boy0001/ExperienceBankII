@@ -16,10 +16,10 @@ import com.empcraft.xpbank.text.YamlLanguageProvider;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.modules.junit4.rule.PowerMockRule;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -31,9 +31,11 @@ import java.util.logging.Level;
 /**
  *
  */
-@RunWith(PowerMockRunner.class)
 @PrepareForTest({ ExpBankConfig.class, JavaPlugin.class, Backend.class })
 public class SqLiteDbTest {
+
+  @Rule
+  public PowerMockRule rule = new PowerMockRule();
 
   @Test
   public void testSqLite() throws ConfigurationException, FileNotFoundException, IOException,

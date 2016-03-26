@@ -1,4 +1,4 @@
-package com.empcraft.xpbank.test;
+package com.empcraft.xpbank.test.helpers;
 
 import org.bukkit.BlockChangeDelegate;
 import org.bukkit.Chunk;

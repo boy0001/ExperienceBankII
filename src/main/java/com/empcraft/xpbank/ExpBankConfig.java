@@ -20,7 +20,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public final class ExpBankConfig {
+public class ExpBankConfig {
 
   private static final String DB_FILENAME = "xp.db";
 

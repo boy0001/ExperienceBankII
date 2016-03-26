@@ -7,6 +7,7 @@ import com.empcraft.xpbank.err.ConfigurationException;
 
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.plugin.InvalidDescriptionException;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.powermock.api.mockito.PowerMockito;
@@ -14,6 +15,9 @@ import org.powermock.api.mockito.PowerMockito;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class ConfigHelper {
@@ -26,7 +30,8 @@ public class ConfigHelper {
   public static ConfigHelper getFakeConfig() throws ConfigurationException, FileNotFoundException,
       IOException, InvalidConfigurationException {
     ConfigHelper confighelper = new ConfigHelper();
-    ExpBankConfig cfg = new ExpBankConfig(mockJavaPlugin());
+    JavaPlugin javaPlugin = mockJavaPlugin();
+    ExpBankConfig cfg = new ExpBankConfig(javaPlugin);
     confighelper.config = PowerMockito.spy(cfg);
 
     return confighelper;
@@ -40,10 +45,19 @@ public class ConfigHelper {
     LOG.info("Using Datafolder: [" + datafolder.getAbsolutePath() + "].");
     JavaPlugin plugin = PowerMockito.mock(JavaPlugin.class);
 
-    PowerMockito.when(plugin.getDataFolder()).thenReturn(datafolder);
-    PowerMockito.when(plugin.getLogger()).thenReturn(Logger.getLogger("TestLogger"));
-    PowerMockito.when(plugin.getDescription()).thenReturn(mockDescription());
-    PowerMockito.when(plugin.getConfig()).thenReturn(getYamlConfig());
+    PluginDescriptionFile mockDescription = mockDescription();
+    LOG.info("Description: [{}].".replaceFirst("\\{\\}", mockDescription.getDescription()));
+    PowerMockito.when(plugin.getDescription()).thenReturn(mockDescription);
+
+    LOG.info("Description: [{}].".replaceFirst("\\{\\}", plugin.getDescription().getDescription()));
+
+    PowerMockito.doReturn(datafolder).when(plugin).getDataFolder();
+
+    YamlConfiguration yamlConfig = getYamlConfig();
+    PowerMockito.doReturn(yamlConfig).when(plugin).getConfig();
+
+    Logger logger = Logger.getLogger("TestLogger");
+    PowerMockito.doReturn(logger).when(plugin).getLogger();
 
     return plugin;
   }
@@ -59,8 +73,23 @@ public class ConfigHelper {
   }
 
   private static PluginDescriptionFile mockDescription() {
-    PluginDescriptionFile descriptionFile = new PluginDescriptionFile("ExpBank",
-        "PluginTest: Version", "com.empcraft.xpbank.ExpBank");
+    InputStream descFile = ConfigHelper.class.getResourceAsStream("/plugin.yml");
+    InputStreamReader isr = new InputStreamReader(descFile);
+    PluginDescriptionFile descriptionFile = null;
+
+    try {
+      descriptionFile = new PluginDescriptionFile(isr);
+      isr.close();
+      descFile.close();
+    } catch (InvalidDescriptionException e) {
+      LOG.log(Level.SEVERE, "Could not load plugin desc!", e);
+    } catch (IOException e) {
+      LOG.log(Level.SEVERE, "Could not load plugin desc!", e);
+    }
+
+    if (descriptionFile == null) {
+      throw new IllegalStateException("Description is null");
+    }
 
     return descriptionFile;
   }

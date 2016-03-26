@@ -21,7 +21,6 @@ import java.util.UUID;
 import java.util.logging.Level;
 
 /**
- * @author bmarwell
  *
  */
 public class YamlPlayerExperienceDao extends PlayerExperienceDao {

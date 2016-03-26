@@ -10,19 +10,21 @@ import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.junit.Assert;
 import org.junit.Assume;
+import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.modules.junit4.rule.PowerMockRule;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.logging.Logger;
 
-@RunWith(PowerMockRunner.class)
 @PrepareForTest({ ExpBankConfig.class, JavaPlugin.class })
 public class LanguageProvidedTest {
+
+  @Rule
+  public PowerMockRule rule = new PowerMockRule();
 
   private static final Logger LOG = Logger.getLogger(LanguageProvidedTest.class.getName());
 

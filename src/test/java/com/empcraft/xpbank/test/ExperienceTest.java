@@ -1,5 +1,7 @@
 package com.empcraft.xpbank.test;
 
+import com.empcraft.xpbank.test.helpers.FakeServer;
+
 import org.bukkit.World.Environment;
 import org.bukkit.entity.Player;
 import org.junit.Assert;

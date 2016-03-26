@@ -8,25 +8,24 @@ import com.empcraft.xpbank.test.helpers.ConfigHelper;
 import com.empcraft.xpbank.text.YamlLanguageProvider;
 
 import org.bukkit.configuration.InvalidConfigurationException;
-import org.bukkit.event.block.SignChangeEvent;
-import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.modules.junit4.rule.PowerMockRule;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ ExpBankConfig.class, SignChangeEvent.class, JavaPlugin.class,
-    PluginDescriptionFile.class })
+@PrepareForTest({ ExpBankConfig.class, JavaPlugin.class })
 public class ExpBankConfigTest {
+
+  @Rule
+  public PowerMockRule rule = new PowerMockRule();
 
   private ExpBankConfig config;
   private YamlLanguageProvider ylp;

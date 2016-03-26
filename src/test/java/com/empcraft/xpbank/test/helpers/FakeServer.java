@@ -1,7 +1,6 @@
-package com.empcraft.xpbank.test;
+package com.empcraft.xpbank.test.helpers;
 
 import com.avaje.ebean.config.ServerConfig;
-import com.empcraft.xpbank.test.helpers.RunnableOfPlugin;
 
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;

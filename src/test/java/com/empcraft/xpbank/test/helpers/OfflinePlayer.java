@@ -1,4 +1,4 @@
-package com.empcraft.xpbank.test;
+package com.empcraft.xpbank.test.helpers;
 
 import com.empcraft.xpbank.logic.ExperienceLevelCalculator;
 
