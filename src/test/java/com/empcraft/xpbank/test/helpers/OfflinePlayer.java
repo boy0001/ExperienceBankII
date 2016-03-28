@@ -1507,4 +1507,16 @@ public class OfflinePlayer implements Player {
     // TODO Auto-generated method stub
 
   }
+
+  @Override
+  public boolean isCollidable() {
+    // TODO Auto-generated method stub
+    return false;
+  }
+
+  @Override
+  public void setCollidable(boolean arg0) {
+    // TODO Auto-generated method stub
+
+  }
 }
