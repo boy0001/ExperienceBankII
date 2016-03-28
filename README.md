@@ -17,3 +17,8 @@ You can choose between yaml, sqlite and mysql. At the moment, only sqlite is bei
 * YAML storage backend.
 * Commands to interact with the plugin (reload etc.).
 
+## Contributing
+* If you can translate the message strings you find in lang/english.yml, please create a pull request!
+* If you add new code, please include a unit test!
+* Database operations should be done in an async thread.
+
