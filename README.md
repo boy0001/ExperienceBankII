@@ -5,6 +5,9 @@
 This is a minecraft / spigot / bukkit plugin, which will allow the player to save and
 withdraw his XP to a bank, represented by a sign.
 
+## Requirements
+* Spigot 1.9.
+
 ## Backends
 You can choose between yaml, sqlite and mysql. At the moment, only sqlite is being tested and known to work.
 
