@@ -3,9 +3,8 @@
  */
 package com.empcraft.xpbank;
 
-import com.empcraft.xpbank.events.PlayerExperienceChangeEvent;
-import com.empcraft.xpbank.logic.ExperienceLevelCalculator;
 import com.empcraft.xpbank.text.YamlLanguageProvider;
+import com.empcraft.xpbank.threads.BukkitChangePlayerExperienceThread;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -37,20 +36,9 @@ public class ExperienceCache extends HashMap<UUID, AtomicInteger> {
       addPlayer(player.getUniqueId());
     }
 
-    PlayerExperienceChangeEvent pece = new PlayerExperienceChangeEvent(player.getUniqueId(), delta,
-        config,
-        language);
-    Bukkit.getServer().getPluginManager().callEvent(pece);
-
-    int newExperienceInBank = this.get(player.getUniqueId()).addAndGet(delta);
-    config.getLogger().info("Player new experience in bank: " + newExperienceInBank);
-
-    player.setTotalExperience(player.getTotalExperience() - delta);
-    config.getLogger().info("Player new experience on Hand: " + player.getTotalExperience());
-
-    int level = ExperienceLevelCalculator.getLevel(player.getTotalExperience());
-    config.getLogger().info("Player new level: " + level);
-    player.setLevel(level);
+    BukkitChangePlayerExperienceThread experienceThread = new BukkitChangePlayerExperienceThread(
+        player, this.get(player.getUniqueId()), delta, config, language);
+    Bukkit.getScheduler().runTask(config.getPlugin(), experienceThread);
   }
 
   public void substractExperience(Player player, int withdrawAmount, final ExpBankConfig config,
