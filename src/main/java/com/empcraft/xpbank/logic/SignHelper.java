@@ -36,46 +36,46 @@ public final class SignHelper {
     Block block = location.getBlock();
 
     if (block == null) {
-      config.getLogger().warning("not a block.");
+      config.getLogger().finer("not a block.");
       return;
     }
 
     if (block.getState() == null) {
-      config.getLogger().warning("not a stateful block.");
+      config.getLogger().finer("not a stateful block.");
       return;
     }
 
     if (!(block.getState() instanceof Sign)) {
-      config.getLogger().warning("not a sign.");
+      config.getLogger().finer("not a sign.");
       return;
     }
 
     if (player == null || !player.isOnline()) {
-      config.getLogger().warning("player is not online.");
+      config.getLogger().finer("player is not online.");
       return;
     }
 
     if (!location.getWorld().equals(player.getWorld())) {
-      config.getLogger().warning("player is in another world.");
+      config.getLogger().finer("player is in another world.");
       return;
     }
 
     if (!location.getChunk().isLoaded()) {
-      config.getLogger().warning("chunk is not loaded.");
+      config.getLogger().finer("chunk is not loaded.");
       return;
     }
 
     double distance = location.distanceSquared(player.getLocation());
 
     if (distance > 1024) {
-      config.getLogger().warning("sign is too far away.");
+      config.getLogger().finer("sign is too far away.");
       return;
     }
 
     String[] lines = SignHelper.getSignText(sign.getLines(), player, config);
 
     if (lines == null) {
-      config.getLogger().warning("sign has no text.");
+      config.getLogger().finer("sign has no text.");
       return;
     }
 
