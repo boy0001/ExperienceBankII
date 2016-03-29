@@ -8,8 +8,6 @@ import com.empcraft.xpbank.text.YamlLanguageProvider;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 public class BukkitChangePlayerExperienceThread implements Runnable {
 
   private Player player;
@@ -18,8 +16,6 @@ public class BukkitChangePlayerExperienceThread implements Runnable {
   private YamlLanguageProvider language;
 
   private int delta;
-
-  private AtomicInteger currentXp;
 
   public BukkitChangePlayerExperienceThread(Player player, int delta,
       ExpBankConfig config,
@@ -46,9 +42,10 @@ public class BukkitChangePlayerExperienceThread implements Runnable {
     player.setLevel(level);
 
     /* Set experience bar */
-    int neededForNextLevel = ExperienceLevelCalculator.getMinExperienceForLevel(level + 1);
+    float neededForNextLevel = ExperienceLevelCalculator.getMinExperienceForLevel(level + 1);
     int neededForCurrentLevel = ExperienceLevelCalculator.getMinExperienceForLevel(level);
-    float percentage = (player.getTotalExperience() - neededForCurrentLevel) / neededForNextLevel;
+    float percentage = (player.getTotalExperience() - (float) neededForCurrentLevel)
+        / neededForNextLevel;
     if (percentage >= 1.0f) {
       percentage = 1.0f;
     }
