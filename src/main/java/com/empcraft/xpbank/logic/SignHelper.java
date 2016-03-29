@@ -78,29 +78,15 @@ public final class SignHelper {
       return;
     }
 
-    if (!lines[0].contains(config.getExperienceBankActivationString()) ||
-        lines[0].contains(config.getSignContent().get(0))
-        || lines[0].contains(MessageUtils.colorise(config.getSignContent().get(0)))) {
-      return;
-    }
-
-    String[] signText = SignHelper.getSignText(player, config);
-    for (int ii = 0; ii < signText.length; ii++) {
-      config.getLogger().finer(
-          "Setting line [{}] to [{}]."
-              .replaceFirst("\\{\\}", Integer.toString(ii))
-              .replaceFirst("\\{\\}", signText[ii]));
-      sign.setLine(ii, signText[ii]);
-    }
-
-    player.sendSignChange(sign.getLocation(), signText);
     sign.update();
   }
 
   public static boolean isExperienceBankSignBlock(final Block block, final ExpBankConfig config) {
     boolean expBankSign = false;
 
-    if (block.getType() != Material.SIGN_POST && block.getType() != Material.WALL_SIGN) {
+    if (block.getType() != Material.SIGN_POST
+        && block.getType() != Material.WALL_SIGN
+        && block.getType() != Material.SIGN) {
       // listen only for signs.
       return expBankSign;
     }
@@ -108,9 +94,8 @@ public final class SignHelper {
     Sign sign = (Sign) block.getState();
 
     String firstLine = sign.getLines()[0];
-    String coloredExpSign = MessageUtils.colorise(config.getSignContent().get(0));
 
-    if (coloredExpSign.equals(firstLine)) {
+    if (firstLine.contains(config.getExperienceBankActivationString())) {
       expBankSign = true;
     }
 

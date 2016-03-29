@@ -5,12 +5,16 @@ import code.husky.DatabaseConnectorException;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.empcraft.xpbank.err.ConfigurationException;
+import com.empcraft.xpbank.listeners.PacketSignSendListener;
 import com.empcraft.xpbank.listeners.PlayerExperienceChangedListener;
 import com.empcraft.xpbank.listeners.PlayerJoinListener;
+import com.empcraft.xpbank.listeners.PlayerMoveListener;
+import com.empcraft.xpbank.listeners.PlayerTeleportListener;
 import com.empcraft.xpbank.listeners.SignCreateEventListener;
 import com.empcraft.xpbank.listeners.SignLeftClickDepositListener;
 import com.empcraft.xpbank.listeners.SignRightClickWithDrawBottleListener;
 import com.empcraft.xpbank.listeners.SignRightClickWithDrawLevelListener;
+import com.empcraft.xpbank.listeners.SignSendEventListener;
 import com.empcraft.xpbank.listeners.SignSneakLeftClickDepositAllListener;
 import com.empcraft.xpbank.listeners.SignSneakRightClickWithDrawAllListener;
 import com.empcraft.xpbank.logic.DataHelper;
@@ -102,13 +106,20 @@ public class ExpBank extends JavaPlugin {
   private void registerEvents(ExpBankConfig config) {
     /* Register protocollib */
     protocolManager = ProtocolLibrary.getProtocolManager();
+    protocolManager.addPacketListener(new PacketSignSendListener(config));
 
     /* Register sign change event. */
     Bukkit.getServer().getPluginManager().registerEvents(
         new SignCreateEventListener(config, ylp), this);
+    Bukkit.getServer().getPluginManager().registerEvents(
+        new SignSendEventListener(config), this);
 
     /* Register player movement events */
     Bukkit.getServer().getPluginManager().registerEvents(new PlayerJoinListener(config, ylp),
+        this);
+    Bukkit.getServer().getPluginManager().registerEvents(new PlayerTeleportListener(config),
+        this);
+    Bukkit.getServer().getPluginManager().registerEvents(new PlayerMoveListener(config),
         this);
 
     /* Registere player leftclick event */

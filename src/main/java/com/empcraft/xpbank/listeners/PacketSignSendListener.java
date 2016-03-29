@@ -5,11 +5,16 @@ import com.comphenix.protocol.events.ListenerPriority;
 import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
-import com.comphenix.protocol.wrappers.WrappedChatComponent;
+import com.comphenix.protocol.wrappers.BlockPosition;
 import com.empcraft.xpbank.ExpBankConfig;
-import com.empcraft.xpbank.logic.SignHelper;
+import com.empcraft.xpbank.events.SignSendEvent;
+import com.empcraft.xpbank.logic.UpdateSignPacketUtility;
 
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
+
+import java.util.logging.Level;
 
 public class PacketSignSendListener extends PacketAdapter {
 
@@ -21,34 +26,43 @@ public class PacketSignSendListener extends PacketAdapter {
     this.config = config;
   }
 
+  /*
+   * (non-Javadoc)
+   *
+   * @see com.comphenix.protocol.events.PacketAdapter#onPacketSending(com.comphenix.protocol.events.
+   * PacketEvent) Source:
+   * https://github.com/blablubbabc/IndividualSigns/blob/master/src/main/java/de/blablubbabc/insigns
+   * /InSigns.java
+   *
+   */
   @Override
   public void onPacketSending(PacketEvent event) {
-    PacketContainer oldpacket = event.getPacket();
-    PacketContainer packet = oldpacket.shallowClone();
-
+    PacketContainer signUpdatePacket = event.getPacket();
     Player player = event.getPlayer();
-    WrappedChatComponent[] component = packet.getChatComponentArrays().read(0);
+    BlockPosition blockPosition = UpdateSignPacketUtility.getLocation(signUpdatePacket);
+    Location location = new Location(player.getWorld(), blockPosition.getX(), blockPosition.getY(),
+        blockPosition.getZ());
 
-    if (component.length == 0 || component[0] == null) {
-      return;
-    }
+    // call the SignSendEvent:
+    SignSendEvent signSendEvent = new SignSendEvent(player, location,
+        UpdateSignPacketUtility.getLinesAsStrings(signUpdatePacket));
+    config.getLogger().log(Level.FINER, "Sending sign send event!");
+    Bukkit.getPluginManager().callEvent(signSendEvent);
 
-    if (component[0].getJson().contains(config.getExperienceBankActivationString())) {
-      String[] lines = new String[4];
-      lines = SignHelper.getSignText(player, config);
-      writePacket(packet, lines);
-      event.setPacket(packet);
-    }
-  }
+    if (signSendEvent.isCancelled()) {
+      event.setCancelled(true);
+    } else {
+      // only replace the outgoing packet if it is needed:
+      if (signSendEvent.isModified()) {
+        String[] lines = signSendEvent.getLines();
 
-  public void writePacket(PacketContainer packet, String[] lines) {
-    WrappedChatComponent[] component = new WrappedChatComponent[4];
-    for (int j = 3; j >= 0; j--) {
-      if (!lines[j].equals("")) {
-        component[j] = WrappedChatComponent.fromJson(lines[j]);
+        // prepare new outgoing packet:
+        PacketContainer outgoingPacket = signUpdatePacket.shallowClone();
+        UpdateSignPacketUtility.setLinesFromStrings(outgoingPacket, lines);
+
+        event.setPacket(outgoingPacket);
       }
     }
-    packet.getChatComponentArrays().write(0, component);
   }
 
 }

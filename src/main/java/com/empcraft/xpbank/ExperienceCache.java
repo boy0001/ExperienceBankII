@@ -36,8 +36,13 @@ public class ExperienceCache extends HashMap<UUID, AtomicInteger> {
       addPlayer(player.getUniqueId());
     }
 
+    AtomicInteger playerInCache = this.get(player.getUniqueId());
+
+    playerInCache.addAndGet(delta);
+    config.getLogger().info("Player new experience in bank: " + playerInCache.get());
+
     BukkitChangePlayerExperienceThread experienceThread = new BukkitChangePlayerExperienceThread(
-        player, this.get(player.getUniqueId()), delta, config, language);
+        player, delta, config, language);
     Bukkit.getScheduler().runTask(config.getPlugin(), experienceThread);
   }
 

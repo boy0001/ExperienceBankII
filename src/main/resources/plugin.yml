@@ -6,4 +6,5 @@ main: com.empcraft.xpbank.ExpBank
 version: 2
 author: Empire92, bmhm
 website: www.empcraft.com
-softdepend:
+depend:
+  - ProtocolLib

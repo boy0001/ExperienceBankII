@@ -1,10 +1,10 @@
 version: '2'
 text:
   create: '[EXP]'
-  '2': '{player}'
   '1': '&8---&aEXP&8---'
-  '4': '&8---&a===&8---'
+  '2': '{player}'
   '3': '{expbank}'
+  '4': '&8---&a===&8---'
 language: english
 
 # Choose your database. either sqlite or mysql.

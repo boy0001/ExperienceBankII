@@ -21,14 +21,13 @@ public class BukkitChangePlayerExperienceThread implements Runnable {
 
   private AtomicInteger currentXp;
 
-  public BukkitChangePlayerExperienceThread(Player player, AtomicInteger currentExp, int delta,
+  public BukkitChangePlayerExperienceThread(Player player, int delta,
       ExpBankConfig config,
       YamlLanguageProvider language) {
     this.player = player;
     this.config = config;
     this.language = language;
     this.delta = delta;
-    this.currentXp = currentExp;
   }
 
   @Override
@@ -36,9 +35,6 @@ public class BukkitChangePlayerExperienceThread implements Runnable {
     PlayerExperienceChangeEvent pece = new PlayerExperienceChangeEvent(player.getUniqueId(), delta,
         config, language);
     Bukkit.getServer().getPluginManager().callEvent(pece);
-
-    int newExperienceInBank = currentXp.addAndGet(delta);
-    config.getLogger().info("Player new experience in bank: " + newExperienceInBank);
 
     /* set total exp */
     player.setTotalExperience(player.getTotalExperience() - delta);

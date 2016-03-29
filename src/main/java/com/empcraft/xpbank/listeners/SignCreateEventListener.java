@@ -49,7 +49,6 @@ public class SignCreateEventListener implements Listener {
       return;
     }
 
-    event.setLine(0, MessageUtils.colorise(config.getExperienceBankActivationString()));
     MessageUtils.sendMessageToPlayer(player, ylp.getMessage(Text.CREATE));
 
     SignHelper.updateSign(player, (Sign) event.getBlock().getState(), config);
