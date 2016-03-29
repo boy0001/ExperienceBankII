@@ -4,6 +4,7 @@ import com.empcraft.xpbank.ExpBankConfig;
 import com.empcraft.xpbank.text.MessageUtils;
 import com.empcraft.xpbank.threads.UpdateAllSignsThread;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -149,6 +150,8 @@ public final class SignHelper {
    */
   public static void scheduleUpdate(final Player player, final Location location,
       final ExpBankConfig expBankConfig) {
-    new UpdateAllSignsThread(player, location, expBankConfig).run();
+    UpdateAllSignsThread updateAllSignsThread = new UpdateAllSignsThread(player, location,
+        expBankConfig);
+    Bukkit.getScheduler().runTaskAsynchronously(expBankConfig.getPlugin(), updateAllSignsThread);
   }
 }
