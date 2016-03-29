@@ -57,6 +57,12 @@ public class SignLeftClickDepositListener extends AbstractExperienceSignListener
     }
 
     amountToDeposit = DataHelper.checkForMaximumDeposit(player, amountToDeposit, getConfig());
+    if (amountToDeposit
+        + getConfig().getExperienceCache().get(player.getUniqueId()).get() > getConfig()
+            .getMaxStorageForPlayer(player)) {
+      getConfig().getLogger().log(Level.INFO,
+          "Player [" + player.getName() + "] is depositing too much: [" + amountToDeposit + "].");
+    }
 
     MessageUtils.sendMessageToPlayer(player, "Depositing one level: [" + amountToDeposit + "].");
     getConfig().getLogger().log(Level.INFO,

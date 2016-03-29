@@ -78,6 +78,12 @@ public final class SignHelper {
       return;
     }
 
+    if (!lines[0].contains(config.getExperienceBankActivationString()) ||
+        lines[0].contains(config.getSignContent().get(0))
+        || lines[0].contains(MessageUtils.colorise(config.getSignContent().get(0)))) {
+      return;
+    }
+
     String[] signText = SignHelper.getSignText(player, config);
     for (int ii = 0; ii < signText.length; ii++) {
       config.getLogger().finer(

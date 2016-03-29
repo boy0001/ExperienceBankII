@@ -2,7 +2,7 @@ package com.empcraft.xpbank.test;
 
 import com.empcraft.xpbank.ExpBankConfig;
 import com.empcraft.xpbank.err.ConfigurationException;
-import com.empcraft.xpbank.listeners.SignChangeEventListener;
+import com.empcraft.xpbank.listeners.SignCreateEventListener;
 import com.empcraft.xpbank.test.helpers.ConfigHelper;
 import com.empcraft.xpbank.test.helpers.FakeServer;
 import com.empcraft.xpbank.test.helpers.RunnableOfPlugin;
@@ -39,7 +39,7 @@ public class SignChangeTest {
 
   private static final String EXP_BANK = "[EXP]";
   private YamlLanguageProvider langYml;
-  private SignChangeEventListener signChangeEventListener;
+  private SignCreateEventListener signChangeEventListener;
   private Player privileged;
   private Player operator;
 
@@ -60,7 +60,7 @@ public class SignChangeTest {
     langYml = PowerMockito.mock(YamlLanguageProvider.class);
 
     ExpBankConfig expBankConfig = ConfigHelper.getFakeConfig().build();
-    signChangeEventListener = new SignChangeEventListener(expBankConfig, langYml);
+    signChangeEventListener = new SignCreateEventListener(expBankConfig, langYml);
 
     /* Set up sign to use */
     Block sign = PowerMockito.mock(Block.class);

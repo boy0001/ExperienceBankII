@@ -21,12 +21,12 @@ import org.bukkit.event.block.SignChangeEvent;
 /**
  * Creates new Signs with special text.
  */
-public class SignChangeEventListener implements Listener {
+public class SignCreateEventListener implements Listener {
 
   private ExpBankConfig config;
   private YamlLanguageProvider ylp;
 
-  public SignChangeEventListener(final ExpBankConfig config, YamlLanguageProvider ylp) {
+  public SignCreateEventListener(final ExpBankConfig config, YamlLanguageProvider ylp) {
     this.config = config;
     this.ylp = ylp;
   }

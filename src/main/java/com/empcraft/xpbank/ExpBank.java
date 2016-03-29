@@ -2,13 +2,12 @@ package com.empcraft.xpbank;
 
 import code.husky.DatabaseConnectorException;
 
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolManager;
 import com.empcraft.xpbank.err.ConfigurationException;
 import com.empcraft.xpbank.listeners.PlayerExperienceChangedListener;
 import com.empcraft.xpbank.listeners.PlayerJoinListener;
-import com.empcraft.xpbank.listeners.PlayerMoveListener;
-import com.empcraft.xpbank.listeners.PlayerTeleportListener;
-import com.empcraft.xpbank.listeners.SignChangeEventListener;
-import com.empcraft.xpbank.listeners.SignChangeUpdateSign;
+import com.empcraft.xpbank.listeners.SignCreateEventListener;
 import com.empcraft.xpbank.listeners.SignLeftClickDepositListener;
 import com.empcraft.xpbank.listeners.SignRightClickWithDrawBottleListener;
 import com.empcraft.xpbank.listeners.SignRightClickWithDrawLevelListener;
@@ -37,6 +36,7 @@ public class ExpBank extends JavaPlugin {
    */
   private YamlLanguageProvider ylp;
   private ExpBankConfig expConfig;
+  private ProtocolManager protocolManager;
 
   @Override
   public void onDisable() {
@@ -73,7 +73,7 @@ public class ExpBank extends JavaPlugin {
     LoadExperienceOnStartupThread lest = new LoadExperienceOnStartupThread(expConfig, ylp);
     Bukkit.getScheduler().runTaskAsynchronously(this, lest);
 
-    registerEvents();
+    registerEvents(expConfig);
   }
 
   private void saveResources() {
@@ -99,32 +99,31 @@ public class ExpBank extends JavaPlugin {
     }
   }
 
-  private void registerEvents() {
+  private void registerEvents(ExpBankConfig config) {
+    /* Register protocollib */
+    protocolManager = ProtocolLibrary.getProtocolManager();
+
     /* Register sign change event. */
     Bukkit.getServer().getPluginManager().registerEvents(
-        new SignChangeEventListener(expConfig, ylp), this);
-    Bukkit.getServer().getPluginManager().registerEvents(new SignChangeUpdateSign(expConfig), this);
+        new SignCreateEventListener(config, ylp), this);
 
     /* Register player movement events */
-    Bukkit.getServer().getPluginManager().registerEvents(new PlayerTeleportListener(expConfig),
-        this);
-    Bukkit.getServer().getPluginManager().registerEvents(new PlayerMoveListener(expConfig), this);
-    Bukkit.getServer().getPluginManager().registerEvents(new PlayerJoinListener(expConfig, ylp),
+    Bukkit.getServer().getPluginManager().registerEvents(new PlayerJoinListener(config, ylp),
         this);
 
     /* Registere player leftclick event */
     Bukkit.getServer().getPluginManager()
-        .registerEvents(new SignLeftClickDepositListener(ylp, expConfig), this);
+        .registerEvents(new SignLeftClickDepositListener(ylp, config), this);
     Bukkit.getServer().getPluginManager()
-        .registerEvents(new SignSneakLeftClickDepositAllListener(ylp, expConfig), this);
+        .registerEvents(new SignSneakLeftClickDepositAllListener(ylp, config), this);
 
     /* Register player right click events */
     Bukkit.getServer().getPluginManager()
-        .registerEvents(new SignRightClickWithDrawLevelListener(ylp, expConfig), this);
+        .registerEvents(new SignRightClickWithDrawLevelListener(ylp, config), this);
     Bukkit.getServer().getPluginManager()
-        .registerEvents(new SignSneakRightClickWithDrawAllListener(ylp, expConfig), this);
+        .registerEvents(new SignSneakRightClickWithDrawAllListener(ylp, config), this);
     Bukkit.getServer().getPluginManager()
-        .registerEvents(new SignRightClickWithDrawBottleListener(ylp, expConfig), this);
+        .registerEvents(new SignRightClickWithDrawBottleListener(ylp, config), this);
 
     /* Register player exp change event */
     Bukkit.getServer().getPluginManager().registerEvents(new PlayerExperienceChangedListener(),

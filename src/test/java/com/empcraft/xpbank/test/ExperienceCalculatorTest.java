@@ -62,6 +62,14 @@ public class ExperienceCalculatorTest {
   }
 
   @Test
+  public void testGetMinimumRequiredXpForLevel_MaxLevelPlus1() {
+    int minXp = ExperienceLevelCalculator.getMinExperienceForLevel(
+        ExperienceLevelCalculator.getMaxLevel() + 1);
+
+    Assert.assertEquals(2920, minXp);
+  }
+
+  @Test
   public void testGetMinimumRequiredXpForLevel_MaxInt() {
     int minXp = ExperienceLevelCalculator.getMinExperienceForLevel(
         Integer.MAX_VALUE);
@@ -95,6 +103,14 @@ public class ExperienceCalculatorTest {
     int deltaToLowerLevel = ExperienceLevelCalculator.getExperienceDelteToLowerLevel(8);
 
     Assert.assertEquals(1, deltaToLowerLevel);
+  }
+
+  @Test
+  public void testGetExperienceDeltaLowerLevel_MaxValue() {
+    int deltaToLowerLevel = ExperienceLevelCalculator
+        .getExperienceDelteToLowerLevel(Integer.MAX_VALUE);
+
+    Assert.assertEquals(2147480727, deltaToLowerLevel);
   }
 
 }

@@ -293,6 +293,9 @@ public class DataHelper {
 
     if (currentlyinstore < toWithdraw) {
       // only get back whats inside.
+      config.getLogger().log(
+          Level.INFO, "Player can only with draw amount because he has no more inside: "
+              + Integer.toString(currentlyinstore));
       return currentlyinstore;
     }
 
@@ -301,16 +304,20 @@ public class DataHelper {
 
   public static int checkForMaximumDeposit(Player player, int toDeposit, final ExpBankConfig config) {
     int maxDeposit = config.getMaxStorageForPlayer(player);
+    config.getLogger().log(Level.INFO, "Player can deposit: " + Integer.toString(maxDeposit));
     int currentlyinstore;
 
     currentlyinstore = config.getExperienceCache().get(player.getUniqueId()).get();
 
     if (toDeposit + currentlyinstore <= maxDeposit) {
       // the player can deposit everything.
+      config.getLogger().log(Level.INFO, "Player can deposit all: " + Integer.toString(toDeposit));
       return toDeposit;
     }
 
     // there is not enough limit left.
+    config.getLogger().log(Level.INFO, "Player can deposit only a part because there is a limit: "
+        + Integer.toString(maxDeposit - currentlyinstore));
     return maxDeposit - currentlyinstore;
   }
 
