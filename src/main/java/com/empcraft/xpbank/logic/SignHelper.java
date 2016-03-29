@@ -4,7 +4,6 @@ import com.empcraft.xpbank.ExpBankConfig;
 import com.empcraft.xpbank.text.MessageUtils;
 import com.empcraft.xpbank.threads.UpdateAllSignsThread;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -67,20 +66,24 @@ public final class SignHelper {
 
     double distance = location.distanceSquared(player.getLocation());
 
-    if (distance > 1024) {
-      config.getLogger().finer("sign is too far away.");
+    if (distance > 1024 * 2) {
+      config.getLogger().finer("sign is too far away: [" + Double.toString(distance) + "].");
       return;
     }
 
-    String[] lines = SignHelper.getSignText(sign.getLines(), player, config);
+    String[] lines = SignHelper.getSignText(player, config);
 
     if (lines == null) {
       config.getLogger().finer("sign has no text.");
       return;
     }
 
-    String[] signText = SignHelper.getSignText(lines, player, config);
+    String[] signText = SignHelper.getSignText(player, config);
     for (int ii = 0; ii < signText.length; ii++) {
+      config.getLogger().finer(
+          "Setting line [{}] to [{}]."
+              .replaceFirst("\\{\\}", Integer.toString(ii))
+              .replaceFirst("\\{\\}", signText[ii]));
       sign.setLine(ii, signText[ii]);
     }
 
@@ -127,21 +130,18 @@ public final class SignHelper {
     return MessageUtils.colorise(renderedLine);
   }
 
-  public static String[] getSignText(String[] lines, Player player,
-      final ExpBankConfig expBankConfig) {
+  public static String[] getSignText(final Player player, final ExpBankConfig config) {
     int storedPlayerExperience;
-    List<String> signLines = expBankConfig.getSignContent();
+    String[] lines = new String[4];
+    List<String> configuredContent = config.getSignContent();
 
-    if (!MessageUtils.colorise(expBankConfig.getSignContent().get(0))
-        .equals(lines[0])) {
-      // this is not an ExpBank-Sign.
-      return lines;
-    }
-
-    storedPlayerExperience = expBankConfig.getExperienceCache().get(player.getUniqueId()).get();
+    storedPlayerExperience = config.getExperienceCache().get(player.getUniqueId()).get();
 
     for (int line = 0; line < 4; line++) {
-      String evaluatedLine = renderSignLines(signLines.get(line), player, storedPlayerExperience);
+      String evaluatedLine = renderSignLines(
+          configuredContent.get(line),
+          player,
+          storedPlayerExperience);
       lines[line] = evaluatedLine;
     }
 
@@ -158,7 +158,6 @@ public final class SignHelper {
    */
   public static void scheduleUpdate(final Player player, final Location location,
       final ExpBankConfig expBankConfig) {
-    Bukkit.getScheduler().runTask(expBankConfig.getPlugin(),
-        new UpdateAllSignsThread(player, location, expBankConfig));
+    new UpdateAllSignsThread(player, location, expBankConfig).run();
   }
 }

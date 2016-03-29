@@ -19,7 +19,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.SignChangeEvent;
 
 /**
- *
+ * Creates new Signs with special text.
  */
 public class SignChangeEventListener implements Listener {
 

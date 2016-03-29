@@ -8,6 +8,7 @@ import com.empcraft.xpbank.listeners.PlayerJoinListener;
 import com.empcraft.xpbank.listeners.PlayerMoveListener;
 import com.empcraft.xpbank.listeners.PlayerTeleportListener;
 import com.empcraft.xpbank.listeners.SignChangeEventListener;
+import com.empcraft.xpbank.listeners.SignChangeUpdateSign;
 import com.empcraft.xpbank.listeners.SignLeftClickDepositListener;
 import com.empcraft.xpbank.listeners.SignRightClickWithDrawBottleListener;
 import com.empcraft.xpbank.listeners.SignRightClickWithDrawLevelListener;
@@ -102,6 +103,7 @@ public class ExpBank extends JavaPlugin {
     /* Register sign change event. */
     Bukkit.getServer().getPluginManager().registerEvents(
         new SignChangeEventListener(expConfig, ylp), this);
+    Bukkit.getServer().getPluginManager().registerEvents(new SignChangeUpdateSign(expConfig), this);
 
     /* Register player movement events */
     Bukkit.getServer().getPluginManager().registerEvents(new PlayerTeleportListener(expConfig),
