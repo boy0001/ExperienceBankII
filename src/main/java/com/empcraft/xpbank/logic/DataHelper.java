@@ -287,38 +287,73 @@ public class DataHelper {
   }
 
   public static int checkForMaximumWithdraw(Player player, int toWithdraw, final ExpBankConfig config) {
-    int currentlyinstore;
+    int inBank = config.getExperienceCache().get(player.getUniqueId()).get();
 
-    currentlyinstore = config.getExperienceCache().get(player.getUniqueId()).get();
+    int actualWithdraw = checkForMaxumumWithdraw(inBank, toWithdraw);
 
-    if (currentlyinstore < toWithdraw) {
-      // only get back whats inside.
-      config.getLogger().log(
-          Level.INFO, "Player can only with draw amount because he has no more inside: "
-              + Integer.toString(currentlyinstore));
-      return currentlyinstore;
+    config.getLogger().log(
+        Level.INFO, "Player will withdraw: "
+            + Integer.toString(inBank) + " from bank.");
+
+    return actualWithdraw;
+  }
+
+  public static int checkForMaxumumWithdraw(final int inBank, final int withdrawAmount) {
+    int actualWithdrawAllowed = withdrawAmount;
+
+    if (inBank == 0) {
+      return 0;
     }
 
-    return toWithdraw;
+    if (actualWithdrawAllowed <= 0) {
+      return 0;
+    }
+
+    if (actualWithdrawAllowed > inBank) {
+      return inBank;
+    }
+
+    return actualWithdrawAllowed;
   }
 
   public static int checkForMaximumDeposit(Player player, int toDeposit, final ExpBankConfig config) {
     int maxDeposit = config.getMaxStorageForPlayer(player);
-    config.getLogger().log(Level.INFO, "Player can deposit: " + Integer.toString(maxDeposit));
-    int currentlyinstore;
+    config.getLogger().log(Level.INFO,
+        "Player can deposit at max: " + Integer.toString(maxDeposit));
+    int currentlyinstore = config.getExperienceCache().get(player.getUniqueId()).get();
 
-    currentlyinstore = config.getExperienceCache().get(player.getUniqueId()).get();
+    int actualDeposit = checkForMaximumDeposit(currentlyinstore, toDeposit,
+        player.getTotalExperience(), maxDeposit);
 
-    if (toDeposit + currentlyinstore <= maxDeposit) {
-      // the player can deposit everything.
-      config.getLogger().log(Level.INFO, "Player can deposit all: " + Integer.toString(toDeposit));
-      return toDeposit;
+    config.getLogger().log(Level.INFO,
+        "Player will deposit: " + Integer.toString(actualDeposit));
+
+    return actualDeposit;
+  }
+
+  public static int checkForMaximumDeposit(final int inBank, final int depositAmount,
+      final int inHand,
+      final int maxInBankAllowed) {
+    int actualDepositAllowed = depositAmount;
+
+    if (actualDepositAllowed <= 0) {
+      return 0;
     }
 
-    // there is not enough limit left.
-    config.getLogger().log(Level.INFO, "Player can deposit only a part because there is a limit: "
-        + Integer.toString(maxDeposit - currentlyinstore));
-    return maxDeposit - currentlyinstore;
+    if (inBank >= maxInBankAllowed) {
+      return 0;
+    }
+
+    if (inHand < actualDepositAllowed) {
+      // store as max as much as we have in hand.
+      actualDepositAllowed = inHand;
+    }
+
+    if ((inBank + actualDepositAllowed) > maxInBankAllowed) {
+      actualDepositAllowed = maxInBankAllowed - inBank;
+    }
+
+    return actualDepositAllowed;
   }
 
 }
